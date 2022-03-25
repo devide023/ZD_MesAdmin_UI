@@ -1,0 +1,52 @@
+.search_bar {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+  }
+  .query_input {
+    width: 250px;
+    margin-right: 10px;
+  }
+  .tb_header_bg{
+    background-color:#DCDCDC !important;
+  }
+  .el-dialog__body{
+    padding-top: 10px;
+  }
+  .el-form-item--small.el-form-item {
+    margin-bottom: 3px;
+  }
+  .el-input__inner{
+    padding: 0 3px;
+  }
+  .el-table .cell{
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .template_download,.template_download:hover,.template_download:visited{
+    font-size: 12px;
+    margin-left: 10px;
+    color: #409EFF;
+  }
+  .btn_upload {
+  width: 73px;
+  height: 29px;
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.el-table .warning-row {
+  background: oldlace;
+}
+.el-table .success-row {
+  background: #f0f9eb;
+}
+.el-table .danger-row {
+  background: #fcd4d9;
+}
+.el-table .info-row {
+  background: #d0c6ff;
+}
+.el-table .danger_cell {
+  background: #fa6565;
+}
