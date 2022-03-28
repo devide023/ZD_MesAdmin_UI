@@ -1,26 +1,30 @@
 export const defaultfuns = [
     {
-        name: '新增',
+        name: 'add',
         fnname: 'add_handle',
         icon: 'el-icon-plus',
-        btntype: 'success'
+        btntype: 'success',
+        btntxt:'新增'
     },
     {
-        name: '编辑',
+        name: 'edit',
         fnname: 'edit_handle',
         icon: 'el-icon-edit',
-        btntype: 'warning'
+        btntype: 'warning',
+        btntxt:'编辑'
     },
     {
-        name: '删除',
+        name: 'delete',
         fnname: 'del_handle',
         icon: 'el-icon-delete',
-        btntype: 'info'
+        btntype: 'info',
+        btntxt: '删除'
     },
     {
-        name: '保存',
+        name: 'save',
         fnname: 'save_handle',
         icon: 'el-icon-check',
-        btntype: 'danger'
+        btntype: 'danger',
+        btntxt: '保存'
     },
 ]

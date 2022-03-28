@@ -255,9 +255,13 @@ export default {
       if (!row.rowkey) {
         row.rowkey = newGuid();
       }
-      if (Object.keys(this.treeprops).length > 0) {
-        return row.id;
-      } else {
+      if (this.treeprops) {
+        if (Object.keys(this.treeprops).length > 0) {
+          return row.id;
+        } else {
+          return row.rowkey;
+        }
+      }else{
         return row.rowkey;
       }
     },

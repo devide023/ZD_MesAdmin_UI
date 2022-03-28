@@ -63,160 +63,6 @@
         </el-dropdown>
       </template>
     </table-component>
-    <!-- <el-table
-      :data="list"
-      stripe
-      border
-      :indent="10"
-      row-key="id"
-      header-cell-class-name="tb_header_bg"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-      @selection-change="handleSelectionChange"
-      ref="tablecomponent"
-    >
-      <el-table-column type="selection"></el-table-column>
-      <el-table-column
-        v-for="(col, idx) in pageconfig.fields"
-        :key="idx"
-        :label="col.label"
-        :prop="col.prop"
-        :header-align="col.headeralign"
-        :align="col.align"
-        :width="col.width"
-      ></el-table-column> -->
-    <!-- <el-table-column
-        header-align="center"
-        align="left"
-        label="编码"
-        prop="code"
-        width="100"
-        show-overflow-tooltip
-      />
-      <el-table-column
-        header-align="center"
-        align="center"
-        label="状态"
-        width="80"
-      >
-        <template slot-scope="scope">
-          <el-tag size="mini" :type="scope.row.status | tagtype">{{
-            scope.row.status | statusname
-          }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
-        header-align="center"
-        align="center"
-        label="名称"
-        prop="name"
-        width="120"
-      />
-      <el-table-column
-        header-align="center"
-        align="center"
-        label="类型"
-        width="70"
-      >
-        <template slot-scope="scope">
-          <el-tag size="mini" :type="scope.row.menutype | typecolor">{{
-            scope.row.menutype | typename
-          }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
-        header-align="center"
-        align="left"
-        label="路由路径"
-        show-overflow-tooltip
-        prop="routepath"
-      />
-      <el-table-column
-        header-align="center"
-        align="left"
-        label="视图路径"
-        show-overflow-tooltip
-        prop="viewpath"
-      />
-      <el-table-column
-        prop="configpath"
-        label="配置文件"
-        header-align="center"
-        align="center"
-      ></el-table-column>
-      <el-table-column
-        prop="componentname"
-        label="组件名称"
-        header-align="center"
-        align="center"
-      ></el-table-column>
-      <el-table-column
-        header-align="center"
-        align="center"
-        label="图标"
-        width="50"
-      >
-        <template slot-scope="scope">
-          <svg-icon :icon-class="scope.row.icon || ''" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        header-align="center"
-        align="center"
-        prop="seq"
-        label="权重"
-        width="50"
-      />
-      <el-table-column
-        header-align="center"
-        align="center"
-        label="创建者"
-        prop="addusername"
-        width="120"
-      />
-      <el-table-column
-        header-align="center"
-        align="center"
-        label="创建日期"
-        show-overflow-tooltip
-        width="150"
-      >
-        <template slot-scope="scope">
-          {{ scope.row.addtime | parseTime("{y}-{m}-{d} {h}:{i}:{s}") }}
-        </template>
-      </el-table-column> -->
-    <!-- <el-table-column
-        header-align="center"
-        align="center"
-        label="操作"
-        width="50px"
-        fixed="right"
-      >
-        <template slot-scope="scope">
-          <el-dropdown>
-            <span class="el-dropdown-link">
-              <i class="el-icon-setting" style="font-size: 16px" />
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item
-                v-if="scope.row.menutype === '01'"
-                @click.native="add_sub_item(scope.row)"
-                ><span class="el-icon-circle-plus-outline"
-                  >子菜单</span
-                ></el-dropdown-item
-              >
-              <el-dropdown-item
-                v-if="scope.row.menutype === '02'"
-                @click.native="add_page_fns(scope.row)"
-                ><span class="el-icon-circle-plus-outline"
-                  >功能</span
-                ></el-dropdown-item
-              >
-            </el-dropdown-menu>
-          </el-dropdown>
-        </template>
-      </el-table-column>
-    </el-table> -->
-
     <!--添加菜单表单-->
     <el-dialog
       v-drag-dialog
@@ -374,17 +220,22 @@
         >
           <el-input
             v-model="item.name"
-            style="width: 25%"
+            style="width: 20%"
             placeholder="按钮名称"
           />
           <el-input
+            style="width: 20%"
+            v-model="item.btntxt"
+            placeholder="按钮文本"
+          ></el-input>
+          <el-input
             v-model="item.fnname"
-            style="width: 25%"
+            style="width: 20%"
             placeholder="调用方法名"
           />
           <el-select
             v-model="item.btntype"
-            style="width: 25%"
+            style="width: 20%"
             placeholder="选择按钮类型"
           >
             <el-option
@@ -398,7 +249,7 @@
           </el-select>
           <el-select
             v-model="item.icon"
-            style="width: 20%"
+            style="width: 15%"
             placeholder="选择按钮图标"
           >
             <el-option
@@ -502,11 +353,14 @@ export default {
         status: 1,
         componentname: "",
         adduser: this.$store.getters.userinfo.id,
+        addusername: this.$store.getters.name,
         addtime: parseTime(new Date()),
       },
       fn_form: {
         pid: 0,
+        code: "",
         adduser: this.$store.getters.userinfo.id,
+        addusername: this.$store.getters.name,
         addtime: parseTime(new Date()),
         fnlist: [],
         collist: [],
@@ -579,13 +433,6 @@ export default {
   },
   mixins: [basemixin],
   filters: {
-    is_disable(val) {
-      if (val === "01" || val === "02") {
-        return false;
-      } else {
-        return true;
-      }
-    },
     fieldname(val) {
       var finded = _this.allfields.filter((i) => {
         return i.prop === val;
@@ -595,42 +442,6 @@ export default {
       } else {
         return "";
       }
-    },
-    typename(typecode) {
-      try {
-        if (typecode) {
-          let item = menutypelist.filter((i) => i.code === typecode);
-          if (item) {
-            return item[0].name;
-          } else {
-            return "";
-          }
-        } else {
-          return "";
-        }
-      } catch (error) {
-        this.$message.error(error);
-      }
-    },
-    typecolor(typecode) {
-      let color = "primary";
-      switch (typecode) {
-        case "01":
-          color = "primary";
-          break;
-        case "02":
-          color = "warning";
-          break;
-        case "03":
-          color = "info";
-          break;
-        case "04":
-          color = "danger";
-          break;
-        default:
-          break;
-      }
-      return color;
     },
   },
   mounted() {
@@ -650,15 +461,18 @@ export default {
     add_funitem() {
       let fnitem = deepClone({
         pid: this.fn_form.pid,
+        code: this.fn_form.code,
         name: "",
         fnname: "",
         btntype: "primary",
+        btntxt: "",
         menutype: "03",
         icon: "",
         seq: 10,
         status: 1,
         adduser: this.fn_form.adduser,
         addtime: this.fn_form.addtime,
+        addusername: this.fn_form.addusername,
       });
       this.fn_form.fnlist.push(fnitem);
     },
@@ -675,17 +489,21 @@ export default {
     },
     add_page_fns(row) {
       this.fn_form.pid = row.id;
+      this.fn_form.code = row.code;
       this.fn_form.fnlist = defaultfuns.map((i) => {
         return {
           pid: row.id,
+          code: row.code,
           name: i.name,
           fnname: i.fnname,
           btntype: i.btntype,
+          btntxt: i.btntxt,
           menutype: "03",
           icon: i.icon,
           status: 1,
           adduser: this.fn_form.adduser,
           addtime: this.fn_form.addtime,
+          addusername: this.fn_form.addusername,
         };
       });
       try {
@@ -745,20 +563,23 @@ export default {
       }
       if (this.fn_form.collist.length > 0) {
         this.fn_form.collist.forEach((i) => {
+          let fitem = this.allfields.filter((t) => t.prop === i);
           postdatas.push({
             pid: this.fn_form.pid,
+            code: this.fn_form.code,
             name: i,
             fnname: "",
             btntype: "",
+            btntxt: fitem ? fitem[0].label : "",
             menutype: "04",
             icon: "",
             seq: 10,
             status: 1,
             adduser: this.fn_form.adduser,
             addtime: this.fn_form.addtime,
+            addusername: this.fn_form.addusername,
           });
         });
-        console.log(postdatas);
         try {
           if (this.pageconfig.addapi) {
             ApiFn.requestapi(
