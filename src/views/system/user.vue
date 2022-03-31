@@ -2,7 +2,7 @@
   <div>
     <search-bar
       :collist="colshowlist"
-      :isgrade="isgradequery"
+      :isgrade="pageconfig.isgradequery || true"
       @query="query_handle"
       @gradequery="grade_query_handle"
     >
@@ -26,6 +26,7 @@
       </template>
     </search-bar>
     <table-component
+      :isoperate="pageconfig.isoperate || false"
       ref="tablecomponent"
       :resultcount="resultcount"
       :datalist="list"

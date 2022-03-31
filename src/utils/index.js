@@ -369,12 +369,14 @@ export function newGuid() {
 export function GetComponentName(){
   let url = window.location.href;
   let pos = url.lastIndexOf('#');
+  console.log(url);
   if(pos!==-1){
     var routepath = url.substring(pos + 1, url.length);
-    var fitem = window.route_component.filter(i => i.routepath === routepath);
-    console.log(fitem[0].component);
-    if(fitem){
-      return fitem[0].component;
+    var idx = window.route_component.findIndex(i => i.routepath === routepath);
+    console.log(idx);
+    if (idx!==-1) {
+      console.log(window.route_component[idx].component);
+      return window.route_component[idx].component;
     }else{
       return '';
     }
