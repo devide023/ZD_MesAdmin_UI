@@ -170,9 +170,50 @@
         <el-button type="danger" @click="editdialogVisible = false"
           >取消</el-button
         >
-        <el-button type="primary" @click="submit_editform_data"
-          >确 定</el-button
+        <el-button type="primary" @click="submit_editform_data">确定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 关联用户窗口 -->
+    <el-dialog
+      v-drag-dialog
+      title="关联用户"
+      :visible.sync="userdialogVisible"
+      width="40%"
+    >
+      <el-row>
+        <el-col :span="24">
+          <el-autocomplete
+            v-model="keyword"
+            value-key="name"
+            value="id"
+            :debounce="500"
+            :fetch-suggestions="SearchUser"
+            placeholder="请输入姓名检索"
+            @select="handleSelectUser"
+            style="width: 100%"
+          ></el-autocomplete>
+        </el-col>
+      </el-row>
+      <el-row style="margin-top: 10px">
+        <el-col :span="24">
+          <el-tag
+            v-for="(tag, idx) in userform.users"
+            :key="idx"
+            closable
+            type="success"
+            size="medium"
+            @close="remove_tag(idx)"
+            style="margin-left: 10px"
+          >
+            {{ tag.name }}[{{ tag.code }}]
+          </el-tag></el-col
         >
+      </el-row>
+      <div slot="footer">
+        <el-button type="danger" @click="userdialogVisible = false"
+          >取消</el-button
+        >
+        <el-button type="primary" @click="save_role_user">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -192,11 +233,13 @@ export default {
     return {
       dialogVisible: false,
       editdialogVisible: false,
+      userdialogVisible: false,
       permistree: [],
       fieldstree: [],
       rolemenulist: [],
       roleeditcollist: [],
       rolehidecollist: [],
+      keyword: "",
       form: {
         mes_role_entity: {
           id: 0,
@@ -210,6 +253,10 @@ export default {
         permission: [],
         editfields: [],
         hidefields: [],
+      },
+      userform: {
+        roleid: 0,
+        users: [],
       },
       treeconfig: {
         children: "children",
@@ -235,6 +282,9 @@ export default {
   },
   mounted() {},
   methods: {
+    remove_tag(pos) {
+      this.userform.users.splice(pos, 1);
+    },
     open_role_dialog() {
       try {
         if (this.pageconfig.treeapi) {
@@ -290,7 +340,53 @@ export default {
       this.$refs.editcolstree_m.setCheckedNodes(this.roleeditcollist);
       this.$refs.hidecolstree_m.setCheckedNodes(this.rolehidecollist);
     },
-    relate_users(row) {},
+    SearchUser(query, cb) {
+      if (query !== "") {
+        if (this.pageconfig.searchuserapi) {
+          ApiFn.requestapi(
+            this.pageconfig.searchuserapi.method,
+            this.pageconfig.searchuserapi.url,
+            { key: query }
+          ).then((res) => {
+            if (res.code === 1) {
+              cb(
+                res.list.map((i) => {
+                  return { name: i.name, id: i.id, code: i.code };
+                })
+              );
+            } else if (res.code === 0) {
+              this.$message.error(res.msg);
+              cb([]);
+            }
+          });
+        }
+      } else {
+        cb([]);
+      }
+    },
+    relate_users(row) {
+      try {
+        if (this.pageconfig.userapi) {
+          ApiFn.requestapi(
+            this.pageconfig.userapi.method,
+            this.pageconfig.userapi.url,
+            { id: row.id }
+          ).then((res) => {
+            if (res.code === 1) {
+              this.userform.roleid = row.id;
+              this.userform.users = res.list.map((i) => {
+                return { id: i.id, code: i.code, name: i.name };
+              });
+              this.userdialogVisible = true;
+            } else if (res.code === 0) {
+              this.$message.error(res.msg);
+            }
+          });
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
     submit_form_data() {
       try {
         this.form.permission = this.$refs.permistree.getCheckedNodes(
@@ -309,7 +405,7 @@ export default {
           ApiFn.requestapi(
             this.pageconfig.addapi.method,
             this.pageconfig.addapi.url,
-            [this.form]
+            this.form
           ).then((res) => {
             if (res.code === 1) {
               this.$message.success(res.msg);
@@ -332,11 +428,23 @@ export default {
     },
     submit_editform_data() {
       try {
+        this.form.permission = this.$refs.permistree_m.getCheckedNodes(
+          false,
+          true
+        );
+        this.form.editfields = this.$refs.editcolstree_m.getCheckedNodes(
+          false,
+          true
+        );
+        this.form.hidefields = this.$refs.hidecolstree_m.getCheckedNodes(
+          false,
+          true
+        );
         if (this.pageconfig.editapi) {
           ApiFn.requestapi(
             this.pageconfig.editapi.method,
             this.pageconfig.editapi.url,
-            [this.form]
+            this.form
           ).then((res) => {
             if (res.code === 1) {
               this.$message.success(res.msg);
@@ -348,6 +456,39 @@ export default {
               this.form.hidefields = [];
               this.editdialogVisible = false;
               this.getlist(this.queryform);
+            } else if (res.code === 0) {
+              this.$message.error(res.msg);
+            }
+          });
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    handleSelectUser(val) {
+      var pos = this.userform.users.findIndex((i) => i.id === val.id);
+      if (pos === -1) {
+        this.userform.users.push(val);
+      }
+    },
+    save_role_user() {
+      try {
+        if (this.pageconfig.roleuserapi) {
+          ApiFn.requestapi(
+            this.pageconfig.roleuserapi.method,
+            this.pageconfig.roleuserapi.url,
+            {
+              roleid: this.userform.roleid,
+              userid: this.userform.users.map((i) => {
+                return i.id;
+              }),
+            }
+          ).then((res) => {
+            if (res.code === 1) {
+              this.$message.success(res.msg);
+              this.userform.roleid = 0;
+              this.userform.users = [];
+              this.userdialogVisible = false;
             } else if (res.code === 0) {
               this.$message.error(res.msg);
             }

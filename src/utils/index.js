@@ -365,3 +365,19 @@ export function newGuid() {
   }
   return guid;
 }
+
+export function GetComponentName(){
+  let url = window.location.href;
+  let pos = url.lastIndexOf('#');
+  if(pos!==-1){
+    var routepath = url.substring(pos + 1, url.length);
+    var fitem = window.route_component.filter(i => i.routepath === routepath);
+    console.log(fitem[0].component);
+    if(fitem){
+      return fitem[0].component;
+    }else{
+      return '';
+    }
+    
+  }
+}

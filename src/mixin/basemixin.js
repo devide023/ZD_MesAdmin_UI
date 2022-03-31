@@ -7,11 +7,11 @@ export const basemixin = {
             list: [],
             selectlist: [],
             colshowlist: [],
+            btnlist: [],
             pagepermis: {},
             pageconfig: {},
             editstatus: false,
             dialogvisible: false,
-            isgradequery: false,
             resultcount: 0,
             queryform: {
                 search_condition: [],
@@ -44,9 +44,25 @@ export const basemixin = {
                     if (res.code === 1) {
                         this.pageconfig = eval(res.pageconfig);
                         this.pagepermis = res.pagepermis;
+                        this.btnlist = res.pagebtns;
                         let hidecols = this.pagepermis.hidefields;
-                        if (this.pageconfig.isgradequery) {
-                            this.isgradequery = this.pageconfig.isgradequery;
+                        var ddlcol = this.pageconfig.fields.filter(i => i.inioptionapi);
+                        if (ddlcol) {
+                            ddlcol.forEach(i => {
+                                try {
+                                    if (i.inioptionapi) {
+                                        ApiFn.requestapi(i.inioptionapi.method, i.inioptionapi.url, {}).then(result => {
+                                            if (result.code === 1) {
+                                                i.options = result.list;
+                                            } else if (result.code === 0) {
+                                                this.$message.error(result.msg);
+                                            }
+                                        });
+                                    }
+                                } catch (error) {
+                                    this.$message.error(error);    
+                                }
+                            })
                         }
                         this.colshowlist = this.pageconfig.fields.filter((item) => {
                             return !hidecols.some((t) => t === item.prop);
@@ -159,8 +175,7 @@ export const basemixin = {
                                     } else {
                                         this.$message.error(res.msg);
                                     }
-                                })
-
+                                });
                             } catch (error) {
                                 this.$message.error(error);
                             }
@@ -173,7 +188,6 @@ export const basemixin = {
             } catch (error) {
                 this.$message.error(error);
             }
-
         },
         save_handle() {
             try {
@@ -215,7 +229,7 @@ export const basemixin = {
                         this.$message.error(error);
                     }
                 }
-                this.$refs.tablecomponent.clearSelect();
+                this.$refs.tablecomponent.clearSelection();
             } catch (error) {
                 this.$message.error(error);
             }

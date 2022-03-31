@@ -40,7 +40,7 @@
                 placeholder="请选择"
               >
                 <el-option
-                  v-for="(item, i) in col.listoptions"
+                  v-for="(item, i) in col.options"
                   :key="i"
                   :label="item.label"
                   :value="item.value"
@@ -63,7 +63,8 @@
             <template v-else-if="col.coltype === 'int' && iscoledit(col.prop)">
               <el-input-number
                 v-model="scope.row[col.prop]"
-                step="1"
+                :step="1"
+                style="width:90px;"
               ></el-input-number>
             </template>
             <template v-else-if="col.coltype === 'date' && iscoledit(col.prop)">
@@ -71,6 +72,7 @@
                 v-model="scope.row[col.prop]"
                 type="date"
                 value-format="yyyy-MM-dd"
+                style="width:100px;"
               />
             </template>
             <template
@@ -80,7 +82,31 @@
                 v-model="scope.row[col.prop]"
                 type="datetime"
                 value-format="yyyy-MM-dd HH:mm:ss"
+                style="width: 120px"
               />
+            </template>
+            <template
+              v-else-if="col.coltype === 'image' && iscoledit(col.prop)"
+            >
+              <el-upload
+                class="avatar-uploader"
+                auto-upload
+                :headers="headers"
+                :action="col.action"
+                :show-file-list="false"
+                :multiple="false"
+                :accept="col.accept || ''"
+                :on-success="upload_success_handle"
+                :before-upload="before_upload_handle"
+                :data="{ rowkey: scope.row.rowkey }"
+              >
+                <img
+                  v-if="scope.row[col.prop]"
+                  :src="rooturl + '/upload/image/' + scope.row[col.prop]"
+                  class="avatar"
+                />
+                <i v-else class="el-icon-plus avatar-uploader-icon" />
+              </el-upload>
             </template>
             <template v-else>
               {{ scope.row[col.prop] }}
@@ -92,6 +118,13 @@
             </template>
             <template v-else-if="col.coltype === 'date'">
               {{ scope.row[col.prop] | parseTime("{y}-{m}-{d}") }}
+            </template>
+            <template v-else-if="col.coltype === 'image'">
+              <img
+                v-if="scope.row[col.prop]"
+                :src="rooturl + '/upload/image/' + scope.row[col.prop]"
+                class="avatar"
+              />
             </template>
             <template v-else-if="col.options && col.istag">
               <el-tag :type="scope.row[col.prop] | showname(col.tagtypes)">{{
@@ -122,7 +155,6 @@
         header-align="center"
         align="center"
         width="50"
-        fixed="right"
         label="操作"
       >
         <template v-slot="scope">
@@ -145,12 +177,16 @@
 </template>
 
 <script>
-import router from "@/router/index";
+import { getToken } from "@/utils/auth";
 import { newGuid } from "@/utils/index";
 export default {
   data() {
     return {
       tableheight: 800,
+      rooturl: process.env.VUE_APP_ROOT,
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
     };
   },
   props: {
@@ -204,11 +240,11 @@ export default {
           if (fitem) {
             return fitem[0].label;
           } else {
-            return "";
+            return value;
           }
         }
       } catch (error) {
-        return "";
+        return value;
       }
     },
   },
@@ -243,7 +279,8 @@ export default {
       return "";
     },
     iscoledit(colname) {
-      let pos = router.currentRoute.meta.editfields.findIndex((i) => {
+      let efields = this.$parent.pagepermis.editfields || [];
+      let pos = efields.findIndex((i) => {
         return i === colname;
       });
       return pos !== -1;
@@ -261,8 +298,18 @@ export default {
         } else {
           return row.rowkey;
         }
-      }else{
+      } else {
         return row.rowkey;
+      }
+    },
+    before_upload_handle(file) {
+      this.$parent["before_upload_handle"](file);
+    },
+    upload_success_handle(res, file) {
+      try {
+        this.$parent["upload_success_handle"](res, file);
+      } catch (error) {
+        this.$message.error(error);
       }
     },
   },
