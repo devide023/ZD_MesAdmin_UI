@@ -40,7 +40,7 @@
                 v-for="(item, index) in collist"
                 :key="index"
                 :label="item.label"
-                :value="item.prop"
+                :value="item.dbprop?item.dbprop:item.prop"
               />
             </el-select>
           </template>

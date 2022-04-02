@@ -13,7 +13,7 @@
           v-for="(item, index) in colshowlist"
           :key="index"
           :label="item.label"
-          :value="item.prop"
+          :value="item.dbprop?item.dbprop:prop"
         >
         </el-option>
       </el-select>

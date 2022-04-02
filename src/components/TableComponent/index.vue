@@ -288,11 +288,11 @@ export default {
     },
     handleCurrentChange(index) {
       this.$emit("update:pageindex", index);
-      this.getlist();
+      this.$parent.getlist(this.$parent.queryform);
     },
     handleSizeChange(value) {
       this.$emit("update:pagesize", value);
-      this.getlist();
+      this.$parent.getlist(this.$parent.queryform);
     },
     sizechangeHandle() {
       let bodyheight = document.body.offsetHeight;

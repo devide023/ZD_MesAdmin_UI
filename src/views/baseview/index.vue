@@ -17,7 +17,7 @@
         >
         <template v-if="pageconfig.isbatoperate">
           <bat-operate
-            :add_upload_success_handle="import_by_add"
+            :add_import_success_handle="import_by_add"
             :replace_import_success_handle="import_by_replace"
             :zh_import_success_handle="import_by_zh"
             :export_excel_handle="export_excel"
@@ -43,11 +43,30 @@
           </span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item
-              v-for="(item, index) in operlist"
+              v-for="(item, index) in pageconfig.operate_fnlist"
               :key="index"
-              @click.native="execfun(scope.row, item.fun)"
-              >{{ item.label }}</el-dropdown-item
             >
+              <template v-if="item.btntype === 'upload'">
+                <el-upload
+                  :headers="headers"
+                  :action="item.action"
+                  :show-file-list="false"
+                  accept=".pdf,application/pdf"
+                  :data="scope.row"
+                  :before-upload="before_upload_PDFHandle"
+                  :on-success="item.callback"
+                >
+                  <el-button type="text">{{ item.label }}</el-button>
+                </el-upload>
+              </template>
+              <template v-else>
+                <el-button
+                  type="text"
+                  @click.native="execfun(scope.row, item.fnname)"
+                  >{{ item.label }}</el-button
+                ></template
+              >
+            </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </template>
@@ -62,6 +81,7 @@ import TableComponent from "@/components/TableComponent/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
 import { GetComponentName } from "@/utils/index";
+import { getToken } from "@/utils/auth";
 export default {
   name: GetComponentName(),
   components: {
@@ -72,7 +92,9 @@ export default {
   mixins: [basemixin],
   data() {
     return {
-      operlist: [],
+      headers: {
+        Authorization: "Bearer " + getToken(),
+      },
     };
   },
   mounted() {
@@ -82,6 +104,18 @@ export default {
     execfun(row, fnname) {
       console.log(fnname);
       this[fnname](row);
+    },
+    before_upload_PDFHandle(file) {
+      const ispdf = ["application/pdf"].indexOf(file.type);
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (ispdf < 0) {
+        this.$message.error("上传文件只能是pdf格式!");
+      }
+      if (!isLt5M) {
+        this.$message.error("上传文件不能超过5MB!");
+      }
+      let isok = ispdf >= 0 && isLt5M;
+      return isok;
     },
     import_by_add(res, file) {
       try {
