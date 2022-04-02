@@ -10,14 +10,6 @@ export const upload_pdf_mixin={
                 this.$message.error("上传文件不能超过5MB!");
             }
             let isok = ispdf >= 0 && isLt5M;
-            // if (isok) {
-            //     this.uploadloading = this.$loading({
-            //         lock: true,
-            //         text: "正在上传文件",
-            //         spinner: "el-icon-loading",
-            //         background: "rgba(0, 0, 0, 0.7)",
-            //     });
-            // }
             return isok;
         },
         
