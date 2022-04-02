@@ -30,7 +30,24 @@
         <template slot-scope="scope">
           <template v-if="scope.row.isedit">
             <template v-if="col.coltype === 'string' && iscoledit(col.prop)">
-              <el-input v-model="scope.row[col.prop]" clearable></el-input>
+              <template v-if="col.suggest">
+                <el-autocomplete
+                  popper-class="my-autocomplete"
+                  v-model="scope.row[col.prop]"
+                  :fetch-suggestions="col.suggest"
+                  @select="selectHandle(col.select_handlename)"
+                  placeholder="关键字过滤"
+                >
+                  <i class="el-icon-search el-input__icon" slot="suffix"> </i>
+                  <template slot-scope="{ item }">
+                    <div class="name">{{ item.value }}</div>
+                    <span class="addr">{{ item.label }}</span>
+                  </template>
+                </el-autocomplete>
+              </template>
+              <template v-else>
+                <el-input v-model="scope.row[col.prop]" clearable></el-input>
+              </template>
             </template>
             <template v-else-if="col.coltype === 'list' && iscoledit(col.prop)">
               <el-select
@@ -64,7 +81,7 @@
               <el-input-number
                 v-model="scope.row[col.prop]"
                 :step="1"
-                style="width:90px;"
+                style="width: 90px"
               ></el-input-number>
             </template>
             <template v-else-if="col.coltype === 'date' && iscoledit(col.prop)">
@@ -72,7 +89,7 @@
                 v-model="scope.row[col.prop]"
                 type="date"
                 value-format="yyyy-MM-dd"
-                style="width:100px;"
+                style="width: 130px"
               />
             </template>
             <template
@@ -85,6 +102,9 @@
                 style="width: 120px"
               />
             </template>
+            <template v-else-if="col.coltype === 'rate' && iscoledit(col.prop)">
+              <el-rate v-model="scope.row[col.prop]"></el-rate>
+            </template>
             <template
               v-else-if="col.coltype === 'image' && iscoledit(col.prop)"
             >
@@ -96,8 +116,8 @@
                 :show-file-list="false"
                 :multiple="false"
                 :accept="col.accept || ''"
-                :on-success="upload_success_handle"
-                :before-upload="before_upload_handle"
+                :on-success="col.upload_success"
+                :before-upload="col.before_upload"
                 :data="{ rowkey: scope.row.rowkey }"
               >
                 <img
@@ -125,6 +145,9 @@
                 :src="rooturl + '/upload/image/' + scope.row[col.prop]"
                 class="avatar"
               />
+            </template>
+            <template v-else-if="col.coltype === 'rate'">
+              <el-rate v-model="scope.row[col.prop]" disabled></el-rate>
             </template>
             <template v-else-if="col.options && col.istag">
               <el-tag :type="scope.row[col.prop] | showname(col.tagtypes)">{{
@@ -302,12 +325,9 @@ export default {
         return row.rowkey;
       }
     },
-    before_upload_handle(file) {
-      this.$parent["before_upload_handle"](file);
-    },
-    upload_success_handle(res, file) {
+    selectHandle(fnname) {
       try {
-        this.$parent["upload_success_handle"](res, file);
+        this.$parent[fnname]();
       } catch (error) {
         this.$message.error(error);
       }
@@ -316,5 +336,24 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+.my-autocomplete {
+  li {
+    line-height: normal;
+    padding: 7px;
+
+    .name {
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .addr {
+      font-size: 12px;
+      color: #b4b4b4;
+    }
+
+    .highlighted .addr {
+      color: #ddd;
+    }
+  }
+}
 </style>

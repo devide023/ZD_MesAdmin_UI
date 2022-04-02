@@ -380,6 +380,6 @@ export function GetComponentName(){
     }else{
       return '';
     }
-    
   }
 }
+

@@ -2,7 +2,7 @@
   <div>
     <search-bar
       :collist="colshowlist"
-      :isgrade="pageconfig.isgradequery || true"
+      :isgrade="pageconfig.isgradequery"
       @query="query_handle"
       @gradequery="grade_query_handle"
     >
@@ -15,10 +15,19 @@
           @click="invokfn(item.fnname)"
           >{{ item.btntxt }}</el-button
         >
+        <template v-if="pageconfig.isbatoperate">
+          <bat-operate
+            :add_upload_success_handle="import_by_add"
+            :replace_import_success_handle="import_by_replace"
+            :zh_import_success_handle="import_by_zh"
+            :export_excel_handle="export_excel"
+          ></bat-operate>
+        </template>
       </template>
     </search-bar>
     <table-component
-      :isoperate="pageconfig.isoperate || false"
+      :isselect="pageconfig.isselect"
+      :isoperate="pageconfig.isoperate"
       ref="tablecomponent"
       :resultcount="resultcount"
       :datalist="list"
@@ -47,15 +56,18 @@
 </template>
 
 <script>
+import Vue from "vue";
 import SearchBar from "@/components/QueryBar/index.vue";
 import TableComponent from "@/components/TableComponent/index.vue";
+import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
-import {GetComponentName} from '@/utils/index';
+import { GetComponentName } from "@/utils/index";
 export default {
   name: GetComponentName(),
   components: {
     TableComponent,
     SearchBar,
+    BatOperate,
   },
   mixins: [basemixin],
   data() {
@@ -63,11 +75,49 @@ export default {
       operlist: [],
     };
   },
-  mounted() {},
+  mounted() {
+    Vue.prototype.$basepage = this;
+  },
   methods: {
     execfun(row, fnname) {
       console.log(fnname);
       this[fnname](row);
+    },
+    import_by_add(res, file) {
+      try {
+        if (this.pageconfig.batoperate.import_by_add) {
+          this.pageconfig.batoperate.import_by_add(this, res, file);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    import_by_replace(res, file) {
+      try {
+        if (this.pageconfig.batoperate.import_by_replace) {
+          this.pageconfig.batoperate.import_by_replace(this, res, file);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    import_by_zh(res, file) {
+      try {
+        if (this.pageconfig.batoperate.import_by_zh) {
+          this.pageconfig.batoperate.import_by_zh(this, res, file);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    export_excel() {
+      try {
+        if (this.pageconfig.batoperate.export_excel) {
+          this.pageconfig.batoperate.export_excel(this);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
     },
   },
 };

@@ -1,6 +1,11 @@
+import Vue from 'vue'
 import ApiFn from "@/api/baseapi";
 import { deepClone, newGuid, parseTime } from "@/utils/index";
 import condition from "./search_form";
+Vue.prototype.$newGuid = newGuid;
+Vue.prototype.$parseTime = parseTime;
+Vue.prototype.$deepClone = deepClone;
+Vue.prototype.$request = ApiFn.requestapi;
 export const basemixin = {
     data() {
         return {
@@ -31,8 +36,6 @@ export const basemixin = {
         }
     },
     created() {
-        this.parseTime = parseTime;
-        this.deepClone = deepClone;
         this.getpageconfig();
     },
     mounted() {
@@ -198,9 +201,13 @@ export const basemixin = {
                         ApiFn.requestapi(this.pageconfig.addapi.method, this.pageconfig.addapi.url, cachedata).then((res) => {
                             if (res.code === 1) {
                                 this.$message.success(res.msg);
-                                cachedata.forEach(i => { i.isedit = false; i.isdb = true; });
-                                this.editstatus = false;
-                                this.pageconfig.addapi.callback(this, res);
+                                if (this.pageconfig.isfresh) {
+                                    this.getlist(this.queryform);
+                                } else {
+                                    cachedata.forEach(i => { i.isedit = false; i.isdb = true; });
+                                    this.editstatus = false;
+                                    this.pageconfig.addapi.callback(this, res);
+                                }
                             }
                             else if (res.code === 2) {
                                 this.$message.warning(res.msg);
@@ -218,9 +225,13 @@ export const basemixin = {
                     try {
                         ApiFn.requestapi(this.pageconfig.editapi.method, this.pageconfig.editapi.url, dbdata).then((res) => {
                             if (res.code === 1) {
-                                dbdata.forEach(i => { i.isedit = false; i.isdb = true; })
-                                this.pageconfig.editapi.callback(this, res);
-                                this.editstatus = false;
+                                if(this.pageconfig.isfresh){
+                                    this.getlist(this.queryform);
+                                } else {
+                                    dbdata.forEach(i => { i.isedit = false; i.isdb = true; })
+                                    this.editstatus = false;
+                                    this.pageconfig.editapi.callback(this, res);
+                                }
                             } else {
                                 this.$message.error(res.msg);
                             }
