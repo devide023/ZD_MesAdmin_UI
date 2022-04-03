@@ -13,7 +13,7 @@
           v-for="(item, index) in colshowlist"
           :key="index"
           :label="item.label"
-          :value="item.dbprop?item.dbprop:prop"
+          :value="item.dbprop?item.dbprop:item.prop"
         >
         </el-option>
       </el-select>
@@ -137,7 +137,7 @@ export default {
   methods: {
     field_change_handle(val) {
       let finditem = this.collist.filter((item) => {
-        return item.prop === val;
+        return (item.dbprop?item.dbprop:item.prop)=== val;
       });
       if (finditem.length > 0) {
         let fieldtype = finditem[0].coltype;

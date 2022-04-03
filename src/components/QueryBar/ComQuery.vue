@@ -348,7 +348,7 @@ export default {
       row.coloptions = [];
       row.value = "";
       let fieldinfo = this.collist.filter((i) => {
-        return i.prop === row.colname;
+        return (i.dbprop?i.dbprop:i.prop) === row.colname;
       });
       if (fieldinfo.length > 0) {
         row.coltype = fieldinfo[0].coltype;
