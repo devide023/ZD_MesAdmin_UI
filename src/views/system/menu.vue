@@ -59,6 +59,13 @@
                 >功能</span
               ></el-dropdown-item
             >
+            <el-dropdown-item
+              v-if="scope.row.menutype === '02'"
+              @click.native="page_config(scope.row)"
+              ><span class="el-icon-circle-plus-outline"
+                >配置</span
+              ></el-dropdown-item
+            >
           </el-dropdown-menu>
         </el-dropdown>
       </template>
@@ -302,6 +309,311 @@
         <el-button type="primary" @click="submit_fnsform">确定</el-button>
       </div>
     </el-dialog>
+    <!-- 页面配置 -->
+    <el-dialog title="页面配置" :visible.sync="dialog_config_Visible">
+      <el-tabs v-model="activatetab" type="border-card" @tab-click="tab_click_handle">
+        <el-tab-pane label="字段信息" name="fields">
+          <el-button type="primary" @click="add_pagefield_item">增加</el-button>
+          <el-table :data="pageconfig_form.fields" style="width: 100%">
+            <el-table-column prop="coltype" label="字段类型" width="100">
+              <template slot-scope="scope">
+                <el-select v-model="scope.row.coltype" placeholder="">
+                  <el-option
+                    v-for="(item, idx) in coltypelist"
+                    :key="idx"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                  </el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column prop="label" label="字段标题" width="80">
+              <template slot-scope="scope">
+                <el-input v-model="scope.row.label" placeholder=""></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="prop" label="字段名称" width="80">
+              <template slot-scope="scope">
+                <el-input v-model="scope.row.prop" placeholder=""></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="dbprop" label="数据库字段" width="80">
+              <template slot-scope="scope">
+                <el-input v-model="scope.row.dbprop" placeholder=""></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="width"
+              label="列宽"
+              width="60"
+              header-align="center"
+            >
+              <template slot-scope="scope">
+                <el-input v-model="scope.row.width" placeholder=""></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="overflowtooltip"
+              label="溢出"
+              header-align="center"
+              width="60"
+            >
+              <template slot-scope="scope">
+                <el-switch
+                  v-model="scope.row.overflowtooltip"
+                  :active-value="true"
+                  :inactive-value="false"
+                ></el-switch>
+              </template>
+            </el-table-column>
+            <el-table-column prop="headeralign" label="列头对齐" width="80">
+              <template slot-scope="scope">
+                <el-select v-model="scope.row.headeralign" placeholder="">
+                  <el-option
+                    v-for="(item, idx) in aligntype"
+                    :key="idx"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                  </el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column prop="align" label="内容对齐" width="80">
+              <template slot-scope="scope">
+                <el-select v-model="scope.row.align" placeholder="">
+                  <el-option
+                    v-for="(item, idx) in aligntype"
+                    :key="idx"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                  </el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="数据源"
+              prop="url"
+              header-align="center"
+              width="150"
+            >
+              <template slot-scope="scope">
+                <el-input
+                  v-model="scope.row.url"
+                  placeholder="初始化选项地址"
+                ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="取数方式"
+              prop="method"
+              width="80"
+              header-align="center"
+            >
+              <template slot-scope="scope">
+                <el-select v-model="scope.row.method" placeholder="">
+                  <el-option label="GET" value="get"></el-option>
+                  <el-option label="POST" value="post"></el-option>
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="回调函数"
+              prop="callback"
+              header-align="center"
+            >
+              <template slot-scope="scope">
+                <el-input
+                  type="textarea"
+                  v-model="scope.row.callback"
+                  rows="2"
+                  placeholder="输入回调函数"
+                ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="50" fixed="right">
+              <template slot-scope="scope">
+                <el-button
+                  type="text"
+                  @click="remove_pagefield_item(scope.$index)"
+                  >删除</el-button
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="基本配置" name="pagecnf">
+          <el-form
+            :model="pageconfig_form.baseconfig"
+            label-width="150px"
+            label-position="right"
+          >
+            <el-form-item label="开启高级查询">
+              <el-switch
+                v-model="pageconfig_form.baseconfig.isgradequery"
+                :inactive-value="false"
+                :active-value="true"
+              ></el-switch>
+            </el-form-item>
+            <el-form-item label="开启批量操作">
+              <el-switch
+                v-model="pageconfig_form.baseconfig.isbatoperate"
+                :inactive-value="false"
+                :active-value="true"
+              ></el-switch>
+            </el-form-item>
+            <el-form-item label="开启选择列">
+              <el-switch
+                v-model="pageconfig_form.baseconfig.isselect"
+                :inactive-value="false"
+                :active-value="true"
+              ></el-switch>
+            </el-form-item>
+            <el-form-item label="操作后是否刷新">
+              <el-switch
+                v-model="pageconfig_form.baseconfig.isfresh"
+                :inactive-value="false"
+                :active-value="true"
+              ></el-switch>
+            </el-form-item>
+            <el-form-item label="开启操作列">
+              <el-switch
+                v-model="pageconfig_form.baseconfig.isoperate"
+                :inactive-value="false"
+                :active-value="true"
+              ></el-switch>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="页面函数" name="pagefn">
+          <el-button type="primary" @click="add_pagefn_item">增加</el-button>
+          <el-table :data="pageconfig_form.pagefn" style="width: 100%">
+            <el-table-column
+              prop="fnname"
+              label="函数名称"
+              width="100"
+              header-align="center"
+              align="center"
+            >
+              <template slot-scope="scope">
+                <el-input v-model="scope.row.fnname"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="fnbody"
+              label="函数体"
+              header-align="center"
+              align="left"
+            >
+              <template slot-scope="scope">
+                <el-input
+                  type="textarea"
+                  v-model="scope.row.fnbody"
+                  :rows="5"
+                  placeholder=""
+                ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+              width="50"
+              fixed="right"
+              label="操作"
+              header-align="center"
+              align="center"
+            >
+              <template slot-scope="scope">
+                <el-button type="text" @click="remove_pagefn_item(scope.$index)"
+                  >删除</el-button
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="表单定义" name="pageform">
+          <el-button type="primary" @click="add_pageform_define_item"
+            >增加</el-button
+          >
+          <el-table :data="pageconfig_form.pageform" style="width: 100%">
+            <el-table-column prop="fieldname" label="项目名称" width="150">
+              <template slot-scope="scope">
+                <el-input
+                  v-model.trim="scope.row.fieldname"
+                  placeholder="项目名称"
+                ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="fieldvalue" label="默认值" width="150">
+              <template slot-scope="scope">
+                <el-input
+                  v-model.trim="scope.row.fieldvalue"
+                  placeholder="默认值"
+                ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button
+                  type="text"
+                  @click="remove_pageform_define_item(scope.$index)"
+                  >删除</el-button
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="数据接口" name="api">
+          <el-button type="primary" @click="add_pageapi_item"
+            >新增接口</el-button
+          >
+          <el-collapse
+            v-for="(item, idx) in pageconfig_form.pageapis"
+            :key="idx"
+          >
+            <el-collapse-item :name="idx">
+              <template slot="title">
+                <div>{{ item.name }}</div>
+                <div style="margin-left: 20px">
+                  <el-button type="danger" @click="remove_api_item(idx)"
+                    >移除接口</el-button
+                  >
+                </div>
+              </template>
+              <el-form :model="item" label-width="80" label-position="right">
+                <el-form-item label="接口名称">
+                  <el-input v-model="item.name" style="width: 90%"></el-input>
+                </el-form-item>
+                <el-form-item label="接口地址">
+                  <el-input v-model="item.url" style="width: 90%"></el-input>
+                </el-form-item>
+                <el-form-item label="请求方式">
+                  <el-select v-model="item.method" placeholder="">
+                    <el-option label="POST" value="post"></el-option>
+                    <el-option label="GET" value="get"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="回调函数">
+                  <el-input
+                    v-model="item.callback"
+                    type="textarea"
+                    :rows="3"
+                    placeholder=""
+                    style="width: 90%"
+                  ></el-input>
+                </el-form-item>
+              </el-form>
+            </el-collapse-item>
+          </el-collapse>
+        </el-tab-pane>
+      </el-tabs>
+      <div slot="footer">
+        <el-button type="danger" @click="dialog_config_Visible = false"
+          >取消</el-button
+        >
+        <el-button type="primary" @click="save_page_config">保存</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -328,9 +640,11 @@ export default {
       pagedialogVisible: false,
       fndialogVisible: false,
       isIndeterminate: true,
+      dialog_config_Visible: false,
       checkAll: false,
       allfields: [],
       AllColOptions: [],
+      activatetab: "fields",
       btntypelist: [
         { label: "主要", value: "primary" },
         { label: "成功", value: "success" },
@@ -364,6 +678,61 @@ export default {
         addtime: parseTime(new Date()),
         fnlist: [],
         collist: [],
+      },
+      aligntype: [
+        { label: "居中", value: "center" },
+        { label: "左对齐", value: "left" },
+        { label: "右对齐", value: "right" },
+      ],
+      coltypelist: [
+        { label: "下拉列", value: "list" },
+        { label: "文本", value: "string" },
+        { label: "数字", value: "int" },
+        { label: "日期", value: "date" },
+        { label: "日期时间", value: "datetime" },
+        { label: "开关", value: "bool" },
+        { label: "输入建议", value: "suggest" },
+      ],
+      pageconfig_form: {
+        menu:{},
+        fields: [],
+        pageform: [],
+        pagefn: [],
+        pageapis: [],
+        baseconfig: {
+          isgradequery: true,
+          isbatoperate: true,
+          isoperate: false,
+          isfresh: true,
+          isselect: true,
+        },
+      },
+      pagefield_item: {
+        coltype: "string",
+        label: "",
+        prop: "",
+        dbprop: "",
+        width: "",
+        overflowtooltip: false,
+        headeralign: "center",
+        align: "center",
+        callback: "",
+        url: "",
+        method: "get",
+      },
+      pagefn_item: {
+        fnname: "",
+        fnbody: "",
+      },
+      pageapi_item: {
+        name: "",
+        url: "",
+        method: "",
+        callback: "",
+      },
+      pageform_item: {
+        fieldname: "",
+        fieldvalue: "",
       },
       rules: {
         code: [
@@ -457,6 +826,15 @@ export default {
       this.checkAll = checkedCount === this.AllColOptions.length;
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.AllColOptions.length;
+    },
+    tab_click_handle(tab,event){
+      if(tab.name === 'pageform')
+      {
+        this.pageconfig_form.pageform=[];
+        this.pageconfig_form.pageform = this.pageconfig_form.fields.map(i=>{
+          return {fieldname:i.prop,fieldvalue:''};
+        });
+      }
     },
     add_funitem() {
       let fnitem = deepClone({
@@ -610,6 +988,81 @@ export default {
     },
     handleSelectionChange(val) {
       this.selectlist = val;
+    },
+    add_pagefield_item() {
+      let item = deepClone(this.pagefield_item);
+      this.pageconfig_form.fields.push(item);
+    },
+    remove_pagefield_item(index) {
+      this.pageconfig_form.fields.splice(index, 1);
+    },
+    add_pagefn_item() {
+      let item = deepClone(this.pageform_item);
+      this.pageconfig_form.pagefn.push(item);
+    },
+    remove_pagefn_item(idx) {
+      this.pageconfig_form.pagefn.splice(idx, 1);
+    },
+    add_pageform_define_item() {
+      let item = deepClone(this.pagefn_item);
+      this.pageconfig_form.pageform.push(item);
+    },
+    remove_pageform_define_item(index) {
+      this.pageconfig_form.pageform.splice(index, 1);
+    },
+    add_pageapi_item() {
+      let item = deepClone(this.pageapi_item);
+      this.pageconfig_form.pageapis.push(item);
+    },
+    remove_api_item(idx) {
+      this.pageconfig_form.pageapis.splice(idx, 1);
+    },
+    page_config(row) {
+      this.pageconfig_form.menu = row;
+      let item_add = deepClone(this.pageapi_item);
+      item_add.name = "addapi";
+      item_add.method = "post";
+      item_add.callback = "function(vm,res){}";
+      this.pageconfig_form.pageapis.push(item_add);
+      let item_edit = deepClone(this.pageapi_item);
+      item_edit.name = "editapi";
+      item_edit.method = "post";
+      item_edit.callback = "function(vm,res){}";
+      this.pageconfig_form.pageapis.push(item_edit);
+      let item_del = deepClone(this.pageapi_item);
+      item_del.name = "delapi";
+      item_del.method = "post";
+      item_del.callback = "function(vm,res){}";
+      this.pageconfig_form.pageapis.push(item_del);
+      let item_query = deepClone(this.pageapi_item);
+      item_query.name = "queryapi";
+      item_query.method = "post";
+      item_query.callback = "function(vm,res){}";
+      this.pageconfig_form.pageapis.push(item_query);
+      this.dialog_config_Visible = true;
+    },
+    save_page_config() {
+      try {
+        ApiFn.requestapi(
+          "post",
+          "/common/saveconfig",
+          this.pageconfig_form
+        ).then((res) => {
+          if (res.code === 1) {
+            this.$message.success(res.msg);
+            this.pageconfig_form.menu={};
+            this.pageconfig_form.fields=[];
+            this.pageconfig_form.pageform=[];
+            this.pageconfig_form.pagefn=[];
+            this.pageconfig_form.pageapis=[];
+            this.dialog_config_Visible = false;
+          } else if (res.code === 0) {
+            this.$message.error(res.msg);
+          }
+        });
+      } catch (error) {
+        this.$message.error(error);
+      }
     },
   },
 };

@@ -33,7 +33,7 @@
               <template v-if="col.suggest">
                 <el-autocomplete
                   popper-class="my-autocomplete"
-                  v-model="scope.row[col.prop]"
+                  v-model.trim="scope.row[col.prop]"
                   :fetch-suggestions="col.suggest"
                   @select="selectHandle(col.select_handlename)"
                   placeholder="关键字过滤"
@@ -46,7 +46,7 @@
                 </el-autocomplete>
               </template>
               <template v-else>
-                <el-input v-model="scope.row[col.prop]" clearable></el-input>
+                <el-input v-model.trim="scope.row[col.prop]" clearable></el-input>
               </template>
             </template>
             <template v-else-if="col.coltype === 'list' && iscoledit(col.prop)">
@@ -79,7 +79,7 @@
             </template>
             <template v-else-if="col.coltype === 'int' && iscoledit(col.prop)">
               <el-input-number
-                v-model="scope.row[col.prop]"
+                v-model.number="scope.row[col.prop]"
                 :step="1"
                 style="width: 90px"
               ></el-input-number>
@@ -103,7 +103,7 @@
               />
             </template>
             <template v-else-if="col.coltype === 'rate' && iscoledit(col.prop)">
-              <el-rate v-model="scope.row[col.prop]"></el-rate>
+              <el-rate v-model.number="scope.row[col.prop]"></el-rate>
             </template>
             <template
               v-else-if="col.coltype === 'image' && iscoledit(col.prop)"
