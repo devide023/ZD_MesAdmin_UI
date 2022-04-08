@@ -483,8 +483,69 @@
                 v-model="pageconfig_form.baseconfig.isoperate"
                 :inactive-value="false"
                 :active-value="true"
+                @change="operate_change_handle"
               ></el-switch>
             </el-form-item>
+            <template v-if="pageconfig_form.baseconfig.isoperate">
+              <el-form-item label="操作列菜单">
+                <el-button type="primary" @click="add_operate_item">增加</el-button>
+                <el-table
+                  :data="pageconfig_form.operate_fnlist">
+                  <el-table-column
+                    prop="label"
+                    header-align="center"
+                    label="按钮名称">
+                    <template slot-scope="scope">
+                      <el-input v-model="scope.row.label" placeholder=""></el-input>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    header-align="center"
+                    align="center"
+                    prop="btntype"
+                    label="按钮类型" >
+                    <template slot-scope="scope">
+                      <el-select v-model="scope.row.btntype" placeholder="">
+                        <el-option label="上传" value="upload"></el-option>
+                        <el-option label="文本" value="text"></el-option>
+                      </el-select>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    header-align="center"
+                    align="center"
+                    prop="fnname"
+                    label="执行函数名" >
+                    <template slot-scope="scope">
+                      <el-input v-model="scope.row.fnname" placeholder=""></el-input>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    header-align="center"
+                    align="center"
+                    prop="action"
+                    label="上传url" >
+                    <template slot-scope="scope">
+                      <el-input v-model="scope.row.action" placeholder=""></el-input>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    header-align="center"
+                    align="center"
+                    prop="callback"
+                    label="回调函数" >
+                    <template slot-scope="scope">
+                      <el-input v-model="scope.row.callback" placeholder=""></el-input>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" align="center" header-align="center" width="50" fixed="right">
+                    <template slot-scope="scope">
+                      <el-button type="text" @click="remove_operate_item(scope.$index)">删除</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-form-item>
+            </template>
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="页面函数" name="pagefn">
@@ -699,6 +760,7 @@ export default {
         pageform: [],
         pagefn: [],
         pageapis: [],
+        operate_fnlist:[],
         baseconfig: {
           isgradequery: true,
           isbatoperate: true,
@@ -706,6 +768,13 @@ export default {
           isfresh: true,
           isselect: true,
         },
+      },
+      operate_item:{
+        label:'',
+        btntype:'',
+        fnname:'',
+        action:'',
+        callback:'',
       },
       pagefield_item: {
         coltype: "string",
@@ -835,6 +904,20 @@ export default {
           return {fieldname:i.prop,fieldvalue:''};
         });
       }
+    },
+    operate_change_handle(v){
+      if(v){
+        
+      }else{
+        this.pageconfig_form.operate_fnlist = [];
+      }
+    },
+    add_operate_item(){
+      let item = deepClone(this.operate_item);
+      this.pageconfig_form.operate_fnlist.push(item);
+    },
+    remove_operate_item(index){
+      this.pageconfig_form.operate_fnlist.splice(index,1);
     },
     add_funitem() {
       let fnitem = deepClone({
@@ -1055,6 +1138,7 @@ export default {
             this.pageconfig_form.pageform=[];
             this.pageconfig_form.pagefn=[];
             this.pageconfig_form.pageapis=[];
+            this.pageconfig_form.operate_fnlist = [];
             this.dialog_config_Visible = false;
           } else if (res.code === 0) {
             this.$message.error(res.msg);

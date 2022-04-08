@@ -63,7 +63,7 @@ export const basemixin = {
                                         });
                                     }
                                 } catch (error) {
-                                    this.$message.error(error);    
+                                    this.$message.error(error);
                                 }
                             })
                         }
@@ -86,25 +86,27 @@ export const basemixin = {
         },
         getlist(data) {
             try {
-                ApiFn.requestapi(
-                    this.pageconfig.queryapi.method,
-                    this.pageconfig.queryapi.url,
-                    data
-                ).then((res) => {
-                    if (res.code === 1) {
-                        this.$message.success(res.msg);
-                        this.resultcount = res.resultcount;
-                        this.list = res.list.map((i) => {
-                            i.rowkey = newGuid();
-                            i.isdb = true;
-                            i.isedit = false;
-                            return i;
-                        });
-                        this.pageconfig.queryapi.callback(this, res);
-                    } else {
-                        this.$message.error(res.msg);
-                    }
-                });
+                if (this.pageconfig.queryapi) {
+                    ApiFn.requestapi(
+                        this.pageconfig.queryapi.method,
+                        this.pageconfig.queryapi.url,
+                        data
+                    ).then((res) => {
+                        if (res.code === 1) {
+                            this.$message.success(res.msg);
+                            this.resultcount = res.resultcount;
+                            this.list = res.list.map((i) => {
+                                i.rowkey = newGuid();
+                                i.isdb = true;
+                                i.isedit = false;
+                                return i;
+                            });
+                            this.pageconfig.queryapi.callback(this, res);
+                        } else {
+                            this.$message.error(res.msg);
+                        }
+                    });
+                }
             } catch (error) {
                 this.$message.error(error);
             }
@@ -154,31 +156,33 @@ export const basemixin = {
                         let dbdata = this.selectlist.filter((i) => i.isdb);
                         if (dbdata.length > 0) {
                             try {
-                                ApiFn.requestapi(
-                                    this.pageconfig.delapi.method,
-                                    this.pageconfig.delapi.url,
-                                    dbdata
-                                ).then(res => {
-                                    if (res.code === 1) {
-                                        this.$message.success(res.msg);
+                                if (this.pageconfig.delapi) {
+                                    ApiFn.requestapi(
+                                        this.pageconfig.delapi.method,
+                                        this.pageconfig.delapi.url,
+                                        dbdata
+                                    ).then(res => {
+                                        if (res.code === 1) {
+                                            this.$message.success(res.msg);
 
-                                        if (this.pageconfig.isfresh) {
-                                            this.getlist(this.queryform);
+                                            if (this.pageconfig.isfresh) {
+                                                this.getlist(this.queryform);
+                                            } else {
+                                                dbdata.forEach((t) => {
+                                                    let pos = this.list.findIndex(
+                                                        (i) => i.rowkey === t.rowkey
+                                                    );
+                                                    if (pos !== -1) {
+                                                        this.list.splice(pos, 1);
+                                                    }
+                                                });
+                                            }
+                                            this.pageconfig.delapi.callback(this, res);
                                         } else {
-                                            dbdata.forEach((t) => {
-                                                let pos = this.list.findIndex(
-                                                    (i) => i.rowkey === t.rowkey
-                                                );
-                                                if (pos !== -1) {
-                                                    this.list.splice(pos, 1);
-                                                }
-                                            });
+                                            this.$message.error(res.msg);
                                         }
-                                        this.pageconfig.delapi.callback(this, res);
-                                    } else {
-                                        this.$message.error(res.msg);
-                                    }
-                                });
+                                    });
+                                }
                             } catch (error) {
                                 this.$message.error(error);
                             }
@@ -198,44 +202,48 @@ export const basemixin = {
                 let dbdata = this.list.filter((i) => i.isdb && i.isedit);
                 if (cachedata.length > 0) {
                     try {
-                        ApiFn.requestapi(this.pageconfig.addapi.method, this.pageconfig.addapi.url, cachedata).then((res) => {
-                            if (res.code === 1) {
-                                this.$message.success(res.msg);
-                                if (this.pageconfig.isfresh) {
-                                    this.getlist(this.queryform);
-                                } else {
-                                    cachedata.forEach(i => { i.isedit = false; i.isdb = true; });
-                                    this.editstatus = false;
+                        if (this.pageconfig.addapi) {
+                            ApiFn.requestapi(this.pageconfig.addapi.method, this.pageconfig.addapi.url, cachedata).then((res) => {
+                                if (res.code === 1) {
+                                    this.$message.success(res.msg);
+                                    if (this.pageconfig.isfresh) {
+                                        this.getlist(this.queryform);
+                                    } else {
+                                        cachedata.forEach(i => { i.isedit = false; i.isdb = true; });
+                                        this.editstatus = false;
+                                        this.pageconfig.addapi.callback(this, res);
+                                    }
+                                }
+                                else if (res.code === 2) {
+                                    this.$message.warning(res.msg);
                                     this.pageconfig.addapi.callback(this, res);
                                 }
-                            }
-                            else if (res.code === 2) {
-                                this.$message.warning(res.msg);
-                                this.pageconfig.addapi.callback(this, res);
-                            }
-                            else {
-                                this.$message.error(res.msg);
-                            }
-                        });
+                                else {
+                                    this.$message.error(res.msg);
+                                }
+                            });
+                        }
                     } catch (error) {
                         this.$message.error(error);
                     }
                 }
                 if (dbdata.length > 0) {
                     try {
-                        ApiFn.requestapi(this.pageconfig.editapi.method, this.pageconfig.editapi.url, dbdata).then((res) => {
-                            if (res.code === 1) {
-                                if(this.pageconfig.isfresh){
-                                    this.getlist(this.queryform);
+                        if (this.pageconfig.editapi) {
+                            ApiFn.requestapi(this.pageconfig.editapi.method, this.pageconfig.editapi.url, dbdata).then((res) => {
+                                if (res.code === 1) {
+                                    if (this.pageconfig.isfresh) {
+                                        this.getlist(this.queryform);
+                                    } else {
+                                        dbdata.forEach(i => { i.isedit = false; i.isdb = true; })
+                                        this.editstatus = false;
+                                        this.pageconfig.editapi.callback(this, res);
+                                    }
                                 } else {
-                                    dbdata.forEach(i => { i.isedit = false; i.isdb = true; })
-                                    this.editstatus = false;
-                                    this.pageconfig.editapi.callback(this, res);
+                                    this.$message.error(res.msg);
                                 }
-                            } else {
-                                this.$message.error(res.msg);
-                            }
-                        });
+                            });
+                        }
                     } catch (error) {
                         this.$message.error(error);
                     }

@@ -48,7 +48,6 @@
             >
               <template v-if="item.btntype === 'upload'">
                 <el-upload
-                  v-if="scope.row.isedit"
                   :headers="headers"
                   :action="item.action"
                   :show-file-list="false"
@@ -77,60 +76,68 @@
 
 <script>
 import Vue from "vue";
-import SearchBar from "@/components/QueryBar/index.vue";
 import TableComponent from "@/components/TableComponent/index.vue";
+import SearchBar from "@/components/QueryBar/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
-import {batoperatemixin} from '@/mixin/batoperate_mixin';
-import { GetComponentName } from "@/utils/index";
-import { getToken } from "@/utils/auth";
 export default {
-  name: GetComponentName(),
+  name: "WbZqComponent",
   components: {
     TableComponent,
     SearchBar,
-    BatOperate,
+    BatOperate
   },
-  mixins: [basemixin,batoperatemixin],
+  mixins: [basemixin],
   data() {
-    return {
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
-    };
+    return {};
   },
-  mounted() {
-    Vue.prototype.$basepage = this;
+  mounted () {
+      Vue.prototype.$basepage = this;
   },
   methods: {
     execfun(row, fnname) {
       console.log(fnname);
       this[fnname](row);
     },
+    import_by_add(res, file) {
+      try {
+        if (this.pageconfig.batoperate.import_by_add) {
+          this.pageconfig.batoperate.import_by_add(this, res, file);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    import_by_replace(res, file) {
+      try {
+        if (this.pageconfig.batoperate.import_by_replace) {
+          this.pageconfig.batoperate.import_by_replace(this, res, file);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    import_by_zh(res, file) {
+      try {
+        if (this.pageconfig.batoperate.import_by_zh) {
+          this.pageconfig.batoperate.import_by_zh(this, res, file);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    export_excel() {
+      try {
+        if (this.pageconfig.batoperate.export_excel) {
+          this.pageconfig.batoperate.export_excel(this);
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
   },
 };
 </script>
 
-<style lang="scss">
-.avatar-uploader .el-upload {
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
-  text-align: center;
-}
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  display: block;
-  margin: auto;
-}
+<style lang="scss" scoped>
 </style>

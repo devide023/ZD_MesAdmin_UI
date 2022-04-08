@@ -46,7 +46,10 @@
                 </el-autocomplete>
               </template>
               <template v-else>
-                <el-input v-model.trim="scope.row[col.prop]" clearable></el-input>
+                <el-input
+                  v-model.trim="scope.row[col.prop]"
+                  clearable
+                ></el-input>
               </template>
             </template>
             <template v-else-if="col.coltype === 'list' && iscoledit(col.prop)">
@@ -242,6 +245,9 @@ export default {
     treeprops: {
       type: Object,
     },
+    tbheight: {
+      type: Number,
+    },
     pageindex: {
       type: Number,
       default: 1,
@@ -288,21 +294,25 @@ export default {
     },
     handleCurrentChange(index) {
       this.$emit("update:pageindex", index);
-      this.$parent.getlist(this.$parent.queryform);
+      this.$basepage.getlist(this.$basepage.queryform);
     },
     handleSizeChange(value) {
       this.$emit("update:pagesize", value);
-      this.$parent.getlist(this.$parent.queryform);
+      this.$basepage.getlist(this.$basepage.queryform);
     },
     sizechangeHandle() {
-      let bodyheight = document.body.offsetHeight;
-      this.tableheight = bodyheight - 155;
+      if (this.tbheight) {
+        this.tableheight = this.tbheight;
+      } else {
+        let bodyheight = document.body.offsetHeight;
+        this.tableheight = bodyheight - 155;
+      }
     },
     tableRowClassName({ row, idx }) {
       return "";
     },
     iscoledit(colname) {
-      let efields = this.$parent.pagepermis.editfields || [];
+      let efields = this.$basepage.pagepermis.editfields || [];
       let pos = efields.findIndex((i) => {
         return i === colname;
       });
@@ -327,7 +337,7 @@ export default {
     },
     selectHandle(fnname) {
       try {
-        this.$parent[fnname]();
+        this.$basepage[fnname]();
       } catch (error) {
         this.$message.error(error);
       }
