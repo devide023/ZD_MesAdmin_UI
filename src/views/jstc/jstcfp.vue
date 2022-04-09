@@ -270,8 +270,8 @@ export default {
       recordcount: 0,
       wfpjtlist: [],
       tableheight: 800,
-      topheight: 270,
-      bottomheight: 530,
+      topheight: 100,
+      bottomheight: 0,
       gcxxlist: [],
       scxlist: [],
       gwlist: [],
@@ -290,7 +290,9 @@ export default {
     Vue.prototype.$basepage = this;
     this.get_wfp_list();
     this.getlist();
-    this.sizechangeHandle();
+    this.$nextTick(() => {
+      this.sizechangeHandle();
+    });
   },
   beforeMount() {
     window.addEventListener("resize", this.sizechangeHandle);
@@ -310,12 +312,15 @@ export default {
         document.getElementsByClassName("search_bar")[0].offsetHeight;
       this.tableheight =
         bodyheight - navbarheight - tagviewheight - querybarheight - 30;
-      document.getElementsByClassName("components-container")[0].style.height =
-        this.tableheight + "px";
-      this.topheight =
-        document.getElementsByClassName("top-container")[0].offsetHeight - 40;
-      this.bottomheight = this.tableheight - this.topheight - 100;
-      this.$refs.tablecomponent.sizechangeHandle();
+        document.getElementsByClassName("components-container")[0].style.height = this.tableheight + 'px';
+      if (document.getElementsByClassName("top-container").length>0) {
+        this.topheight =
+          document.getElementsByClassName("top-container")[0].offsetHeight - 40;
+        this.bottomheight = this.tableheight - this.topheight-95;
+        this.$nextTick(function(){
+            this.$refs.tablecomponent.sizechangeHandle();
+        });
+      }
     },
     dialog_opend_handle() {
       this.gcxxlist = this.pageconfig.fields[0].options;

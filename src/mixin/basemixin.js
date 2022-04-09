@@ -45,7 +45,8 @@ export const basemixin = {
             try {
                 ApiFn.pageconfig().then((res) => {
                     if (res.code === 1) {
-                        this.pageconfig = eval(res.pageconfig);
+                        //this.pageconfig = eval(res.pageconfig);
+                        this.pageconfig = Function('return ' + res.pageconfig)();
                         this.pagepermis = res.pagepermis;
                         this.btnlist = res.pagebtns;
                         let hidecols = this.pagepermis.hidefields;

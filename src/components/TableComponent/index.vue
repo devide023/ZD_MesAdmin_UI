@@ -278,7 +278,7 @@ export default {
     },
   },
   mounted() {
-    this.$nextTick(() => {
+    this.$nextTick(function () {
       this.sizechangeHandle();
     });
   },
@@ -341,6 +341,14 @@ export default {
       } catch (error) {
         this.$message.error(error);
       }
+    },
+    doLayout() {
+      this.$refs.maintable.doLayout();
+    },
+  },
+  watch: {
+    datalist(val) {
+      this.doLayout();
     },
   },
 };
