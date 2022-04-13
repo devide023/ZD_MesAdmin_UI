@@ -1101,6 +1101,7 @@ export default {
       this.pageconfig_form.pageapis.splice(idx, 1);
     },
     page_config(row) {
+      this.pageconfig_form.pageapis = [];
       this.pageconfig_form.menu = row;
       let item_add = deepClone(this.pageapi_item);
       item_add.name = "addapi";
