@@ -53,24 +53,49 @@
               </template>
             </template>
             <template v-else-if="col.coltype === 'list' && iscoledit(col.prop)">
-              <el-select
-                v-model="scope.row[col.prop]"
-                clearable
-                filterable
-                placeholder="请选择"
-              >
-                <el-option
-                  v-for="(item, i) in col.options"
-                  :key="i"
-                  :label="item.label"
-                  :value="item.value"
+              <template v-if="col.remote">
+                <el-select
+                  v-model.trim="scope.row[col.prop]"
+                  filterable
+                  remote
+                  :remote-method="col.remote"
+                  placeholder="关键字过滤"
                 >
-                  <span style="float: left">{{ item.label }}</span>
-                  <span style="float: right; color: #8492a6; font-size: 13px">{{
-                    item.value
-                  }}</span>
-                </el-option>
-              </el-select>
+                  <el-option
+                    v-for="(item, i) in col.options"
+                    :key="i"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                    <span style="float: left">{{ item.label }}</span>
+                    <span
+                      style="float: right; color: #8492a6; font-size: 13px"
+                      >{{ item.value }}</span
+                    >
+                  </el-option>
+                </el-select>
+              </template>
+              <template v-else>
+                <el-select
+                  v-model="scope.row[col.prop]"
+                  clearable
+                  filterable
+                  placeholder="请选择"
+                >
+                  <el-option
+                    v-for="(item, i) in col.options"
+                    :key="i"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                    <span style="float: left">{{ item.label }}</span>
+                    <span
+                      style="float: right; color: #8492a6; font-size: 13px"
+                      >{{ item.value }}</span
+                    >
+                  </el-option>
+                </el-select>
+              </template>
             </template>
             <template v-else-if="col.coltype === 'bool' && iscoledit(col.prop)">
               <el-switch
