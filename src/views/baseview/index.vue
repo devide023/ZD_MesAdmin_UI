@@ -82,6 +82,7 @@ import TableComponent from "@/components/TableComponent/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
 import {batoperatemixin} from '@/mixin/batoperate_mixin';
+import {export_xls_mixin} from '@/mixin/export_xls_mixin';
 import { GetComponentName } from "@/utils/index";
 import { getToken } from "@/utils/auth";
 export default {
@@ -91,7 +92,7 @@ export default {
     SearchBar,
     BatOperate,
   },
-  mixins: [basemixin,batoperatemixin],
+  mixins: [basemixin,batoperatemixin,export_xls_mixin],
   data() {
     return {
       headers: {

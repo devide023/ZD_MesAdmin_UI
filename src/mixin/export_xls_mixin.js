@@ -10,7 +10,7 @@ export const export_xls_mixin = {
             });
             let colnames = fields.map(i => i.label);
             import('@/vendor/Export2Excel').then(excel => {
-                const data = this.formatJson(fields, expdata)
+                const data = this.formatJson(fields, expdata);
                 excel.export_json_to_excel({
                     header: colnames,
                     data,
@@ -23,12 +23,12 @@ export const export_xls_mixin = {
         },
         formatJson(filterVal, jsonData) {
             return jsonData.map(v => filterVal.map(j => {
-                if (j.type === 'date' || j.type==='datetime') {
-                    return parseTime(v[j.value])
+                if (j.coltype === 'date' || j.coltype==='datetime') {
+                    return parseTime(v[j.prop])
                 } else {
-                    return v[j.value]
+                    return v[j.prop]
                 }
-            }))
+            }));
         }
     },
 }

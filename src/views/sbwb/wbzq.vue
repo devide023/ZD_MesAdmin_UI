@@ -213,6 +213,7 @@ import SearchBar from "@/components/QueryBar/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
 import { batoperatemixin } from "@/mixin/batoperate_mixin";
+import {export_xls_mixin} from '@/mixin/export_xls_mixin';
 import { newGuid } from "@/utils";
 var _this;
 export default {
@@ -222,7 +223,7 @@ export default {
     SearchBar,
     BatOperate,
   },
-  mixins: [basemixin, batoperatemixin],
+  mixins: [basemixin, batoperatemixin,export_xls_mixin],
   data() {
     return {
       dialogVisible: false,
