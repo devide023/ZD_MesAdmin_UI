@@ -7,7 +7,7 @@ function getrouteComponent() {
         params: {}
     }).then(res => {
         if (res.code === 1) {
-            console.log(res.list);
+            //console.log(res.list);
             window.route_component = res.list.map(i => { return { routepath: i.routepath, component: i.componentname } });
         }
     });

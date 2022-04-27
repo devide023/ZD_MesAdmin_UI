@@ -52,7 +52,7 @@ const mutations = {
 const actions = {
   generateRoutes({ commit }, accessedRoutes) {
     const menus = get_user_menus(accessedRoutes);
-    console.log(menus);
+    //console.log(menus);
     return new Promise(resolve => {
       commit('SET_ROUTES', menus)
       resolve(menus)

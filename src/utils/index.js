@@ -369,7 +369,7 @@ export function newGuid() {
 export function GetComponentName(){
   let url = window.location.href;
   let pos = url.lastIndexOf('#');
-  console.log(url);
+  //console.log(url);
   if(pos!==-1){
     var routepath = url.substring(pos + 1, url.length);
     var idx = window.route_component.findIndex(i => i.routepath === routepath);
