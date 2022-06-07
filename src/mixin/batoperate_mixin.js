@@ -12,6 +12,19 @@ export const batoperatemixin={
             let isok = ispdf >= 0 && isLt5M;
             return isok;
         },
+        before_upload_Mp4Handle(file) {
+            console.log(file);
+            const ismp4 = ["video/mp4"].indexOf(file.type);
+            const isLt500M = file.size / 1024 / 1024 < 500;
+            if (ismp4 < 0) {
+                this.$message.error("上传文件只能是Mp4格式!");
+            }
+            if (!isLt500M) {
+                this.$message.error("上传文件不能超过500MB!");
+            }
+            let isok = ismp4 >= 0 && isLt500M;
+            return isok;
+        },
         import_by_add(res, file) {
             try {
                 if (typeof (this.pageconfig.batoperate.import_by_add) === 'function') {

@@ -6,7 +6,6 @@ export const hg_fields = [
     headeralign: 'center',
     align: 'center',
     width: 80,
-    fixed: 'left',
   }, {
     coltype: 'string',
     prop: 'scx',
@@ -14,7 +13,6 @@ export const hg_fields = [
     headeralign: 'center',
     align: 'center',
     width: 80,
-    fixed: 'left',
   }, {
     coltype: 'string',
     prop: 'sbbh',
@@ -22,14 +20,13 @@ export const hg_fields = [
     headeralign: 'center',
     align: 'center',
     width: 100,
-    fixed: 'left',
   }, {
     coltype: 'string',
     prop: 'sbmc',
     label: '设备名称',
     headeralign: 'center',
     align: 'center',
-    fixed: 'left',
+    width:100,
 	overflowtooltip: true
   },
   {
@@ -39,7 +36,30 @@ export const hg_fields = [
     headeralign: 'center',
     align: 'center',
     width: 80,
-    fixed: 'left',
+  },
+  {
+    coltype: 'string',
+    prop: 'jgs',
+    label: '加工数',
+    headeralign: 'center',
+    align: 'center',
+    width: 80,
+  },
+  {
+    coltype: 'string',
+    prop: 'yzzt',
+    label: '运行状态',
+    headeralign: 'center',
+    align: 'center',
+    width: 80,
+  },
+  {
+    coltype: 'string',
+    prop: 'wd',
+    label: '温度',
+    headeralign: 'center',
+    align: 'center',
+    width: 80,
   },
   {
     coltype: 'datetime',
@@ -48,7 +68,6 @@ export const hg_fields = [
     headeralign: 'center',
     align: 'center',
     width: 140,
-    fixed: 'left',
 	overflowtooltip: true
   },
 ];

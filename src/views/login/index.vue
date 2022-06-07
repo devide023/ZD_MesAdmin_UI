@@ -9,7 +9,7 @@
       label-position="left"
     >
       <div class="title-container">
-        <h3 class="title">系统登录</h3>
+        <h3 class="title">机加MES系统登录</h3>
       </div>
 
       <el-form-item prop="username">
@@ -81,8 +81,8 @@ export default {
     };
     return {
       loginForm: {
-        username: "001",
-        password: "123456",
+        username: "",
+        password: "",
       },
       loginRules: {
         password: [

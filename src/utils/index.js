@@ -373,9 +373,9 @@ export function GetComponentName(){
   if(pos!==-1){
     var routepath = url.substring(pos + 1, url.length);
     var idx = window.route_component.findIndex(i => i.routepath === routepath);
-    console.log(idx);
+    //console.log(idx);
     if (idx!==-1) {
-      console.log(window.route_component[idx].component);
+      //console.log(window.route_component[idx].component);
       return window.route_component[idx].component;
     }else{
       return '';

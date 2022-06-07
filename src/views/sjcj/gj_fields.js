@@ -6,7 +6,6 @@ export const gj_fields = [
     headeralign: 'center',
     align: 'center',
     width: 80,
-    fixed: 'left',
   }, {
     coltype: 'string',
     prop: 'scx',
@@ -14,7 +13,6 @@ export const gj_fields = [
     headeralign: 'center',
     align: 'center',
     width: 80,
-    fixed: 'left',
   }, {
     coltype: 'string',
     prop: 'sbbh',
@@ -22,14 +20,13 @@ export const gj_fields = [
     headeralign: 'center',
     align: 'center',
     width: 100,
-    fixed: 'left',
   }, {
     coltype: 'string',
     prop: 'sbmc',
     label: '设备名称',
     headeralign: 'center',
     align: 'center',
-    fixed: 'left',
+    width:100,
 	overflowtooltip: true
   },
   {
@@ -39,7 +36,30 @@ export const gj_fields = [
     headeralign: 'center',
     align: 'center',
     width: 80,
-    fixed: 'left',
+  },
+  {
+    coltype: 'string',
+    prop: 'kjzt',
+    label: '开机状态',
+    headeralign: 'center',
+    align: 'center',
+    width: 80,
+  },
+  {
+    coltype: 'string',
+    prop: 'yxzt',
+    label: '运行状态',
+    headeralign: 'center',
+    align: 'center',
+    width: 80,
+  },
+  {
+    coltype: 'string',
+    prop: 'bjzt',
+    label: '报警状态',
+    headeralign: 'center',
+    align: 'center',
+    width: 80,
   },
   {
     coltype: 'datetime',

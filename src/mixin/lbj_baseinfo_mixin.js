@@ -6,10 +6,9 @@ export const lbj_baseinfo_mixin = {
             scxxx_list: [],
             gwzd_list: [],
             dbxx_list: [],
-            free_dbxx_list: [],
+            unuse_dbxx_list:[],
             rjxx_list: [],
-            cnc_list: [],
-            free_cnc_list: [],
+            sbxx_list: [],
         }
     },
     methods: {
@@ -53,10 +52,10 @@ export const lbj_baseinfo_mixin = {
                 }
             });
         },
-        get_freedb_list() {
-            ApiFn.requestapi('get', 'lbj/baseinfo/free_db_list').then(res => {
+        get_unusedbxx_list(){
+            ApiFn.requestapi('get', 'lbj/baseinfo/unuse_dbxx').then(res => {
                 if (res.code === 1) {
-                    this.free_dbxx_list = res.list;
+                    this.unuse_dbxx_list = res.list;
                 }
                 else if (res.code === 0) {
                     this.$message.error(res.msg);
@@ -73,25 +72,5 @@ export const lbj_baseinfo_mixin = {
                 }
             });
         },
-        get_cnc_list() {
-            ApiFn.requestapi('get', 'lbj/baseinfo/cnc_list').then(res => {
-                if (res.code === 1) {
-                    this.cnc_list = res.list;
-                }
-                else if (res.code === 0) {
-                    this.$message.error(res.msg);
-                }
-            })
-        },
-        get_free_cnc_list() {
-            ApiFn.requestapi('get', 'lbj/baseinfo/free_cnc_list').then(res => {
-                if (res.code === 1) {
-                    this.free_cnc_list = res.list;
-                }
-                else if (res.code === 0) {
-                    this.$message.error(res.msg);
-                }
-            })
-        }
     },
 }

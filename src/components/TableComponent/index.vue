@@ -58,8 +58,10 @@
                   v-model.trim="scope.row[col.prop]"
                   filterable
                   remote
+                  :multiple="col.multiple"
                   :remote-method="col.remote"
                   placeholder="关键字过滤"
+                  style="width: 100%"
                 >
                   <el-option
                     v-for="(item, i) in col.options"
@@ -80,13 +82,17 @@
                   v-model="scope.row[col.prop]"
                   clearable
                   filterable
+                  :multiple="col.multiple"
                   placeholder="请选择"
+                  style="width: 100%"
+                  @change="(val)=>col_ddl_change_handle(val,scope.row,col)"
                 >
                   <el-option
                     v-for="(item, i) in col.options"
                     :key="i"
                     :label="item.label"
                     :value="item.value"
+                    :disabled="item.disabled"
                   >
                     <span style="float: left">{{ item.label }}</span>
                     <span
@@ -162,14 +168,14 @@
           </template>
           <template v-else>
             <template v-if="col.coltype === 'datetime'">
-              {{ scope.row[col.prop] | parseTime("{y}-{m}-{d} {h}:{i}:{s}") }}
+              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | parseTime("{y}-{m}-{d} {h}:{i}:{s}") }}
             </template>
             <template v-else-if="col.coltype === 'date'">
-              {{ scope.row[col.prop] | parseTime("{y}-{m}-{d}") }}
+              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | parseTime("{y}-{m}-{d}") }}
             </template>
             <template v-else-if="col.coltype === 'image'">
               <img
-                v-if="scope.row[col.prop]"
+                v-if="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop]"
                 :src="rooturl + '/upload/image/' + scope.row[col.prop]"
                 class="avatar"
               />
@@ -178,25 +184,25 @@
               <el-rate v-model="scope.row[col.prop]" disabled></el-rate>
             </template>
             <template v-else-if="col.options && col.istag">
-              <el-tag :type="scope.row[col.prop] | showname(col.tagtypes)">{{
-                scope.row[col.prop] | showname(col.options)
+              <el-tag :type="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | showname(col.tagtypes)">{{
+                col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | showname(col.options)
               }}</el-tag>
             </template>
             <template v-else-if="col.options">
-              {{ scope.row[col.prop] | showname(col.options) }}
+              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | showname(col.options) }}
             </template>
             <template v-else-if="col.isicon">
               <template
-                v-if="(scope.row[col.prop] || '').indexOf('el-icon') !== -1"
+                v-if="(col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] || '').indexOf('el-icon') !== -1"
               >
-                <i :class="scope.row[col.prop]"></i>
+                <i :class="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop]"></i>
               </template>
               <template v-else>
-                <svg-icon :icon-class="scope.row[col.prop] || ''"
+                <svg-icon :icon-class="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] || ''"
               /></template>
             </template>
             <template v-else>
-              {{ scope.row[col.prop] }}
+              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] }}
             </template>
           </template>
         </template>
@@ -290,17 +296,28 @@ export default {
     showname: function (value, options) {
       try {
         if (options) {
-          let fitem = options.filter((i) => i.value === value);
-          if (fitem) {
-            return fitem[0].label;
+          if (typeof value === "object") {
+            let find = options.filter((i) => value.some((j) => j === i.value));
+            if (find) {
+              return find.map((i) => i.label).join(",");
+            } else {
+              return value;
+            }
           } else {
-            return value;
+            let fitem = options.filter((i) => i.value === value);
+            if (fitem) {
+              return fitem.map((i) => i.label).join(",");
+            } else {
+              return value;
+            }
           }
         }
       } catch (error) {
         return value;
       }
     },
+  },
+  computed: {
   },
   mounted() {
     this.$nextTick(function () {
@@ -319,10 +336,12 @@ export default {
     },
     handleCurrentChange(index) {
       this.$emit("update:pageindex", index);
+      this.$basepage.queryform.pageindex = index;
       this.$basepage.getlist(this.$basepage.queryform);
     },
     handleSizeChange(value) {
       this.$emit("update:pagesize", value);
+      this.$basepage.queryform.pagesize = value;
       this.$basepage.getlist(this.$basepage.queryform);
     },
     sizechangeHandle() {
@@ -370,6 +389,11 @@ export default {
     doLayout() {
       this.$refs.maintable.doLayout();
     },
+    col_ddl_change_handle(val,row,col){
+      if(col.change_fn_name){
+        this.$basepage[col.change_fn_name](this.collist,val,row);
+      }
+    }
   },
   watch: {
     datalist(val) {

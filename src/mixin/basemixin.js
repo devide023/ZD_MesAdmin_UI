@@ -269,6 +269,7 @@ export const basemixin = {
                 this.queryform.search_condition = [];
                 this.queryform.px_condition = [];
             }
+            this.queryform.pageindex = 1;
             this.getlist(this.queryform);
         },
         grade_query_handle(data) {
@@ -287,6 +288,7 @@ export const basemixin = {
             if (data.pxlist) {
                 this.queryform.px_condition = data.pxlist;
             }
+            this.queryform.pageindex = 1;
             this.getlist(this.queryform);
         },
     },

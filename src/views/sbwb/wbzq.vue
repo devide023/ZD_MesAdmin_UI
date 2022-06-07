@@ -76,6 +76,8 @@
       e-drag-dialog
       title="维保周期录入"
       :visible.sync="dialogVisible"
+      top="10px"
+      :close-on-click-modal="false"
       width="60%"
     >
       <el-form
@@ -254,7 +256,7 @@ export default {
       });
       if (fitem) {
         let optionitem = fitem[0].options.filter((i) => i.value === val);
-        if (optionitem) {
+        if (optionitem && optionitem.length>0) {
           return optionitem[0].label;
         } else {
           return val;
@@ -266,7 +268,6 @@ export default {
   },
   methods: {
     execfun(row, fnname) {
-      console.log(fnname);
       this[fnname](row);
     },
     add_handle() {
@@ -292,7 +293,7 @@ export default {
         if (v) {
           try {
             this.wbzq_form.sbwbls = this.wbzqlist.filter((i) => i.sfwb === "Y");
-            this.$request("post", "lbj/wbzq/add", this.wbzq_form).then(
+            this.$request("post", "/lbj/wbzq/add", this.wbzq_form).then(
               (res) => {
                 if (res.code === 1) {
                   this.wbzq_form.next_date = "";

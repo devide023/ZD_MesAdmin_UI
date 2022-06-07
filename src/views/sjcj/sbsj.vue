@@ -43,7 +43,7 @@
           @size-change="cnc_handleSizeChange"
         ></el-pagination>
       </el-tab-pane>
-      <el-tab-pane label="干检采集数据" name="tab2">
+      <el-tab-pane label="检漏仪采集数据" name="tab2">
         <search-bar
           :collist="gj_cols"
           :isgrade="true"
@@ -195,6 +195,82 @@
           @size-change="spc_handleSizeChange"
         ></el-pagination>
       </el-tab-pane>
+      <el-tab-pane label="SPC环境采集数据" name="tab6">
+        <search-bar
+          :collist="spchj_cols"
+          :isgrade="true"
+          @query="spchj_query_handle"
+          @gradequery="spchj_grade_query_handle"
+        >
+        </search-bar>
+        <el-table
+          :data="spchj_datalist"
+          border
+          header-cell-class-name="tb_header_bg"
+          style="width: 100%"
+        >
+          <el-table-column
+            v-for="(item, idx) in spchj_cols"
+            :key="idx"
+            :prop="item.prop"
+            :label="item.label"
+            :width="item.width"
+            :align="item.align"
+            :header-align="item.headeralign"
+            :show-overflow-tooltip="item.overflowtooltip"
+          >
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          :total="spchj_resultcount"
+          :current-page="spchj_queryform.pageindex"
+          :page-size="spchj_queryform.pagesize"
+          :page-sizes="[20, 50, 100, 200]"
+          layout="total, sizes, prev, pager, next"
+          background
+          style="text-align: right"
+          @current-change="spchj_handleCurrentChange"
+          @size-change="spchj_handleSizeChange"
+        ></el-pagination>
+      </el-tab-pane>
+      <el-tab-pane label="油冷机采集数据" name="tab7">
+        <search-bar
+          :collist="ylj_cols"
+          :isgrade="true"
+          @query="ylj_query_handle"
+          @gradequery="ylj_grade_query_handle"
+        >
+        </search-bar>
+        <el-table
+          :data="ylj_datalist"
+          border
+          header-cell-class-name="tb_header_bg"
+          style="width: 100%"
+        >
+          <el-table-column
+            v-for="(item, idx) in ylj_cols"
+            :key="idx"
+            :prop="item.prop"
+            :label="item.label"
+            :width="item.width"
+            :align="item.align"
+            :header-align="item.headeralign"
+            :show-overflow-tooltip="item.overflowtooltip"
+          >
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          :total="ylj_resultcount"
+          :current-page="ylj_queryform.pageindex"
+          :page-size="ylj_queryform.pagesize"
+          :page-sizes="[20, 50, 100, 200]"
+          layout="total, sizes, prev, pager, next"
+          background
+          style="text-align: right"
+          @current-change="ylj_handleCurrentChange"
+          @size-change="ylj_handleSizeChange"
+        ></el-pagination>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -207,6 +283,8 @@ import { gj_fields } from "./gj_fields";
 import { qx_fields } from "./qx_fields";
 import { hg_fields } from "./hg_fields";
 import { pcs_fields } from "./pcs_fields";
+import {spc_hj_fields} from './spc_hj_fields';
+import {ylj_fields} from './ylj_fields';
 import { deepClone } from "@/utils/index";
 import condition from "@/mixin/search_form";
 export default {
@@ -222,11 +300,15 @@ export default {
       qx_cols: qx_fields,
       hg_cols: hg_fields,
       spc_cols: pcs_fields,
+      ylj_cols:ylj_fields,
+      spchj_cols:spc_hj_fields,
       cnc_datalist: [],
       gj_datalist: [],
       qx_datalist: [],
       hg_datalist: [],
       spc_datalist: [],
+      spchj_datalist:[],
+      ylj_datalist:[],
       cnc_queryform: {
         search_condition: [],
         px_condition: [],
@@ -257,11 +339,25 @@ export default {
         pageindex: 1,
         pagesize: 20,
       },
+      spchj_queryform:{
+        search_condition: [],
+        px_condition: [],
+        pageindex: 1,
+        pagesize: 20,
+      },
+      ylj_queryform:{
+        search_condition: [],
+        px_condition: [],
+        pageindex: 1,
+        pagesize: 20,
+      },
       cnc_resultcount: 0,
       gj_resultcount: 0,
       qx_resultcount: 0,
       hg_resultcount: 0,
       spc_resultcount: 0,
+      spchj_resultcount:0,
+      ylj_resultcount:0,
     };
   },
   methods: {
@@ -306,6 +402,7 @@ export default {
         ApiFn.requestapi("post", "lbj/sjcj/cnc", data).then((res) => {
           if (res.code === 1) {
             this.cnc_datalist = res.list;
+            this.cnc_resultcount = res.resultcount;
           } else if (res.code === 0) {
             this.$message.error(res.msg);
           }
@@ -319,6 +416,7 @@ export default {
         ApiFn.requestapi("post", "lbj/sjcj/gj", data).then((res) => {
           if (res.code === 1) {
             this.gj_datalist = res.list;
+            this.gj_resultcount = res.resultcount;
           } else if (res.code === 0) {
             this.$message.error(res.msg);
           }
@@ -332,6 +430,7 @@ export default {
         ApiFn.requestapi("post", "lbj/sjcj/qx", data).then((res) => {
           if (res.code === 1) {
             this.qx_datalist = res.list;
+            this.qx_resultcount = res.resultcount;
           } else if (res.code === 0) {
             this.$message.error(res.msg);
           }
@@ -345,6 +444,7 @@ export default {
         ApiFn.requestapi("post", "lbj/sjcj/hg", data).then((res) => {
           if (res.code === 1) {
             this.hg_datalist = res.list;
+            this.hg_resultcount = res.resultcount;
           } else if (res.code === 0) {
             this.$message.error(res.msg);
           }
@@ -358,6 +458,35 @@ export default {
         ApiFn.requestapi("post", "lbj/sjcj/spc", data).then((res) => {
           if (res.code === 1) {
             this.spc_datalist = res.list;
+            this.spc_resultcount = res.resultcount;
+          } else if (res.code === 0) {
+            this.$message.error(res.msg);
+          }
+        });
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    get_spchj_list(data) {
+      try {
+        ApiFn.requestapi("post", "lbj/sjcj/spchj", data).then((res) => {
+          if (res.code === 1) {
+            this.spchj_datalist = res.list;
+            this.spchj_resultcount = res.resultcount;
+          } else if (res.code === 0) {
+            this.$message.error(res.msg);
+          }
+        });
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    get_ylj_list(data) {
+      try {
+        ApiFn.requestapi("post", "lbj/sjcj/ylj", data).then((res) => {
+          if (res.code === 1) {
+            this.ylj_datalist = res.list;
+            this.ylj_resultcount = res.resultcount;
           } else if (res.code === 0) {
             this.$message.error(res.msg);
           }
@@ -545,6 +674,94 @@ export default {
     spc_handleSizeChange(val) {
       this.spc_queryform.pagesize = val;
       this.get_spc_list(this.spc_queryform);
+    },
+    //
+    spchj_query_handle(data) {
+      if (data.field) {
+        let exp = deepClone(condition.form);
+        exp.colname = data.field;
+        exp.coltype = data.fieldtype;
+        exp.oper = data.operate;
+        exp.value = data.value;
+        exp.values = data.values;
+        this.spchj_queryform.search_condition = [];
+        this.spchj_queryform.px_condition = [];
+        this.spchj_queryform.search_condition.push(exp);
+      } else {
+        this.spchj_queryform.search_condition = [];
+        this.spchj_queryform.px_condition = [];
+      }
+      this.get_spchj_list(this.spchj_queryform);
+    },
+    spchj_grade_query_handle(data) {
+      this.spchj_queryform.search_condition = [];
+      this.spchj_queryform.px_condition = [];
+      data.list.forEach((i) => {
+        let exp = deepClone(condition.form);
+        exp.colname = i.colname;
+        exp.coltype = i.coltype;
+        exp.oper = i.oper;
+        exp.logic = i.logic;
+        exp.value = i.value;
+        exp.values = i.values;
+        this.spchj_queryform.search_condition.push(exp);
+      });
+      if (data.pxlist) {
+        this.spchj_queryform.px_condition = data.pxlist;
+      }
+      this.get_spc_list(this.spchj_queryform);
+    },
+    spchj_handleCurrentChange(index) {
+      this.spc_queryform.pageindex = index;
+      this.get_spc_list(this.spchj_queryform);
+    },
+    spchj_handleSizeChange(val) {
+      this.spchj_queryform.pagesize = val;
+      this.get_spchj_list(this.spchj_queryform);
+    },
+    //油冷机
+    ylj_query_handle(data) {
+      if (data.field) {
+        let exp = deepClone(condition.form);
+        exp.colname = data.field;
+        exp.coltype = data.fieldtype;
+        exp.oper = data.operate;
+        exp.value = data.value;
+        exp.values = data.values;
+        this.ylj_queryform.search_condition = [];
+        this.ylj_queryform.px_condition = [];
+        this.ylj_queryform.search_condition.push(exp);
+      } else {
+        this.ylj_queryform.search_condition = [];
+        this.ylj_queryform.px_condition = [];
+      }
+      this.get_ylj_list(this.ylj_queryform);
+    },
+    ylj_grade_query_handle(data) {
+      this.ylj_queryform.search_condition = [];
+      this.ylj_queryform.px_condition = [];
+      data.list.forEach((i) => {
+        let exp = deepClone(condition.form);
+        exp.colname = i.colname;
+        exp.coltype = i.coltype;
+        exp.oper = i.oper;
+        exp.logic = i.logic;
+        exp.value = i.value;
+        exp.values = i.values;
+        this.ylj_queryform.search_condition.push(exp);
+      });
+      if (data.pxlist) {
+        this.ylj_queryform.px_condition = data.pxlist;
+      }
+      this.get_ylj_list(this.ylj_queryform);
+    },
+    ylj_handleCurrentChange(index) {
+      this.ylj_queryform.pageindex = index;
+      this.get_ylj_list(this.ylj_queryform);
+    },
+    ylj_handleSizeChange(val) {
+      this.ylj_queryform.pagesize = val;
+      this.get_ylj_list(this.ylj_queryform);
     },
   },
 };

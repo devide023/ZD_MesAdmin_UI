@@ -21,7 +21,13 @@
             :replace_import_success_handle="import_by_replace"
             :zh_import_success_handle="import_by_zh"
             :export_excel_handle="export_excel"
-          ></bat-operate>
+          >
+            <template #other>
+              <el-dropdown-item v-for="(btn,index) in pageconfig.bat_btnlist" :key="index">
+                <el-button type="text" @click="invokfn(btn.fnname)">{{ btn.btntxt }}</el-button>
+              </el-dropdown-item>
+            </template>
+          </bat-operate>
         </template>
       </template>
     </search-bar>
@@ -60,6 +66,20 @@
                   <el-button type="text">{{ item.label }}</el-button>
                 </el-upload>
               </template>
+              <template v-else-if="item.btntype === 'uploadvideo'">
+                <el-upload
+                  v-if="scope.row.isedit"
+                  :headers="headers"
+                  :action="item.action"
+                  :show-file-list="false"
+                  accept=".mp4,video/mp4,application/mp4"
+                  :data="scope.row"
+                  :before-upload="before_upload_Mp4Handle"
+                  :on-success="item.callback"
+                >
+                  <el-button type="text">{{ item.label }}</el-button>
+                </el-upload>
+              </template>
               <template v-else>
                 <el-button
                   type="text"
@@ -81,8 +101,8 @@ import SearchBar from "@/components/QueryBar/index.vue";
 import TableComponent from "@/components/TableComponent/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
-import {batoperatemixin} from '@/mixin/batoperate_mixin';
-import {export_xls_mixin} from '@/mixin/export_xls_mixin';
+import { batoperatemixin } from "@/mixin/batoperate_mixin";
+import { export_xls_mixin } from "@/mixin/export_xls_mixin";
 import { GetComponentName } from "@/utils/index";
 import { getToken } from "@/utils/auth";
 export default {
@@ -92,7 +112,7 @@ export default {
     SearchBar,
     BatOperate,
   },
-  mixins: [basemixin,batoperatemixin,export_xls_mixin],
+  mixins: [basemixin, batoperatemixin, export_xls_mixin],
   data() {
     return {
       headers: {
@@ -105,7 +125,7 @@ export default {
   },
   methods: {
     execfun(row, fnname) {
-      console.log(fnname);
+      //console.log(fnname);
       this[fnname](row);
     },
   },
