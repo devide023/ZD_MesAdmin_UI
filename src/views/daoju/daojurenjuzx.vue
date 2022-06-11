@@ -44,8 +44,12 @@
       :datalist="list"
       :collist="colshowlist"
       :multipleSelection.sync="selectlist"
+      :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
+      :pageindexHandle = "pageindex_change_handle"
+      :pagesizeHandle = "pagesize_change_handle"
+
     >
       <template #operate="scope">
         <el-dropdown>
@@ -528,7 +532,7 @@ export default {
     Vue.prototype.$basepage = this;
     this.get_gcxx_list();
     this.get_scxxx_list();
-    this.get_dbxx_list();
+    //this.get_dbxx_list();
   },
   methods: {
     execfun(row, fnname) {

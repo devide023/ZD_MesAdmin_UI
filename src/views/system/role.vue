@@ -32,8 +32,11 @@
       :isoperate="pageconfig.isoperate"
       :isselect="true"
       :multipleSelection.sync="selectlist"
+      :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
+      :pageindexHandle = "pageindex_change_handle"
+      :pagesizeHandle = "pagesize_change_handle"
       :resultcount="resultcount"
     >
       <template #operate="scope">

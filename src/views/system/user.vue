@@ -32,8 +32,11 @@
       :isoperate="pageconfig.isoperate"
       :isselect="true"
       :multipleSelection.sync="selectlist"
+      :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
+      :pageindexHandle = "pageindex_change_handle"
+      :pagesizeHandle = "pagesize_change_handle"
       :resultcount="resultcount"
     >
       <template #operate="scope">
@@ -45,6 +48,9 @@
             <el-dropdown-item @click.native="reset_userpwd(scope.row)"
               ><span class="el-icon-key">重置密码</span></el-dropdown-item
             >
+            <el-dropdown-item @click.native="reset_token(scope.row)"
+              ><span class="el-icon-refresh">重置Token</span></el-dropdown-item
+            >
           </el-dropdown-menu>
         </el-dropdown>
       </template>
@@ -53,7 +59,7 @@
 </template>
 
 <script>
-import Vue from 'vue';
+import Vue from "vue";
 import ApiFn from "@/api/baseapi";
 import SearchBar from "@/components/QueryBar/index.vue";
 import TableComponent from "@/components/TableComponent/index.vue";
@@ -90,6 +96,17 @@ export default {
     dialog_show_handle(row) {
       this.form.id = row.id;
       this.dialogVisible = true;
+    },
+    reset_token(row) {
+      try {
+        ApiFn.requestapi("post", "/user/resettoken", row).then((res) => {
+          if (res.code === 1) {
+            this.$message.success(res.msg);
+          } else if (res.code === 0) {
+            this.$message.error(res.msg);
+          }
+        });
+      } catch (error) {}
     },
     reset_userpwd(row) {
       this.$prompt("新密码", "重置密码", {

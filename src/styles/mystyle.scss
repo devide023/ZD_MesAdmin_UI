@@ -36,16 +36,19 @@
   margin-right: 10px;
 }
 .el-table .warning-row {
-  background: oldlace;
+  background: rgb(252, 232, 196);
 }
 .el-table .success-row {
   background: #f0f9eb;
 }
 .el-table .danger-row {
-  background: #fcd4d9;
+  background: #ffdee1;
 }
 .el-table .info-row {
   background: #d0c6ff;
+}
+.el-table .error-row {
+  background: #ffbebe;
 }
 .el-table .danger_cell {
   background: #fa6565;

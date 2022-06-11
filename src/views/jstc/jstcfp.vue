@@ -120,8 +120,11 @@
               :collist="colshowlist"
               :tbheight="bottomheight"
               :multipleSelection.sync="selectlist"
+              :trbginfo="trbginfo"
               :pagesize.sync="queryform.pagesize"
               :pageindex.sync="queryform.pageindex"
+              :pageindexHandle="pageindex_change_handle"
+              :pagesizeHandle="pagesize_change_handle"
             >
               <template #operate="scope">
                 <span
@@ -312,13 +315,14 @@ export default {
         document.getElementsByClassName("search_bar")[0].offsetHeight;
       this.tableheight =
         bodyheight - navbarheight - tagviewheight - querybarheight - 30;
-        document.getElementsByClassName("components-container")[0].style.height = this.tableheight + 'px';
-      if (document.getElementsByClassName("top-container").length>0) {
+      document.getElementsByClassName("components-container")[0].style.height =
+        this.tableheight + "px";
+      if (document.getElementsByClassName("top-container").length > 0) {
         this.topheight =
           document.getElementsByClassName("top-container")[0].offsetHeight - 40;
-        this.bottomheight = this.tableheight - this.topheight-95;
-        this.$nextTick(function(){
-            this.$refs.tablecomponent.sizechangeHandle();
+        this.bottomheight = this.tableheight - this.topheight - 95;
+        this.$nextTick(function () {
+          this.$refs.tablecomponent.sizechangeHandle();
         });
       }
     },

@@ -85,7 +85,7 @@
                   :multiple="col.multiple"
                   placeholder="请选择"
                   style="width: 100%"
-                  @change="(val)=>col_ddl_change_handle(val,scope.row,col)"
+                  @change="(val) => col_ddl_change_handle(val, scope.row, col)"
                 >
                   <el-option
                     v-for="(item, i) in col.options"
@@ -168,41 +168,97 @@
           </template>
           <template v-else>
             <template v-if="col.coltype === 'datetime'">
-              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | parseTime("{y}-{m}-{d} {h}:{i}:{s}") }}
+              {{
+                col.subprop
+                  ? scope.row[col.prop][col.subprop]
+                  : scope.row[col.prop] | parseTime("{y}-{m}-{d} {h}:{i}:{s}")
+              }}
             </template>
             <template v-else-if="col.coltype === 'date'">
-              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | parseTime("{y}-{m}-{d}") }}
+              {{
+                col.subprop
+                  ? scope.row[col.prop][col.subprop]
+                  : scope.row[col.prop] | parseTime("{y}-{m}-{d}")
+              }}
             </template>
             <template v-else-if="col.coltype === 'image'">
               <img
-                v-if="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop]"
+                v-if="
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop]
+                "
                 :src="rooturl + '/upload/image/' + scope.row[col.prop]"
                 class="avatar"
               />
+            </template>
+            <template v-else-if="col.coltype === 'progress'">
+              <el-progress
+                :percentage="
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop]
+                "
+                text-inside
+                :stroke-width="15"
+              ></el-progress>
             </template>
             <template v-else-if="col.coltype === 'rate'">
               <el-rate v-model="scope.row[col.prop]" disabled></el-rate>
             </template>
             <template v-else-if="col.options && col.istag">
-              <el-tag :type="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | showname(col.tagtypes)">{{
-                col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | showname(col.options)
-              }}</el-tag>
+              <el-tag
+                :type="
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop] | showname(col.tagtypes)
+                "
+                >{{
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop] | showname(col.options)
+                }}</el-tag
+              >
             </template>
             <template v-else-if="col.options">
-              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] | showname(col.options) }}
+              {{
+                col.subprop
+                  ? scope.row[col.prop][col.subprop]
+                  : scope.row[col.prop] | showname(col.options)
+              }}
             </template>
             <template v-else-if="col.isicon">
               <template
-                v-if="(col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] || '').indexOf('el-icon') !== -1"
+                v-if="
+                  (col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop] || ''
+                  ).indexOf('el-icon') !== -1
+                "
               >
-                <i :class="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop]"></i>
+                <i
+                  :class="
+                    col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop]
+                  "
+                ></i>
               </template>
               <template v-else>
-                <svg-icon :icon-class="col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] || ''"
+                <svg-icon
+                  :icon-class="
+                    col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop] || ''
+                  "
               /></template>
             </template>
             <template v-else>
-              {{ col.subprop?scope.row[col.prop][col.subprop]:scope.row[col.prop] }}
+              {{
+                col.subprop
+                  ? scope.row[col.prop][col.subprop]
+                  : scope.row[col.prop]
+              }}
             </template>
           </template>
         </template>
@@ -278,6 +334,13 @@ export default {
     },
     tbheight: {
       type: Number,
+    }, //行背景信息
+    trbginfo: {
+      type: Object,
+      default: {
+        colname: "",
+        logiclist: [],
+      },
     },
     pageindex: {
       type: Number,
@@ -286,6 +349,12 @@ export default {
     pagesize: {
       type: Number,
       default: 20,
+    },
+    pageindexHandle: {
+      type: Function,
+    },
+    pagesizeHandle: {
+      type: Function,
     },
     resultcount: {
       type: Number,
@@ -317,8 +386,7 @@ export default {
       }
     },
   },
-  computed: {
-  },
+  computed: {},
   mounted() {
     this.$nextTick(function () {
       this.sizechangeHandle();
@@ -335,14 +403,24 @@ export default {
       this.$emit("update:multipleSelection", val);
     },
     handleCurrentChange(index) {
-      this.$emit("update:pageindex", index);
-      this.$basepage.queryform.pageindex = index;
-      this.$basepage.getlist(this.$basepage.queryform);
+      // this.$emit("update:pageindex", index);
+      // this.$basepage.queryform.pageindex = index;
+      // this.$basepage.getlist(this.$basepage.queryform);
+      if (typeof this.pageindexHandle === "function") {
+        this.pageindexHandle(index);
+      } else {
+        this.$message.error("pageindexHandle不是函数");
+      }
     },
     handleSizeChange(value) {
-      this.$emit("update:pagesize", value);
-      this.$basepage.queryform.pagesize = value;
-      this.$basepage.getlist(this.$basepage.queryform);
+      // this.$emit("update:pagesize", value);
+      // this.$basepage.queryform.pagesize = value;
+      // this.$basepage.getlist(this.$basepage.queryform);
+      if (typeof this.pagesizeHandle === "function") {
+        this.pagesizeHandle(value);
+      } else {
+        this.$message.error("pagesizeHandle不是函数");
+      }
     },
     sizechangeHandle() {
       if (this.tbheight) {
@@ -353,7 +431,49 @@ export default {
       }
     },
     tableRowClassName({ row, idx }) {
-      return "";
+      let cellvalue = row[this.trbginfo.colname];
+      let logiclist = this.trbginfo.logiclist;
+      if (logiclist instanceof Array) {
+        for (let index = 0; index < logiclist.length; index++) {
+          const i = logiclist[index];
+          if (i.logic === "=") {
+            if (i.val0 === cellvalue) {
+              return i.classname;
+            }
+          } else if (i.logic === "in") {
+            if (i.val0 instanceof Array) {
+              let _pos = i.val0.findIndex((i) => i === cellvalue);
+              if (_pos !== -1) {
+                return i.classname;
+              }
+            }
+          } else if (i.logic === "between") {
+            if (i.val0 <= cellvalue && cellvalue < i.val1) {
+              return i.classname;
+            }
+          } else if (i.logic === ">") {
+            if (cellvalue > i.val0) {
+              return i.classname;
+            }
+          } else if (i.logic === ">=") {
+            if (cellvalue >= i.val0) {
+              return i.classname;
+            }
+          } else if (i.logic === "<") {
+            if (cellvalue < i.val0) {
+              return i.classname;
+            }
+          } else if (i.logic === "<=") {
+            if (cellvalue <= i.val0) {
+              return i.classname;
+            }
+          } else if (i.logic === "<>") {
+            if (cellvalue !== i.val0) {
+              return i.classname;
+            }
+          }
+        }
+      }
     },
     iscoledit(colname) {
       let efields = this.$basepage.pagepermis.editfields || [];
@@ -389,11 +509,11 @@ export default {
     doLayout() {
       this.$refs.maintable.doLayout();
     },
-    col_ddl_change_handle(val,row,col){
-      if(col.change_fn_name){
-        this.$basepage[col.change_fn_name](this.collist,val,row);
+    col_ddl_change_handle(val, row, col) {
+      if (col.change_fn_name) {
+        this.$basepage[col.change_fn_name](this.collist, val, row);
       }
-    }
+    },
   },
   watch: {
     datalist(val) {

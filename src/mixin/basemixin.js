@@ -24,6 +24,7 @@ export const basemixin = {
                 pageindex: 1,
                 pagesize: 20,
             },
+            trbginfo:{},
         }
     },
     computed: {
@@ -75,6 +76,9 @@ export const basemixin = {
                             Object.keys(this.pageconfig.pagefuns).forEach((key) => {
                                 this[key] = this.pageconfig.pagefuns[key];
                             });
+                        }
+                        if(this.pageconfig.trbginfo){
+                            this.trbginfo = this.pageconfig.trbginfo;
                         }
                         this.getlist(this.queryform);
                     } else {
@@ -253,6 +257,14 @@ export const basemixin = {
             } catch (error) {
                 this.$message.error(error);
             }
+        },
+        pageindex_change_handle(index) {
+            this.queryform.pageindex = index;
+            this.getlist(this.queryform);
+        },
+        pagesize_change_handle(value) {
+            this.queryform.pagesize = value;
+            this.getlist(this.queryform);
         },
         query_handle(data) {
             if (data.field) {

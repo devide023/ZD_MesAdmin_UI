@@ -36,8 +36,11 @@
       :treeprops="{ children: 'children', hasChildren: 'hasChildren' }"
       :collist="colshowlist"
       :multipleSelection.sync="selectlist"
+      :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
+      :pageindexHandle = "pageindex_change_handle"
+      :pagesizeHandle = "pagesize_change_handle"
     >
       <template #operate="scope">
         <el-dropdown>
