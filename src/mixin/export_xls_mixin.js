@@ -24,8 +24,12 @@ export const export_xls_mixin = {
         formatJson(filterVal, jsonData) {
             return jsonData.map(v => filterVal.map(j => {
                 if (j.coltype === 'date' || j.coltype==='datetime') {
-                    return parseTime(v[j.prop])
-                } else {
+                    return parseTime(v[j.prop]);
+                }
+                else if (j.subprop){
+                    return v[j.prop][j.subprop];
+                }
+                else {
                     return v[j.prop]
                 }
             }));

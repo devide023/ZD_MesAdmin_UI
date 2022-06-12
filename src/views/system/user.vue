@@ -106,7 +106,9 @@ export default {
             this.$message.error(res.msg);
           }
         });
-      } catch (error) {}
+      } catch (error) {
+        this.$message.error(error);
+      }
     },
     reset_userpwd(row) {
       this.$prompt("新密码", "重置密码", {

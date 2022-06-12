@@ -13,7 +13,7 @@
           v-for="(item, index) in colshowlist"
           :key="index"
           :label="item.label"
-          :value="item.dbprop?item.dbprop:item.prop"
+          :value="item.dbprop ? item.dbprop : item.prop"
         >
         </el-option>
       </el-select>
@@ -91,14 +91,17 @@
       >
     </div>
 
-    <com-query :collist="colshowlist" :isshow.sync="visiable" @query="gradequeryHandle"></com-query>
-
+    <com-query
+      :collist="colshowlist"
+      :isshow.sync="visiable"
+      @query="gradequeryHandle"
+    ></com-query>
   </div>
 </template>
 
 <script>
 import { parseTime } from "@/utils";
-import ComQuery from '@/components/QueryBar/ComQuery.vue';
+import ComQuery from "@/components/QueryBar/ComQuery.vue";
 export default {
   components: { ComQuery },
   name: "SearchBar",
@@ -128,16 +131,22 @@ export default {
   },
   computed: {
     colshowlist() {
-      let showlist = this.collist.filter((i) => {
-        return !i.type
+      let searchlist = this.collist.filter((i) => {
+        //检查是否存在searchable属性
+        let isexist = Object.prototype.hasOwnProperty.call(i, "searchable");
+        if (isexist) {
+          return i.searchable === true;
+        } else {
+          return i;
+        }
       });
-      return showlist;
+      return searchlist;
     },
   },
   methods: {
     field_change_handle(val) {
       let finditem = this.collist.filter((item) => {
-        return (item.dbprop?item.dbprop:item.prop)=== val;
+        return (item.dbprop ? item.dbprop : item.prop) === val;
       });
       if (finditem.length > 0) {
         let fieldtype = finditem[0].coltype;
@@ -207,10 +216,9 @@ export default {
       }
       this.$emit("query", retdata);
     },
-    gradequeryHandle(data){
-        console.log(data);
-        this.$emit("gradequery",data);
-    }
+    gradequeryHandle(data) {
+      this.$emit("gradequery", data);
+    },
   },
 };
 </script>
