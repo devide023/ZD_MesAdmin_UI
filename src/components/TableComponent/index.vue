@@ -86,9 +86,10 @@
                   placeholder="请选择"
                   style="width: 100%"
                   @change="(val) => col_ddl_change_handle(val, scope.row, col)"
+                  @clear="()=>col_ddl_clear_handle(scope.row,col)"
                 >
                   <el-option
-                    v-for="(item, i) in col.options"
+                    v-for="(item, i) in (col.relation?scope.row[col.relation]:col.options)"
                     :key="i"
                     :label="item.label"
                     :value="item.value"
@@ -154,12 +155,36 @@
                 :before-upload="col.before_upload"
                 :data="{ rowkey: scope.row.rowkey }"
               >
-                <img
-                  v-if="scope.row[col.prop]"
-                  :src="rooturl + '/upload/image/' + scope.row[col.prop]"
+                <div slot="default">
+                  <img
+                  v-if="
+                    col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop]
+                  "
+                  :src="
+                    rooturl +
+                    '/upload/image/' +
+                    (col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop])
+                  "
                   class="avatar"
                 />
                 <i v-else class="el-icon-plus avatar-uploader-icon" />
+                </div>
+                <div slot="file" slot-scope="{ file }">
+                  <img
+                    class="el-upload-list__item-thumbnail"
+                    :src="file.url"
+                    alt=""
+                  />
+                  <span class="el-upload-list__item-actions">
+                    <span class="el-upload-list__item-preview">
+                      <i class="el-icon-zoom-in"></i>
+                    </span>
+                  </span>
+                </div>
               </el-upload>
             </template>
             <template v-else>
@@ -182,15 +207,27 @@
               }}
             </template>
             <template v-else-if="col.coltype === 'image'">
-              <img
+              <el-image
                 v-if="
                   col.subprop
                     ? scope.row[col.prop][col.subprop]
                     : scope.row[col.prop]
                 "
-                :src="rooturl + '/upload/image/' + scope.row[col.prop]"
+                :src="
+                  rooturl +
+                  '/upload/image/' +
+                  (col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop])
+                "
+                :preview-src-list="
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop] | showpreviewlist
+                "
                 class="avatar"
-              />
+              >
+              </el-image>
             </template>
             <template v-else-if="col.coltype === 'progress'">
               <el-progress
@@ -297,6 +334,7 @@ export default {
     return {
       tableheight: 800,
       rooturl: process.env.VUE_APP_ROOT,
+      preview_list: [],
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -337,9 +375,11 @@ export default {
     }, //行背景信息
     trbginfo: {
       type: Object,
-      default: {
-        colname: "",
-        logiclist: [],
+      default: function () {
+        return {
+          colname: "",
+          logiclist: [],
+        };
       },
     },
     pageindex: {
@@ -385,9 +425,15 @@ export default {
         return value;
       }
     },
+    showpreviewlist: function (val) {
+      let ls = [];
+      ls.push(window._this.rooturl + "/upload/image/" + val);
+      return ls;
+    },
   },
   computed: {},
   mounted() {
+    window._this = this;
     this.$nextTick(function () {
       this.sizechangeHandle();
     });
@@ -511,9 +557,22 @@ export default {
     },
     col_ddl_change_handle(val, row, col) {
       if (col.change_fn_name) {
-        this.$basepage[col.change_fn_name](this.collist, val, row);
+        if (typeof col.change_fn_name === "function") {
+          col.change_fn_name(this, this.collist, val,row);
+        } else {
+          this.$basepage[col.change_fn_name](this.collist, val, row);
+        }
       }
     },
+    col_ddl_clear_handle(row,col){
+      if(col.clear_fn_name){
+        if(typeof col.clear_fn_name === 'function'){
+          col.clear_fn_name(this,row,col);
+        }else{
+          this.$basepage[col.clear_fn_name](row,col);
+        }
+      }
+    }
   },
   watch: {
     datalist(val) {

@@ -128,6 +128,7 @@
             prop="gwh"
             width="80"
             label="岗位"
+            sortable
           >
             <template slot-scope="scope">
               {{ scope.row.gwh | show_option_label("gwh") }}
@@ -138,7 +139,8 @@
             align="center"
             prop="wbsh"
             label="顺序"
-            width="60"
+            width="80"
+            sortable
           ></el-table-column>
           <el-table-column
             header-align="center"
@@ -154,6 +156,7 @@
             prop="wbzt"
             label="维保状态"
             width="100"
+            sortable
           >
           </el-table-column>
           <el-table-column
@@ -162,6 +165,7 @@
             prop="wbjhsj"
             label="计划时间"
             width="130"
+            sortable
             show-overflow-tooltip
           >
             <template slot-scope="scope">
