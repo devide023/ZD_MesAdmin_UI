@@ -83,6 +83,7 @@
                 :props="treeconfig"
                 show-checkbox
                 accordion
+                check-strictly
                 node-key="id"
               />
             </el-tab-pane>

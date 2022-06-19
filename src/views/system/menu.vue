@@ -13,19 +13,19 @@
           @click="dialogVisible = true"
           >新增</el-button
         >
-        <el-button
+        <!-- <el-button
           type="info"
           icon="el-icon-edit"
           ref="btnedit"
           @click="edit_handle"
           >{{ edittxt }}</el-button
-        >
+        > -->
         <el-button type="warning" icon="el-icon-delete" @click="del_handle"
           >删除</el-button
         >
-        <el-button type="danger" icon="el-icon-check" @click="save_handle"
+        <!-- <el-button type="danger" icon="el-icon-check" @click="save_handle"
           >保存</el-button
-        >
+        > -->
       </template>
     </search-bar>
     <table-component
@@ -39,8 +39,8 @@
       :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
-      :pageindexHandle = "pageindex_change_handle"
-      :pagesizeHandle = "pagesize_change_handle"
+      :pageindexHandle="pageindex_change_handle"
+      :pagesizeHandle="pagesize_change_handle"
     >
       <template #operate="scope">
         <el-dropdown>
@@ -69,10 +69,78 @@
                 >配置</span
               ></el-dropdown-item
             >
+            <el-dropdown-item @click.native="edit_menu_item(scope.row)"
+              ><span class="el-icon-edit">编辑</span></el-dropdown-item
+            >
           </el-dropdown-menu>
         </el-dropdown>
       </template>
     </table-component>
+    <!-- 编辑菜单表单 -->
+    <el-dialog
+      title="编辑项目"
+      :visible.sync="editItemVisible"
+      width="40%"
+      top="10px"
+      :close-on-click-modal="false"
+    >
+      <el-form
+        :model="edit_menu_form"
+        label-position="right"
+        label-width="100px"
+      >
+        <el-form-item label="编码">
+          <el-input v-model="edit_menu_form.code"></el-input>
+        </el-form-item>
+        <el-form-item label="名称">
+          <el-input v-model="edit_menu_form.name"></el-input>
+        </el-form-item>
+        <template v-if="edit_menu_form.menutype === '04'">
+          <el-form-item label="字段名称">
+            <el-input v-model="edit_menu_form.btntxt"></el-input>
+          </el-form-item>
+        </template>
+        <template v-if="edit_menu_form.menutype !== '04'">
+          <el-form-item label="图标">
+            <el-input v-model="edit_menu_form.icon"></el-input>
+          </el-form-item>
+        </template>
+        <template v-if="edit_menu_form.menutype === '02'">
+          <el-form-item label="路由">
+            <el-input v-model="edit_menu_form.routepath"></el-input>
+          </el-form-item>
+          <el-form-item label="视图路径">
+            <el-input v-model="edit_menu_form.viewpath"></el-input>
+          </el-form-item>
+          <el-form-item label="配置文件路劲">
+            <el-input v-model="edit_menu_form.configpath"></el-input>
+          </el-form-item>
+          <el-form-item label="组件名称">
+            <el-input v-model="edit_menu_form.componentname"></el-input>
+          </el-form-item>
+        </template>
+        <el-form-item label="排序权重">
+          <el-input v-model="edit_menu_form.seq"></el-input>
+        </el-form-item>
+        <template v-if="edit_menu_form.menutype === '03'">
+          <el-form-item label="按钮文本">
+            <el-input v-model="edit_menu_form.btntxt"></el-input>
+          </el-form-item>
+          <el-form-item label="按钮类型">
+            <el-input v-model="edit_menu_form.btntype"></el-input>
+          </el-form-item>
+          <el-form-item label="按钮方法">
+            <el-input v-model="edit_menu_form.fnname"></el-input>
+          </el-form-item>
+        </template>
+      </el-form>
+      <div slot="footer">
+        <el-button type="danger" @click="editItemVisible = false"
+          >取消</el-button
+        >
+        <el-button type="primary" @click="modify_menu_item">确定</el-button>
+      </div>
+    </el-dialog>
     <!--添加菜单表单-->
     <el-dialog
       v-drag-dialog
@@ -314,7 +382,11 @@
     </el-dialog>
     <!-- 页面配置 -->
     <el-dialog title="页面配置" :visible.sync="dialog_config_Visible">
-      <el-tabs v-model="activatetab" type="border-card" @tab-click="tab_click_handle">
+      <el-tabs
+        v-model="activatetab"
+        type="border-card"
+        @tab-click="tab_click_handle"
+      >
         <el-tab-pane label="字段信息" name="fields">
           <el-button type="primary" @click="add_pagefield_item">增加</el-button>
           <el-table :data="pageconfig_form.fields" style="width: 100%">
@@ -491,22 +563,28 @@
             </el-form-item>
             <template v-if="pageconfig_form.baseconfig.isoperate">
               <el-form-item label="操作列菜单">
-                <el-button type="primary" @click="add_operate_item">增加</el-button>
-                <el-table
-                  :data="pageconfig_form.operate_fnlist">
+                <el-button type="primary" @click="add_operate_item"
+                  >增加</el-button
+                >
+                <el-table :data="pageconfig_form.operate_fnlist">
                   <el-table-column
                     prop="label"
                     header-align="center"
-                    label="按钮名称">
+                    label="按钮名称"
+                  >
                     <template slot-scope="scope">
-                      <el-input v-model="scope.row.label" placeholder=""></el-input>
+                      <el-input
+                        v-model="scope.row.label"
+                        placeholder=""
+                      ></el-input>
                     </template>
                   </el-table-column>
                   <el-table-column
                     header-align="center"
                     align="center"
                     prop="btntype"
-                    label="按钮类型" >
+                    label="按钮类型"
+                  >
                     <template slot-scope="scope">
                       <el-select v-model="scope.row.btntype" placeholder="">
                         <el-option label="上传" value="upload"></el-option>
@@ -518,32 +596,54 @@
                     header-align="center"
                     align="center"
                     prop="fnname"
-                    label="执行函数名" >
+                    label="执行函数名"
+                  >
                     <template slot-scope="scope">
-                      <el-input v-model="scope.row.fnname" placeholder=""></el-input>
+                      <el-input
+                        v-model="scope.row.fnname"
+                        placeholder=""
+                      ></el-input>
                     </template>
                   </el-table-column>
                   <el-table-column
                     header-align="center"
                     align="center"
                     prop="action"
-                    label="上传url" >
+                    label="上传url"
+                  >
                     <template slot-scope="scope">
-                      <el-input v-model="scope.row.action" placeholder=""></el-input>
+                      <el-input
+                        v-model="scope.row.action"
+                        placeholder=""
+                      ></el-input>
                     </template>
                   </el-table-column>
                   <el-table-column
                     header-align="center"
                     align="center"
                     prop="callback"
-                    label="回调函数" >
+                    label="回调函数"
+                  >
                     <template slot-scope="scope">
-                      <el-input v-model="scope.row.callback" placeholder=""></el-input>
+                      <el-input
+                        v-model="scope.row.callback"
+                        placeholder=""
+                      ></el-input>
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" align="center" header-align="center" width="50" fixed="right">
+                  <el-table-column
+                    label="操作"
+                    align="center"
+                    header-align="center"
+                    width="50"
+                    fixed="right"
+                  >
                     <template slot-scope="scope">
-                      <el-button type="text" @click="remove_operate_item(scope.$index)">删除</el-button>
+                      <el-button
+                        type="text"
+                        @click="remove_operate_item(scope.$index)"
+                        >删除</el-button
+                      >
                     </template>
                   </el-table-column>
                 </el-table>
@@ -703,6 +803,7 @@ export default {
       dialogVisible: false,
       pagedialogVisible: false,
       fndialogVisible: false,
+      editItemVisible: false,
       isIndeterminate: true,
       dialog_config_Visible: false,
       checkAll: false,
@@ -718,6 +819,22 @@ export default {
       ],
       elementIcons,
       menutypelist,
+      edit_menu_form: {
+        id: 0,
+        pid: 0,
+        code: "",
+        name: "",
+        btntxt: "",
+        menutype: "",
+        fnname: "",
+        btntype: "",
+        icon: "",
+        routepath: "",
+        viewpath: "",
+        seq: 10,
+        configpath: "",
+        componentname: "",
+      },
       menu_form: {
         pid: 0,
         code: "",
@@ -758,12 +875,12 @@ export default {
         { label: "输入建议", value: "suggest" },
       ],
       pageconfig_form: {
-        menu:{},
+        menu: {},
         fields: [],
         pageform: [],
         pagefn: [],
         pageapis: [],
-        operate_fnlist:[],
+        operate_fnlist: [],
         baseconfig: {
           isgradequery: true,
           isbatoperate: true,
@@ -772,12 +889,12 @@ export default {
           isselect: true,
         },
       },
-      operate_item:{
-        label:'',
-        btntype:'',
-        fnname:'',
-        action:'',
-        callback:'',
+      operate_item: {
+        label: "",
+        btntype: "",
+        fnname: "",
+        action: "",
+        callback: "",
       },
       pagefield_item: {
         coltype: "string",
@@ -899,28 +1016,44 @@ export default {
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.AllColOptions.length;
     },
-    tab_click_handle(tab,event){
-      if(tab.name === 'pageform')
-      {
-        this.pageconfig_form.pageform=[];
-        this.pageconfig_form.pageform = this.pageconfig_form.fields.map(i=>{
-          return {fieldname:i.prop,fieldvalue:''};
+    edit_menu_item(row) {
+      this.edit_menu_form = row;
+      this.editItemVisible = true;
+    },
+    modify_menu_item() {
+      ApiFn.requestapi(
+        this.pageconfig.editapi.method,
+        this.pageconfig.editapi.url,
+        [this.edit_menu_form]
+      ).then((res) => {
+        if (res.code === 1) {
+          this.$message.success(res.msg);
+          this.editItemVisible = false;
+        } else if (res.code === 0) {
+          this.$message.error(res.msg);
+        }
+      });
+    },
+    tab_click_handle(tab, event) {
+      if (tab.name === "pageform") {
+        this.pageconfig_form.pageform = [];
+        this.pageconfig_form.pageform = this.pageconfig_form.fields.map((i) => {
+          return { fieldname: i.prop, fieldvalue: "" };
         });
       }
     },
-    operate_change_handle(v){
-      if(v){
-        
-      }else{
+    operate_change_handle(v) {
+      if (v) {
+      } else {
         this.pageconfig_form.operate_fnlist = [];
       }
     },
-    add_operate_item(){
+    add_operate_item() {
       let item = deepClone(this.operate_item);
       this.pageconfig_form.operate_fnlist.push(item);
     },
-    remove_operate_item(index){
-      this.pageconfig_form.operate_fnlist.splice(index,1);
+    remove_operate_item(index) {
+      this.pageconfig_form.operate_fnlist.splice(index, 1);
     },
     add_funitem() {
       let fnitem = deepClone({
@@ -1137,11 +1270,11 @@ export default {
         ).then((res) => {
           if (res.code === 1) {
             this.$message.success(res.msg);
-            this.pageconfig_form.menu={};
-            this.pageconfig_form.fields=[];
-            this.pageconfig_form.pageform=[];
-            this.pageconfig_form.pagefn=[];
-            this.pageconfig_form.pageapis=[];
+            this.pageconfig_form.menu = {};
+            this.pageconfig_form.fields = [];
+            this.pageconfig_form.pageform = [];
+            this.pageconfig_form.pagefn = [];
+            this.pageconfig_form.pageapis = [];
             this.pageconfig_form.operate_fnlist = [];
             this.dialog_config_Visible = false;
           } else if (res.code === 0) {

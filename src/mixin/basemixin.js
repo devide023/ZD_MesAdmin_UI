@@ -38,6 +38,7 @@ export const basemixin = {
     },
     created() {
         this.getpageconfig();
+        Vue.prototype.$basepage = this;
     },
     mounted() {
     },

@@ -449,9 +449,6 @@ export default {
       this.$emit("update:multipleSelection", val);
     },
     handleCurrentChange(index) {
-      // this.$emit("update:pageindex", index);
-      // this.$basepage.queryform.pageindex = index;
-      // this.$basepage.getlist(this.$basepage.queryform);
       if (typeof this.pageindexHandle === "function") {
         this.pageindexHandle(index);
       } else {
@@ -459,9 +456,6 @@ export default {
       }
     },
     handleSizeChange(value) {
-      // this.$emit("update:pagesize", value);
-      // this.$basepage.queryform.pagesize = value;
-      // this.$basepage.getlist(this.$basepage.queryform);
       if (typeof this.pagesizeHandle === "function") {
         this.pagesizeHandle(value);
       } else {
@@ -522,6 +516,7 @@ export default {
       }
     },
     iscoledit(colname) {
+      console.log(this.$basepage);
       let efields = this.$basepage.pagepermis.editfields || [];
       let pos = efields.findIndex((i) => {
         return i === colname;
