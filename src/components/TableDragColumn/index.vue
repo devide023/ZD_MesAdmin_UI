@@ -76,7 +76,7 @@ export default {
           ? `darg_active_${this.dragState.direction}`
           : "";
       let start = columnIndex - 1 === this.dragState.start ? `darg_start` : "";
-      console.log(active,start)
+      //console.log(active,start)
       return `${active} ${start}`;
     },
     cellClassName({ column, columnIndex }) {

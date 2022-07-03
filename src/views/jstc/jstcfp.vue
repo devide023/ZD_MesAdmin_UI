@@ -36,13 +36,21 @@
             >
               <el-table-column
                 prop="jtid"
-                label="技通编号"
+                label="技通ID"
                 header-align="center"
                 width="130"
                 show-overflow-tooltip
               >
               </el-table-column>
-
+              <el-table-column
+                prop="jcbh"
+                label="技通编号"
+                header-align="center"
+                align="left"
+                width="130"
+                show-overflow-tooltip
+              >
+              </el-table-column>
               <el-table-column
                 prop="jcmc"
                 label="技通名称"
@@ -51,12 +59,19 @@
               >
               </el-table-column>
               <el-table-column
+                label="描述"
+                prop="jcms"
+                header-align="center"
+                width="130"
+                show-overflow-tooltip
+              ></el-table-column>
+              <!-- <el-table-column
                 label="文件名称"
                 prop="wjlj"
                 header-align="center"
                 width="200"
                 show-overflow-tooltip
-              ></el-table-column>
+              ></el-table-column> -->
               <el-table-column
                 label="有效期开始"
                 prop="yxqx1"
@@ -195,6 +210,7 @@
             v-model="jtfpform.scx"
             style="width: 100%"
             placeholder=""
+            @change="scx_change_handle"
           >
             <el-option
               v-for="(item, index) in scxlist"
@@ -332,7 +348,7 @@ export default {
       this.gwlist = this.pageconfig.fields[2].options;
     },
     Gc_Change_Handle(val) {
-      console.log(val);
+      //console.log(val);
       try {
         ApiFn.requestapi("get", "/lbj/baseinfo/scx?gcdm=" + val, {}).then(
           (res) => {
@@ -342,6 +358,16 @@ export default {
           }
         );
       } catch (error) {}
+    },
+    scx_change_handle(val){
+      ApiFn.requestapi('get','/lbj/baseinfo/scx_gwh',{scx:val}).then(res=>{
+        if(res.code === 1){
+          this.gwlist = res.list;
+        }
+        else if(res.code === 0){
+          this.$message.error(res.msg);
+        }
+      })
     },
     get_wfp_list() {
       try {
@@ -359,7 +385,7 @@ export default {
     Choose_GwJx(row) {
       this.jtfpform.jstc = row;
       this.dialogvisible = true;
-      this.dialog_title = `${row.jtid}分配`;
+      this.dialog_title = `${row.jcbh}分配`;
     },
     save_jtfp() {
       try {
@@ -383,7 +409,7 @@ export default {
       }
     },
     execfun(row, fnname) {
-      console.log(fnname);
+      //console.log(fnname);
       this[fnname](row);
     },
   },

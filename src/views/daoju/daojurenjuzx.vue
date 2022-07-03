@@ -15,7 +15,7 @@
           @click="invokfn(item.fnname)"
           >{{ item.btntxt }}</el-button
         >
-        <template v-if="pageconfig.isbatoperate">
+        <template v-if="pageconfig.isbatoperate && batbtnlist.length>0">
           <bat-operate
             :add_import_success_handle="import_by_add"
             :replace_import_success_handle="import_by_replace"
@@ -652,7 +652,7 @@ export default {
     },
     handleSelect(val) {
       try {
-        console.log(val);
+        //console.log(val);
         let scx = val.scx;
         let sbbh = val.label;
         this.form_scx_change_handle(scx);
@@ -675,8 +675,8 @@ export default {
       this.rjlxselection = val;
     },
     ddl_rjlx_change_handle(val, row) {
-      console.log(val);
-      console.log(row);
+      //console.log(val);
+      //console.log(row);
     },
     change_rjzx_handle() {
       try {
