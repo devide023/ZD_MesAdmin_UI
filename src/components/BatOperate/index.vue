@@ -47,11 +47,11 @@
             >导出Excel</el-button
           >
         </el-dropdown-item>
-        <el-dropdown-item>
+        <!-- <el-dropdown-item>
           <el-button type="text" @click.native.prevent="visiable = true"
             >复制数据</el-button
           >
-        </el-dropdown-item>
+        </el-dropdown-item> -->
         <slot name="other"></slot>
       </el-dropdown-menu>
     </el-dropdown>
@@ -90,12 +90,6 @@ export default {
   },
   methods: {
     before_upload_xls_handle(file) {
-      this.$loading({
-          lock: true,
-          text: "正在上传文件",
-          spinner: "el-icon-loading",
-          background: "rgba(0, 0, 0, 0.7)",
-        });
       const isxls = [
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -108,6 +102,14 @@ export default {
         this.$message.error("上传文件大小不能超过 5MB!");
       }
       let isok = isxls >= 0 && isLt5M;
+      if (isok) {
+        this.$loading({
+          lock: true,
+          text: "正在上传文件",
+          spinner: "el-icon-loading",
+          background: "rgba(0, 0, 0, 0.7)",
+        });
+      }
       return isok;
     },
     add_upload_success(res, file, fileList) {
@@ -115,11 +117,11 @@ export default {
         this.$loading().close();
         if (res.code === 1) {
           this.$loading({
-          lock: true,
-          text: "正在读取文件",
-          spinner: "el-icon-loading",
-          background: "rgba(0, 0, 0, 0.7)",
-        });
+            lock: true,
+            text: "正在读取文件",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)",
+          });
           this.add_import_success_handle(res, file, fileList);
         } else if (res.code === 0) {
           this.$message.error(res.msg);
@@ -130,16 +132,16 @@ export default {
         this.$loading().close();
       }
     },
-    replace_upload_success(res, file, fileList){
+    replace_upload_success(res, file, fileList) {
       try {
         this.$loading().close();
         if (res.code === 1) {
           this.$loading({
-          lock: true,
-          text: "正在读取文件",
-          spinner: "el-icon-loading",
-          background: "rgba(0, 0, 0, 0.7)",
-        });
+            lock: true,
+            text: "正在读取文件",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)",
+          });
           this.replace_import_success_handle(res, file, fileList);
         } else if (res.code === 0) {
           this.$message.error(res.msg);
@@ -150,16 +152,16 @@ export default {
         this.$loading().close();
       }
     },
-    zh_upload_success(res, file, fileList){
+    zh_upload_success(res, file, fileList) {
       try {
         this.$loading().close();
         if (res.code === 1) {
           this.$loading({
-          lock: true,
-          text: "正在读取文件",
-          spinner: "el-icon-loading",
-          background: "rgba(0, 0, 0, 0.7)",
-        });
+            lock: true,
+            text: "正在读取文件",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)",
+          });
           this.zh_import_success_handle(res, file, fileList);
         } else if (res.code === 0) {
           this.$message.error(res.msg);
@@ -169,7 +171,7 @@ export default {
         this.$message.error(error);
         this.$loading().close();
       }
-    }
+    },
   },
 };
 </script>

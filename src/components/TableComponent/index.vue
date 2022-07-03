@@ -59,12 +59,12 @@
                   filterable
                   remote
                   :multiple="col.multiple"
-                  :remote-method="col.remote"
+                  :remote-method="(q)=>remote_method(q,col,scope.row)"
                   placeholder="关键字过滤"
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="(item, i) in col.options"
+                    v-for="(item, i) in scope.row.remotelist"
                     :key="i"
                     :label="item.label"
                     :value="item.value"
@@ -306,6 +306,7 @@
         align="center"
         width="50"
         label="操作"
+        fixed="right"
       >
         <template v-slot="scope">
           <slot name="operate" :row="scope.row"></slot>
@@ -407,14 +408,14 @@ export default {
         if (options) {
           if (typeof value === "object") {
             let find = options.filter((i) => value.some((j) => j === i.value));
-            if (find) {
+            if (find.length>0) {
               return find.map((i) => i.label).join(",");
             } else {
               return value;
             }
           } else {
             let fitem = options.filter((i) => i.value === value);
-            if (fitem) {
+            if (fitem.length>0) {
               return fitem.map((i) => i.label).join(",");
             } else {
               return value;
@@ -516,7 +517,7 @@ export default {
       }
     },
     iscoledit(colname) {
-      console.log(this.$basepage);
+      //console.log(this.$basepage);
       let efields = this.$basepage.pagepermis.editfields || [];
       let pos = efields.findIndex((i) => {
         return i === colname;
@@ -566,6 +567,15 @@ export default {
         }else{
           this.$basepage[col.clear_fn_name](row,col);
         }
+      }
+    },
+    remote_method(q,col,row){
+      if(col.remote){
+        if(typeof col.remote ==='function'){
+        col.remote(q,this,row);
+      }
+      }else{
+        this.$message.error('远程查询不是一个函数');
       }
     }
   },

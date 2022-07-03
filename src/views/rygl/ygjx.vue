@@ -135,6 +135,7 @@ export default {
         }
         RyJXFn.ryjx(this.form).then((res) => {
           if (res.rtn === 1) {
+            
             this.list = res.data.map(i=>{
               i.HGL = (parseFloat(i.HGS/i.JGS)*100).toFixed(2);
               return i;

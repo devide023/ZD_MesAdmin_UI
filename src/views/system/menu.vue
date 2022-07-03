@@ -290,7 +290,7 @@
       v-drag-dialog
       :visible.sync="fndialogVisible"
     >
-      <el-form label-width="50px" :model="fn_form" label-position="right">
+      <el-form label-width="100px" :model="fn_form" label-position="right">
         <el-form-item
           v-for="(item, idx) in fn_form.fnlist"
           :key="idx"
@@ -351,6 +351,32 @@
             @click="remove_fnitem(idx)"
           ></i>
         </el-form-item>
+        <el-form-item
+          v-for="(item, i) in fn_form.batlist"
+          :key="i + 100"
+          :label="'批量操作' + (i + 1)"
+        >
+          <el-input
+            v-model="item.name"
+            style="width: 20%"
+            placeholder="批量操作按钮名称"
+          />
+          <el-input
+            style="width: 20%"
+            v-model="item.btntxt"
+            placeholder="批量操作按钮文本"
+          ></el-input>
+          <i
+            style="
+              color: red;
+              margin-left: 15px;
+              margin-top: 5px;
+              cursor: pointer;
+            "
+            class="el-icon-delete-solid"
+            @click="remove_batitem(i)"
+          ></i>
+        </el-form-item>
         <el-form-item label="字段">
           <el-checkbox
             :indeterminate="isIndeterminate"
@@ -376,7 +402,10 @@
         <el-button type="danger" @click="fndialogVisible = false"
           >取消</el-button
         >
-        <el-button type="success" @click="add_funitem">增加功能</el-button>
+        <el-button type="warning" @click="add_batitem"
+          >增加批操作按钮</el-button
+        >
+        <el-button type="success" @click="add_funitem">增加功能按钮</el-button>
         <el-button type="primary" @click="submit_fnsform">确定</el-button>
       </div>
     </el-dialog>
@@ -859,6 +888,7 @@ export default {
         addtime: parseTime(new Date()),
         fnlist: [],
         collist: [],
+        batlist: [], //批量操作名称
       },
       aligntype: [
         { label: "居中", value: "center" },
@@ -1055,6 +1085,21 @@ export default {
     remove_operate_item(index) {
       this.pageconfig_form.operate_fnlist.splice(index, 1);
     },
+    add_batitem() {
+      let batitem = deepClone({
+        pid: this.fn_form.pid,
+        code: this.fn_form.code,
+        name: "",
+        btntxt: "",
+        menutype: "05",
+        seq: 10,
+        status: 1,
+        adduser: this.fn_form.adduser,
+        addtime: this.fn_form.addtime,
+        addusername: this.fn_form.addusername,
+      });
+      this.fn_form.batlist.push(batitem);
+    },
     add_funitem() {
       let fnitem = deepClone({
         pid: this.fn_form.pid,
@@ -1073,6 +1118,9 @@ export default {
       });
       this.fn_form.fnlist.push(fnitem);
     },
+    remove_batitem(index) {
+      this.fn_form.batlist.splice(index, 1);
+    },
     remove_fnitem(index) {
       this.fn_form.fnlist.splice(index, 1);
     },
@@ -1087,6 +1135,19 @@ export default {
     add_page_fns(row) {
       this.fn_form.pid = row.id;
       this.fn_form.code = row.code;
+      this.fn_form.batlist = [];
+      this.fn_form.batlist.push({
+        pid: row.id,
+        code: row.code,
+        name: "bat",
+        btntxt: "批量操作",
+        menutype: "05",
+        seq: 10,
+        status: 1,
+        adduser: this.fn_form.adduser,
+        addtime: this.fn_form.addtime,
+        addusername: this.fn_form.addusername,
+      });
       this.fn_form.fnlist = defaultfuns.map((i) => {
         return {
           pid: row.id,
@@ -1158,6 +1219,11 @@ export default {
           postdatas.push(i);
         });
       }
+      if (this.fn_form.batlist.length > 0) {
+        this.fn_form.batlist.forEach((i) => {
+          postdatas.push(i);
+        });
+      }
       if (this.fn_form.collist.length > 0) {
         this.fn_form.collist.forEach((i) => {
           let fitem = this.allfields.filter((t) => t.prop === i);
@@ -1191,6 +1257,7 @@ export default {
                 this.getlist(this.queryform);
                 this.fn_form.pid = 0;
                 this.fn_form.fnlist = [];
+                this.fn_form.batlist = [];
                 this.fn_form.collist = [];
               } else {
                 this.$message.error(res.msg);

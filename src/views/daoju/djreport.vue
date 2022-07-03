@@ -62,11 +62,15 @@
           }}</span>
         </el-option>
       </el-select>
-
+      <el-select clearable v-model="form.rjzt" placeholder="状态">
+        <el-option label="报警" value="1"></el-option>
+        <el-option label="正常" value="0"></el-option>
+      </el-select>
       <el-button
         type="primary"
         icon="el-icon-search"
         @click="report_query_handle"
+        style="margin-left:5px;"
         >查询</el-button
       >
     </div>
@@ -81,8 +85,8 @@
       :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
-      :pageindexHandle = "pageindex_change_handle"
-      :pagesizeHandle = "pagesize_change_handle"
+      :pageindexHandle="pageindex_change_handle"
+      :pagesizeHandle="pagesize_change_handle"
     >
       <template #operate="scope">
         <el-dropdown>
@@ -157,18 +161,19 @@ export default {
         scx: "",
         sbbh: "",
         dbh: [],
-      }
+        rjzt: "1",
+      },
     };
   },
   mounted() {
     Vue.prototype.$basepage = this;
     this.get_scxxx_list();
+    this.report_query_handle();
   },
   methods: {
     scx_change_handle(val) {
-      console.log(val);
       try {
-        ApiFn.requestapi("get", "/lbj/djreport/sbxxbyscx", { scx: val }).then(
+        ApiFn.requestapi("get", "/lbj/baseinfo/cnc_list_by_scx", { scx: val }).then(
           (res) => {
             if (res.code === 1) {
               this.sbxx_list = res.list.map((i) => {
@@ -198,52 +203,69 @@ export default {
       }
     },
     report_query_handle() {
-      try {
-        this.queryform.search_condition = [];
-        this.queryform.px_condition = [];
-
-        if (this.form.scx) {
-          let exp = deepClone(condition.form);
-          exp.colname = "scx";
-          exp.coltype = "string";
-          exp.oper = "=";
-          exp.value = this.form.scx;
-          exp.values = [];
-          this.queryform.search_condition.push(exp);
-        }
-        if (this.form.sbbh) {
-          let exp1 = deepClone(condition.form);
-          exp1.colname = "sbbh";
-          exp1.coltype = "string";
-          exp1.oper = "=";
-          exp1.value = this.form.sbbh;
-          exp1.values = [];
-          this.queryform.search_condition[0].logic = "and";
-          this.queryform.search_condition.push(exp1);
-        }
-        if (this.form.dbh.length>0) {
-          let exp2 = deepClone(condition.form);
-          exp2.colname = "dbh";
-          exp2.coltype = "list";
-          exp2.oper = "in";
-          exp2.value = "";
-          exp2.values = this.form.dbh;
-          this.queryform.search_condition[1].logic = "and";
-          this.queryform.search_condition.push(exp2);
-        }
-        ApiFn.requestapi(
-          this.pageconfig.queryapi.method,
-          this.pageconfig.queryapi.url,
-          this.queryform
-        ).then((res) => {
-          if (res.code === 1) {
-            this.list = res.list;
-            this.resultcount = res.resultcount;
-          }
-        });
-      } catch (error) {
-        this.$message.error(error);
+      this.queryform.search_condition = [];
+      this.queryform.px_condition = [];
+      if (this.form.scx) {
+        let exp = deepClone(condition.form);
+        exp.colname = "scx";
+        exp.coltype = "string";
+        exp.oper = "=";
+        exp.value = this.form.scx;
+        exp.values = [];
+        this.queryform.search_condition.push(exp);
       }
+      if (this.form.sbbh) {
+        let exp1 = deepClone(condition.form);
+        exp1.colname = "sbbh";
+        exp1.coltype = "string";
+        exp1.oper = "=";
+        exp1.value = this.form.sbbh;
+        exp1.values = [];
+        this.queryform.search_condition.push(exp1);
+      }
+      if (this.form.dbh.length > 0) {
+        let exp2 = deepClone(condition.form);
+        exp2.colname = "dbh";
+        exp2.coltype = "list";
+        exp2.oper = "in";
+        exp2.value = "";
+        exp2.values = this.form.dbh;
+        this.queryform.search_condition.push(exp2);
+      }
+      if (this.form.rjzt) {
+        let exp3 = deepClone(condition.form);
+        exp3.colname = "rjzt";
+        exp3.coltype = "int";
+        if (this.form.rjzt === "1") {
+          exp3.oper = ">=";
+          exp3.value = "95";
+        } else if (this.form.rjzt === "0") {
+          exp3.oper = "<";
+          exp3.value = "95";
+        } else {
+          exp3.oper = "";
+          exp3.value = "";
+        }
+        exp3.values = [];
+        this.queryform.search_condition.push(exp3);
+      }
+      for (
+        let index = 0;
+        index < this.queryform.search_condition.length - 1;
+        index++
+      ) {
+        this.queryform.search_condition[index].logic = "and";
+      }
+      ApiFn.requestapi(
+        this.pageconfig.queryapi.method,
+        this.pageconfig.queryapi.url,
+        this.queryform
+      ).then((res) => {
+        if (res.code === 1) {
+          this.list = res.list;
+          this.resultcount = res.resultcount;
+        }
+      });
     },
   },
 };

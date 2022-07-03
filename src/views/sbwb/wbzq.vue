@@ -15,7 +15,7 @@
           @click="invokfn(item.fnname)"
           >{{ item.btntxt }}</el-button
         >
-        <template v-if="pageconfig.isbatoperate">
+        <template v-if="pageconfig.isbatoperate && batbtnlist.length > 0">
           <bat-operate
             :add_import_success_handle="import_by_add"
             :replace_import_success_handle="import_by_replace"
@@ -36,8 +36,8 @@
       :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
-      :pageindexHandle = "pageindex_change_handle"
-      :pagesizeHandle = "pagesize_change_handle"
+      :pageindexHandle="pageindex_change_handle"
+      :pagesizeHandle="pagesize_change_handle"
     >
       <template #operate="scope">
         <el-dropdown>
@@ -81,25 +81,90 @@
       :visible.sync="dialogVisible"
       top="10px"
       :close-on-click-modal="false"
-      width="60%"
+      width="80%"
     >
       <el-form
         ref="wbzq_form"
         :model="wbzq_form"
         label-width="120px"
         label-position="right"
+        inline
         :rules="rules"
       >
-        <el-form-item label="下次维保时间" prop="next_date">
+        <el-form-item label="生产线">
+          <el-select
+            v-model="wbzq_form.scx"
+            placeholder="生产线"
+            clearable
+            style="width: 150px"
+            @change="scx_change_handel"
+          >
+            <el-option
+              v-for="(item, index) in scxxx_list"
+              :key="index"
+              :label="item.label"
+              :value="item.value"
+            >
+              <span style="float: left">{{ item.label }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{
+                item.value
+              }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="设备名称">
+          <el-select
+            v-model="wbzq_form.sbbh"
+            placeholder="设备选择"
+            multiple
+            clearable
+            collapse-tags
+            style="width: 200px"
+          >
+            <el-option
+              v-for="(item, index) in scx_sbxx_list"
+              :key="index"
+              :label="item.label"
+              :value="item.value"
+            >
+              <span style="float: left">{{ item.label }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{
+                item.value
+              }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="下次维保时间段" prop="next_date">
           <el-date-picker
             v-model="wbzq_form.next_date"
-            value-format="yyyy-MM-dd"
-            type="date"
-            placeholder="下次维保时间"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            type="datetimerange"
+            range-separator="至"
+            placeholder="下次维保时间段"
           ></el-date-picker>
         </el-form-item>
+        <el-button
+          type="primary"
+          icon="el-icon-search"
+          @click="sbwbxx_search_handle"
+          >查询</el-button
+        >
         <el-table :data="wbzqlist" header-cell-class-name="tb_header_bg" border>
           <el-table-column
+            header-align="center"
+            align="center"
+            label="是否维保"
+            width="80"
+          >
+            <template slot-scope="scope">
+              <el-switch
+                v-model="scope.row.sfwb"
+                active-value="Y"
+                inactive-value="N"
+              ></el-switch>
+            </template>
+          </el-table-column>
+          <!-- <el-table-column
             header-align="center"
             align="center"
             prop="gcdm"
@@ -109,7 +174,7 @@
             <template slot-scope="scope">
               {{ scope.row.gcdm | show_option_label("gcdm") }}
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column
             prop="scx"
             label="生产线"
@@ -125,13 +190,14 @@
           <el-table-column
             header-align="center"
             align="center"
-            prop="gwh"
-            width="80"
-            label="岗位"
+            prop="sbbh"
+            width="130"
+            label="设备名称"
             sortable
+            show-overflow-tooltip
           >
             <template slot-scope="scope">
-              {{ scope.row.gwh | show_option_label("gwh") }}
+              {{ scope.row.sbbh | show_option_label("sbbh") }}
             </template>
           </el-table-column>
           <el-table-column
@@ -163,13 +229,26 @@
             header-align="center"
             align="center"
             prop="wbjhsj"
-            label="计划时间"
+            label="计划开始时间"
             width="130"
             sortable
             show-overflow-tooltip
           >
             <template slot-scope="scope">
-              {{ scope.row.wbjhsj | parseTime("{y}-{m}-{d}") }}
+              {{ scope.row.wbjhsj | parseTime("{y}-{m}-{d} {h}:{i}:{s}") }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            header-align="center"
+            align="center"
+            prop="wbjhsjend"
+            label="计划结束时间"
+            width="130"
+            sortable
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
+              {{ scope.row.wbjhsjend | parseTime("{y}-{m}-{d} {h}:{i}:{s}") }}
             </template>
           </el-table-column>
           <el-table-column
@@ -191,20 +270,6 @@
             label="完成人"
           >
           </el-table-column>
-          <el-table-column
-            header-align="center"
-            align="center"
-            label="是否维保"
-            width="80"
-          >
-            <template slot-scope="scope">
-              <el-switch
-                v-model="scope.row.sfwb"
-                active-value="Y"
-                inactive-value="N"
-              ></el-switch>
-            </template>
-          </el-table-column>
         </el-table>
       </el-form>
       <div slot="footer">
@@ -217,12 +282,14 @@
 
 <script>
 import Vue from "vue";
+import ApiFn from "@/api/baseapi";
 import TableComponent from "@/components/TableComponent/index.vue";
 import SearchBar from "@/components/QueryBar/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
 import { batoperatemixin } from "@/mixin/batoperate_mixin";
-import {export_xls_mixin} from '@/mixin/export_xls_mixin';
+import { export_xls_mixin } from "@/mixin/export_xls_mixin";
+import { lbj_baseinfo_mixin } from "@/mixin/lbj_baseinfo_mixin";
 import { newGuid } from "@/utils";
 var _this;
 export default {
@@ -232,21 +299,23 @@ export default {
     SearchBar,
     BatOperate,
   },
-  mixins: [basemixin, batoperatemixin,export_xls_mixin],
+  mixins: [basemixin, batoperatemixin, export_xls_mixin, lbj_baseinfo_mixin],
   data() {
     return {
       dialogVisible: false,
       wbzqlist: [],
       wbzq_form: {
-        next_date: "",
+        next_date: [],
         sbwbls: [],
+        sbbh:[],
       },
+      scx_sbxx_list:[],
       rules: {
         next_date: [
           {
             required: true,
             message: "下次维保时间不能为空",
-            trigger: "blur",
+            trigger: "change",
           },
         ],
       },
@@ -255,6 +324,8 @@ export default {
   mounted() {
     _this = this;
     Vue.prototype.$basepage = this;
+    this.get_scxxx_list();
+    this.get_sbxx_list();
   },
   filters: {
     show_option_label(val, col) {
@@ -263,7 +334,7 @@ export default {
       });
       if (fitem) {
         let optionitem = fitem[0].options.filter((i) => i.value === val);
-        if (optionitem && optionitem.length>0) {
+        if (optionitem && optionitem.length > 0) {
           return optionitem[0].label;
         } else {
           return val;
@@ -295,6 +366,37 @@ export default {
         this.$message.error(error);
       }
     },
+    scx_change_handel(scx) {
+      try {
+        ApiFn.requestapi("get", "/lbj/baseinfo/scx_sbxx", { scx: scx }).then(
+          (res) => {
+            if (res.code === 1) {
+              this.scx_sbxx_list = res.list;
+            } else if (res.code === 0) {
+              this.$message.error(res.msg);
+            }
+          }
+        );
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
+    sbwbxx_search_handle() {
+      ApiFn.requestapi("post", "/lbj/wbzq/query", {
+        scx: this.wbzq_form.scx,
+        sbbh: this.wbzq_form.sbbh,
+      }).then((res) => {
+        if (res.code === 1) {
+          this.wbzqlist = res.list.map((i) => {
+            i.rowkey = newGuid();
+            i.sfwb = "Y";
+            return i;
+          });
+        } else if (res.code === 0) {
+          this.$message.error(res.msg);
+        }
+      });
+    },
     save_wbzq() {
       this.$refs.wbzq_form.validate((v) => {
         if (v) {
@@ -303,9 +405,9 @@ export default {
             this.$request("post", "/lbj/wbzq/add", this.wbzq_form).then(
               (res) => {
                 if (res.code === 1) {
+                  this.dialogVisible = false;
                   this.wbzq_form.next_date = "";
                   this.wbzq_form.sbwbls = [];
-                  this.dialogVisible = false;
                   this.getlist(this.queryform);
                 } else if (res.code === 0) {
                   this.$message.error(res.msg);

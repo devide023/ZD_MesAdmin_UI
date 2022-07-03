@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'MESAdmin',
+  title: 'MES后台管理系统',
 
   /**
    * @type {boolean} true | false

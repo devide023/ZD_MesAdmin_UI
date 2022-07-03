@@ -15,7 +15,7 @@
           @click="invokfn(item.fnname)"
           >{{ item.btntxt }}</el-button
         >
-        <template v-if="pageconfig.isbatoperate">
+        <template v-if="pageconfig.isbatoperate && batbtnlist.length>0">
           <bat-operate
             :add_import_success_handle="import_by_add"
             :replace_import_success_handle="import_by_replace"
@@ -46,6 +46,46 @@
       :pagesizeHandle = "pagesize_change_handle"
     >
       <template #operate="scope">
+        <template v-if="pageconfig.operate_type === 'text'">
+          <span v-for="(item, index) in pageconfig.operate_fnlist" :key="index">
+              <template v-if="item.btntype === 'upload'">
+                <el-upload
+                  v-if="scope.row.isedit"
+                  :headers="headers"
+                  :action="item.action"
+                  :show-file-list="false"
+                  accept=".pdf,application/pdf"
+                  :data="scope.row"
+                  :before-upload="before_upload_PDFHandle"
+                  :on-success="item.callback"
+                >
+                  <el-button type="text">{{ item.label }}</el-button>
+                </el-upload>
+              </template>
+              <template v-else-if="item.btntype === 'uploadvideo'">
+                <el-upload
+                  v-if="scope.row.isedit"
+                  :headers="headers"
+                  :action="item.action"
+                  :show-file-list="false"
+                  accept=".mp4,video/mp4,application/mp4"
+                  :data="scope.row"
+                  :before-upload="before_upload_Mp4Handle"
+                  :on-success="item.callback"
+                >
+                  <el-button type="text">{{ item.label }}</el-button>
+                </el-upload>
+              </template>
+              <template v-else>
+                <el-button
+                  type="text"
+                  @click.native="execfun(scope.row, item.fnname)"
+                  >{{ item.label }}</el-button
+                ></template
+              >
+          </span>
+        </template>
+        <template v-else>
         <el-dropdown>
           <span class="el-dropdown-link">
             <i class="el-icon-setting" style="font-size: 16px" />
@@ -93,13 +133,13 @@
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
+        </template>
       </template>
     </table-component>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
 import SearchBar from "@/components/QueryBar/index.vue";
 import TableComponent from "@/components/TableComponent/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
@@ -124,11 +164,9 @@ export default {
     };
   },
   mounted() {
-    Vue.prototype.$basepage = this;
   },
   methods: {
     execfun(row, fnname) {
-      //console.log(fnname);
       this[fnname](row);
     },
   },

@@ -13,6 +13,7 @@ export const basemixin = {
             selectlist: [],
             colshowlist: [],
             btnlist: [],
+            batbtnlist: [],
             pagepermis: {},
             pageconfig: {},
             editstatus: false,
@@ -24,7 +25,7 @@ export const basemixin = {
                 pageindex: 1,
                 pagesize: 20,
             },
-            trbginfo:{},
+            trbginfo: {},
         }
     },
     computed: {
@@ -51,6 +52,7 @@ export const basemixin = {
                         this.pageconfig = Function('return ' + res.pageconfig)();
                         this.pagepermis = res.pagepermis;
                         this.btnlist = res.pagebtns;
+                        this.batbtnlist = res.batbtns;
                         let hidecols = this.pagepermis.hidefields;
                         var ddlcol = this.pageconfig.fields.filter(i => i.inioptionapi);
                         if (ddlcol) {
@@ -78,7 +80,7 @@ export const basemixin = {
                                 this[key] = this.pageconfig.pagefuns[key];
                             });
                         }
-                        if(this.pageconfig.trbginfo){
+                        if (this.pageconfig.trbginfo) {
                             this.trbginfo = this.pageconfig.trbginfo;
                         }
                         this.getlist(this.queryform);
@@ -100,6 +102,7 @@ export const basemixin = {
                     ).then((res) => {
                         if (res.code === 1) {
                             this.$message.success(res.msg);
+                            this.editstatus = false;
                             this.resultcount = res.resultcount;
                             this.list = res.list.map((i) => {
                                 i.rowkey = newGuid();
@@ -126,7 +129,15 @@ export const basemixin = {
                     this.editstatus = !this.editstatus;
                     if (this.editstatus) {
                         this.selectlist.forEach(i => {
-                            i.isedit = true;
+                            if (this.pageconfig.disedit) {
+                                if (i[this.pageconfig.disedit.fieldname] === this.pageconfig.disedit.fieldvalue) {
+                                    i.isedit = false;
+                                } else {
+                                    i.isedit = true;
+                                }
+                            } else {
+                                i.isedit = true;
+                            }
                         });
                     } else {
                         this.selectlist.forEach(i => {

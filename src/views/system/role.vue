@@ -338,7 +338,7 @@ export default {
     },
     editdialog_opened_handle() {
       let nodes1 = this.rolemenulist.filter(
-        (i) => i.menutype === "01" || i.menutype === "02" || i.menutype === "03"
+        (i) => i.menutype === "01" || i.menutype === "02" || i.menutype === "03" || i.menutype === "05"
       );
       this.$refs.permistree_m.setCheckedNodes(nodes1);
       this.$refs.editcolstree_m.setCheckedNodes(this.roleeditcollist);

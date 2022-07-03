@@ -42,6 +42,16 @@ export const lbj_baseinfo_mixin = {
                 }
             });
         },
+        get_sbxx_list(){
+            ApiFn.requestapi('get', 'lbj/baseinfo/sbxx').then(res => {
+                if (res.code === 1) {
+                    this.sbxx_list = res.list;
+                }
+                else if (res.code === 0) {
+                    this.$message.error(res.msg);
+                }
+            });
+        },
         get_dbxx_list() {
             ApiFn.requestapi('get', 'lbj/baseinfo/dbxx').then(res => {
                 if (res.code === 1) {
@@ -72,5 +82,6 @@ export const lbj_baseinfo_mixin = {
                 }
             });
         },
+
     },
 }
