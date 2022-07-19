@@ -149,7 +149,7 @@ export default {
         return (item.dbprop ? item.dbprop : item.prop) === val;
       });
       if (finditem.length > 0) {
-        let fieldtype = finditem[0].coltype;
+        let fieldtype = finditem[0].searchtype?finditem[0].searchtype:finditem[0].coltype;
         this.fieldtype = fieldtype;
         switch (fieldtype) {
           case "string":

@@ -1,5 +1,7 @@
 import router,{ constantRoutes } from '@/router'
 import { get_user_menus} from '@/router/usermenu';
+
+
 /**
  * Use meta.role to determine if the current user has permission
  * @param roles
@@ -36,7 +38,8 @@ export function filterAsyncRoutes(routes, roles) {
 
 const state = {
   routes: [],
-  addRoutes: []
+  addRoutes: [],
+  page_permis: [],
 }
 
 const mutations = {
@@ -46,6 +49,18 @@ const mutations = {
     state.routes = user_route
     router.addRoutes(user_route)
     router.options.routes = user_route;
+  },
+  SET_PAGE_PERMIS:(state,permis)=>{
+    state.page_permis.push(permis);
+  },
+  Del_PAGE_PERMIS:(state,path)=>{
+    let pos = state.page_permis.findIndex(t=>t.path === path);
+    if(pos!==-1){
+      state.page_permis.splice(pos,1);
+    }
+  },
+  DEL_ALL_PERMIS:(state)=>{
+    state.page_permis=[];
   }
 }
 

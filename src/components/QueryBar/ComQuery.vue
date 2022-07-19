@@ -351,7 +351,7 @@ export default {
         return (i.dbprop?i.dbprop:i.prop) === row.colname;
       });
       if (fieldinfo.length > 0) {
-        row.coltype = fieldinfo[0].coltype;
+        row.coltype = fieldinfo[0].searchtype?fieldinfo[0].searchtype:fieldinfo[0].coltype;
         row.coloptions = fieldinfo[0].options;
       } else {
         row.coltype = "string";

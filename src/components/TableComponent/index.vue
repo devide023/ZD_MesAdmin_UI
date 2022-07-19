@@ -59,7 +59,7 @@
                   filterable
                   remote
                   :multiple="col.multiple"
-                  :remote-method="(q)=>remote_method(q,col,scope.row)"
+                  :remote-method="(q) => remote_method(q, col, scope.row)"
                   placeholder="关键字过滤"
                   style="width: 100%"
                 >
@@ -86,10 +86,12 @@
                   placeholder="请选择"
                   style="width: 100%"
                   @change="(val) => col_ddl_change_handle(val, scope.row, col)"
-                  @clear="()=>col_ddl_clear_handle(scope.row,col)"
+                  @clear="() => col_ddl_clear_handle(scope.row, col)"
                 >
                   <el-option
-                    v-for="(item, i) in (col.relation?scope.row[col.relation]:col.options)"
+                    v-for="(item, i) in col.relation
+                      ? scope.row[col.relation]
+                      : col.options"
                     :key="i"
                     :label="item.label"
                     :value="item.value"
@@ -157,21 +159,21 @@
               >
                 <div slot="default">
                   <img
-                  v-if="
-                    col.subprop
-                      ? scope.row[col.prop][col.subprop]
-                      : scope.row[col.prop]
-                  "
-                  :src="
-                    rooturl +
-                    '/upload/image/' +
-                    (col.subprop
-                      ? scope.row[col.prop][col.subprop]
-                      : scope.row[col.prop])
-                  "
-                  class="avatar"
-                />
-                <i v-else class="el-icon-plus avatar-uploader-icon" />
+                    v-if="
+                      col.subprop
+                        ? scope.row[col.prop][col.subprop]
+                        : scope.row[col.prop]
+                    "
+                    :src="
+                      rooturl +
+                      '/upload/image/' +
+                      (col.subprop
+                        ? scope.row[col.prop][col.subprop]
+                        : scope.row[col.prop])
+                    "
+                    class="avatar"
+                  />
+                  <i v-else class="el-icon-plus avatar-uploader-icon" />
                 </div>
                 <div slot="file" slot-scope="{ file }">
                   <img
@@ -335,6 +337,8 @@ export default {
     return {
       tableheight: 800,
       rooturl: process.env.VUE_APP_ROOT,
+      fullpath: "",
+      cur_page_permis: [],
       preview_list: [],
       headers: {
         Authorization: "Bearer " + getToken(),
@@ -408,14 +412,14 @@ export default {
         if (options) {
           if (typeof value === "object") {
             let find = options.filter((i) => value.some((j) => j === i.value));
-            if (find.length>0) {
+            if (find.length > 0) {
               return find.map((i) => i.label).join(",");
             } else {
               return value;
             }
           } else {
             let fitem = options.filter((i) => i.value === value);
-            if (fitem.length>0) {
+            if (fitem.length > 0) {
               return fitem.map((i) => i.label).join(",");
             } else {
               return value;
@@ -435,6 +439,8 @@ export default {
   computed: {},
   mounted() {
     window._this = this;
+    this.fullpath = this.$router.currentRoute.fullPath;
+    this.cur_page_permis = this.$store.getters.pagepermis;
     this.$nextTick(function () {
       this.sizechangeHandle();
     });
@@ -517,8 +523,12 @@ export default {
       }
     },
     iscoledit(colname) {
-      //console.log(this.$basepage);
-      let efields = this.$basepage.pagepermis.editfields || [];
+      let path = this.fullpath;
+      var finditem = this.cur_page_permis.filter((t) => t.path === path);
+      let efields = [];
+      if (finditem.length > 0) {
+        efields = finditem[0].permis.editfields;
+      }
       let pos = efields.findIndex((i) => {
         return i === colname;
       });
@@ -554,30 +564,30 @@ export default {
     col_ddl_change_handle(val, row, col) {
       if (col.change_fn_name) {
         if (typeof col.change_fn_name === "function") {
-          col.change_fn_name(this, this.collist, val,row);
+          col.change_fn_name(this, this.collist, val, row);
         } else {
           this.$basepage[col.change_fn_name](this.collist, val, row);
         }
       }
     },
-    col_ddl_clear_handle(row,col){
-      if(col.clear_fn_name){
-        if(typeof col.clear_fn_name === 'function'){
-          col.clear_fn_name(this,row,col);
-        }else{
-          this.$basepage[col.clear_fn_name](row,col);
+    col_ddl_clear_handle(row, col) {
+      if (col.clear_fn_name) {
+        if (typeof col.clear_fn_name === "function") {
+          col.clear_fn_name(this, row, col);
+        } else {
+          this.$basepage[col.clear_fn_name](row, col);
         }
       }
     },
-    remote_method(q,col,row){
-      if(col.remote){
-        if(typeof col.remote ==='function'){
-        col.remote(q,this,row);
+    remote_method(q, col, row) {
+      if (col.remote) {
+        if (typeof col.remote === "function") {
+          col.remote(q, this, row);
+        }
+      } else {
+        this.$message.error("远程查询不是一个函数");
       }
-      }else{
-        this.$message.error('远程查询不是一个函数');
-      }
-    }
+    },
   },
   watch: {
     datalist(val) {

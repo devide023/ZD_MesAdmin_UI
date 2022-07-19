@@ -46,11 +46,17 @@ export const basemixin = {
     methods: {
         getpageconfig() {
             try {
+                let fullpath = this.$router.currentRoute.fullPath;
                 ApiFn.pageconfig().then((res) => {
                     if (res.code === 1) {
                         //this.pageconfig = eval(res.pageconfig);
                         this.pageconfig = Function('return ' + res.pageconfig)();
                         this.pagepermis = res.pagepermis;
+                        let permis_info = this.$store.getters.pagepermis;
+                        let pos = permis_info.findIndex(t=>t.path === fullpath);
+                        if(pos === -1){
+                            this.$store.commit('permission/SET_PAGE_PERMIS',{ path:fullpath,permis:res.pagepermis});
+                        }
                         this.btnlist = res.pagebtns;
                         this.batbtnlist = res.batbtns;
                         let hidecols = this.pagepermis.hidefields;

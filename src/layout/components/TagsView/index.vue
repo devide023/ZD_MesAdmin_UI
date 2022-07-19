@@ -136,6 +136,7 @@ export default {
     },
     closeSelectedTag(view) {
       this.$store.dispatch('tagsView/delView', view).then(({ visitedViews }) => {
+        this.$store.commit('permission/Del_PAGE_PERMIS',view.fullPath);
         if (this.isActive(view)) {
           this.toLastView(visitedViews, view)
         }
@@ -148,7 +149,7 @@ export default {
       })
     },
     closeAllTags(view) {
-      this.$store.dispatch('tagsView/delAllViews').then(({ visitedViews }) => {
+      this.$store.dispatch('tagsView/delAllViews').then(({ visitedViews }) => {        
         if (this.affixTags.some(tag => tag.path === view.path)) {
           return
         }
