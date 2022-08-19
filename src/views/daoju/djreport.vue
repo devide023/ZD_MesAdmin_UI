@@ -70,7 +70,7 @@
         type="primary"
         icon="el-icon-search"
         @click="report_query_handle"
-        style="margin-left:5px;"
+        style="margin-left: 5px"
         >查询</el-button
       >
     </div>
@@ -173,15 +173,15 @@ export default {
   methods: {
     scx_change_handle(val) {
       try {
-        ApiFn.requestapi("get", "/lbj/baseinfo/cnc_list_by_scx", { scx: val }).then(
-          (res) => {
-            if (res.code === 1) {
-              this.sbxx_list = res.list.map((i) => {
-                return { label: i.sbmc, value: i.sbbh };
-              });
-            }
+        ApiFn.requestapi("get", "/lbj/baseinfo/cnc_list_by_scx", {
+          scx: val,
+        }).then((res) => {
+          if (res.code === 1) {
+            this.sbxx_list = res.list.map((i) => {
+              return { label: i.sbmc, value: i.sbbh };
+            });
           }
-        );
+        });
       } catch (error) {
         this.$message.error(error);
       }
@@ -256,16 +256,18 @@ export default {
       ) {
         this.queryform.search_condition[index].logic = "and";
       }
-      ApiFn.requestapi(
-        this.pageconfig.queryapi.method,
-        this.pageconfig.queryapi.url,
-        this.queryform
-      ).then((res) => {
-        if (res.code === 1) {
-          this.list = res.list;
-          this.resultcount = res.resultcount;
-        }
-      });
+      if (this.pageconfig.queryapi) {
+        ApiFn.requestapi(
+          this.pageconfig.queryapi.method,
+          this.pageconfig.queryapi.url,
+          this.queryform
+        ).then((res) => {
+          if (res.code === 1) {
+            this.list = res.list;
+            this.resultcount = res.resultcount;
+          }
+        });
+      }
     },
   },
 };

@@ -51,8 +51,56 @@ service.interceptors.response.use(
   response => {
     // if the custom code is not 20000, it is judged as an error.
     loadingInstance.close();
-    const res = response.data
-    if (res.code === 0) {
+    let errormsg = '';
+    const res = response.data;
+    if (response.status !== 200) {
+      switch (response.status) {
+        case 400:
+          errormsg = '请求错误(400)';
+          break;
+        case 401:
+          errormsg = '未授权请重新登录(401)';
+          break;
+        case 403:
+          errormsg = '拒绝访问(403)';
+          break;
+        case 404:
+          errormsg = '请求出错(404)';
+          break;
+        case 408:
+          errormsg = '请求超时(408)';
+          break;
+        case 500:
+          errormsg = '服务器错误(500)';
+          break;
+        case 501:
+          errormsg = '服务未实现(501)';
+          break;
+        case 502:
+          errormsg = '网络错误(502)';
+          break;
+        case 503:
+          errormsg = '服务不可用(503)';
+          break;
+        case 504:
+          errormsg = '网络超时(504)';
+          break;
+        case 505:
+          errormsg = 'Http版本不受支持(505)';
+          break;
+        default:
+          errormsg = `错误(${response.status})`;
+          break;
+      }
+    }
+    if (errormsg !== '') {
+      Message({
+        message: errormsg,
+        type: 'error',
+        duration: 5 * 1000
+      });
+    }
+    else if (res.code === 0) {
       Message({
         message: res.msg || 'Error',
         type: 'error',
@@ -78,12 +126,13 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    // for debug
     Message({
-      message: error.msg || error.Message,
+      message: error,
       type: 'error',
       duration: 15 * 1000
-    })
+    });
+    loadingInstance.close();
     return Promise.reject(error)
   }
 )

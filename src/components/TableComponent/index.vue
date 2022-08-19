@@ -234,7 +234,11 @@
             <template v-else-if="col.coltype === 'progress'">
               <el-progress
                 :percentage="
-                  col.subprop
+                  (col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop]) > 100
+                    ? 100
+                    : col.subprop
                     ? scope.row[col.prop][col.subprop]
                     : scope.row[col.prop]
                 "

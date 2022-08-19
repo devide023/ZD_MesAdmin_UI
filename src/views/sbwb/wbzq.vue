@@ -136,12 +136,29 @@
         </el-form-item>
         <el-form-item label="下次维保时间段" prop="next_date">
           <el-date-picker
+            value-format="yyyy-MM-dd HH:mm:ss"
+            v-model="wbzq_form.next_date[0]"
+            type="datetime"
+            style="width: 182px"
+            placeholder="选择维保开始时间"
+          >
+          </el-date-picker
+          >至
+          <el-date-picker
+            value-format="yyyy-MM-dd HH:mm:ss"
+            v-model="wbzq_form.next_date[1]"
+            type="datetime"
+            style="width: 182px"
+            placeholder="选择维保结束时间"
+          >
+          </el-date-picker>
+          <!-- <el-date-picker
             v-model="wbzq_form.next_date"
             value-format="yyyy-MM-dd HH:mm:ss"
             type="datetimerange"
             range-separator="至"
             placeholder="下次维保时间段"
-          ></el-date-picker>
+          ></el-date-picker> -->
         </el-form-item>
         <el-button
           type="primary"
@@ -305,11 +322,13 @@ export default {
       dialogVisible: false,
       wbzqlist: [],
       wbzq_form: {
+        kssj: "",
+        jssj: "",
         next_date: [],
         sbwbls: [],
-        sbbh:[],
+        sbbh: [],
       },
-      scx_sbxx_list:[],
+      scx_sbxx_list: [],
       rules: {
         next_date: [
           {
@@ -400,22 +419,38 @@ export default {
     save_wbzq() {
       this.$refs.wbzq_form.validate((v) => {
         if (v) {
-          try {
-            this.wbzq_form.sbwbls = this.wbzqlist.filter((i) => i.sfwb === "Y");
-            this.$request("post", "/lbj/wbzq/add", this.wbzq_form).then(
-              (res) => {
-                if (res.code === 1) {
-                  this.dialogVisible = false;
-                  this.wbzq_form.next_date = "";
-                  this.wbzq_form.sbwbls = [];
-                  this.getlist(this.queryform);
-                } else if (res.code === 0) {
-                  this.$message.error(res.msg);
+          if (this.wbzq_form.next_date.length === 2) {
+            let rq0 = this.wbzq_form.next_date[0];
+            let rq1 = this.wbzq_form.next_date[1];
+            if (rq0 && rq1) {
+              if (Date.parse(rq1) > Date.parse(rq0)) {
+                try {
+                  this.wbzq_form.sbwbls = this.wbzqlist.filter(
+                    (i) => i.sfwb === "Y"
+                  );
+                  this.$request("post", "/lbj/wbzq/add", this.wbzq_form).then(
+                    (res) => {
+                      if (res.code === 1) {
+                        this.dialogVisible = false;
+                        this.wbzq_form.next_date = "";
+                        this.wbzq_form.sbwbls = [];
+                        this.getlist(this.queryform);
+                      } else if (res.code === 0) {
+                        this.$message.error(res.msg);
+                      }
+                    }
+                  );
+                } catch (error) {
+                  this.$message.error(error);
                 }
+              } else {
+                this.$message.error("结束日期应大于开始日期");
               }
-            );
-          } catch (error) {
-            this.$message.error(error);
+            } else {
+              this.$message.error("起止时间需选择");
+            }
+          } else {
+            this.$message.error("起止时间需选择");
           }
         }
       });

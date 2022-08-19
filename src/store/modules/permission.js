@@ -1,7 +1,6 @@
 import router,{ constantRoutes } from '@/router'
 import { get_user_menus} from '@/router/usermenu';
 
-
 /**
  * Use meta.role to determine if the current user has permission
  * @param roles
