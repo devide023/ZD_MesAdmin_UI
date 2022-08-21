@@ -5,8 +5,9 @@
     <table class="gtjjb_form_head">
       <tr>
         <td style="width: 33.3%">
-          日期：<span v-if="isread">{{dqrq}}</span>
-          <el-date-picker v-else
+          日期：<span v-if="isread">{{ dqrq | parseTime("{y}-{m}-{d}") }}</span>
+          <el-date-picker
+            v-else
             v-model="dqrq"
             value-format="yyyy-MM-dd"
             placeholder="选择日期"
@@ -14,16 +15,22 @@
           ></el-date-picker>
         </td>
         <td style="width: 33.3%">
-          班次：<span v-if="isread">{{bc}}</span>
-          <el-select v-else v-model="bc" placeholder="请选择班次">
+          班次：<span v-if="isread">{{ bc }}</span>
+          <el-select
+            v-else
+            v-model="bc"
+            @change="bc_change_handle"
+            placeholder="请选择班次"
+          >
             <el-option label="白班" value="白班"></el-option>
             <el-option label="中班" value="中班"></el-option>
             <el-option label="晚班" value="晚班"></el-option>
           </el-select>
         </td>
         <td style="width: 33.3%">
-          交班人：<span v-if="isread">{{jbr}}</span>
-          <el-input v-else
+          交班人：<span v-if="isread">{{ jbr }}</span>
+          <el-input
+            v-else
             v-model="jbr"
             style="width: 200px"
             clearable
@@ -35,16 +42,16 @@
     <table class="gtjjb_form_body">
       <thead>
         <tr>
-          <th>产品名称</th>
-          <th>上个班次毛坯余数</th>
-          <th>当班毛坯数量</th>
-          <th>换产数量</th>
-          <th>投入加工数</th>
-          <th>工废数</th>
-          <th>料废数</th>
-          <th>合格数</th>
-          <th>当班毛坯余数</th>
-          <th v-if="!isread" style="width: 50px; text-align: center">操作</th>
+          <th class="tdlabel">产品名称</th>
+          <th class="tdlabel">上个班次毛坯余数</th>
+          <th class="tdlabel">当班毛坯数量</th>
+          <th class="tdlabel">换产数量</th>
+          <th class="tdlabel">投入加工数</th>
+          <th class="tdlabel">工废数</th>
+          <th class="tdlabel">料废数</th>
+          <th class="tdlabel">合格数</th>
+          <th class="tdlabel">当班毛坯余数</th>
+          <th class="tdlabel" v-if="!isread" style="width: 50px; text-align: center">操作</th>
         </tr>
       </thead>
       <tbody>
@@ -56,14 +63,16 @@
             <el-select
               v-else
               v-model="item.cpmc"
+              clearable
+              filterable
               placeholder="选择产品名称"
               style="width: 100%"
             >
               <el-option
                 v-for="(el, idx) in cplist"
                 :key="'el' + idx"
-                :label="item.label"
-                :value="item.value"
+                :label="el.label"
+                :value="el.value"
               >
               </el-option>
             </el-select>
@@ -162,29 +171,49 @@
           </td>
         </tr>
         <tr>
-            <td style="text-align: center"><b>当班组长：</b></td>
-            <td>
-                <span v-if="isread">{{dbzz}}</span>
-                <el-input v-else v-model="dbzz" placeholder="" style="width:100%"></el-input>
-            </td>
-            <td style="text-align: center"><b>上料岗位：</b></td>
-            <td>
-                <span v-if="isread">{{slgw}}</span>
-                <el-input v-else v-model="slgw" placeholder="" style="width:100%"></el-input>
-            </td>
-            <td style="text-align: center"><b>毛刺岗位：</b></td>
-            <td>
-                <span v-if="isread">{{mcgw}}</span>
-                <el-input v-else v-model="mcgw" placeholder="" style="width:100%"></el-input>
-            </td>
-            <td style="text-align: center"><b>检验岗位：</b></td>
-            <td :colspan="isread?2:3">
-                <span v-if="isread">{{jygw}}</span>
-                <el-input v-else v-model="jygw" placeholder="" style="width:100%"></el-input>
-            </td>
+          <td  class="tdlabel" style="text-align: center"><b>当班组长：</b></td>
+          <td>
+            <span v-if="isread">{{ dbzz }}</span>
+            <el-input
+              v-else
+              v-model="dbzz"
+              placeholder=""
+              style="width: 100%"
+            ></el-input>
+          </td>
+          <td  class="tdlabel" style="text-align: center"><b>上料岗位：</b></td>
+          <td>
+            <span v-if="isread">{{ slgw }}</span>
+            <el-input
+              v-else
+              v-model="slgw"
+              placeholder=""
+              style="width: 100%"
+            ></el-input>
+          </td>
+          <td class="tdlabel" style="text-align: center"><b>毛刺岗位：</b></td>
+          <td>
+            <span v-if="isread">{{ mcgw }}</span>
+            <el-input
+              v-else
+              v-model="mcgw"
+              placeholder=""
+              style="width: 100%"
+            ></el-input>
+          </td>
+          <td class="tdlabel" style="text-align: center"><b>检验岗位：</b></td>
+          <td :colspan="isread ? 2 : 3">
+            <span v-if="isread">{{ jygw }}</span>
+            <el-input
+              v-else
+              v-model="jygw"
+              placeholder=""
+              style="width: 100%"
+            ></el-input>
+          </td>
         </tr>
         <tr>
-          <td style="text-align: center"><b>质量情况：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>质量情况：</b></td>
           <td :colspan="isread ? 9 : 10">
             <span v-if="isread">
               {{ zlqk }}
@@ -200,7 +229,7 @@
           </td>
         </tr>
         <tr>
-          <td style="text-align: center"><b>设备情况：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>设备情况：</b></td>
           <td :colspan="isread ? 9 : 10">
             <span v-if="isread">
               {{ sbqk }}
@@ -216,7 +245,7 @@
           </td>
         </tr>
         <tr>
-          <td style="text-align: center"><b>其它情况：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>其它情况：</b></td>
           <td :colspan="isread ? 9 : 10">
             <span v-if="isread">
               {{ qtqk }}
@@ -234,13 +263,20 @@
       </tbody>
     </table>
     <div class="gtjjb_form_footer">
-        <el-button v-if="!isread" type="danger" icon="el-icon-check" @click="save_handle">保存</el-button>
+      <el-button
+        v-if="!isread"
+        type="danger"
+        icon="el-icon-check"
+        @click="save_handle"
+        >保存</el-button
+      >
     </div>
   </div>
 </template>
 
 <script>
-import { deepClone } from "@/utils/index";
+import ApiFn from "@/api/baseapi";
+import { deepClone, parseTime } from "@/utils/index";
 export default {
   name: "Gtjjb_Form_Component",
   props: {
@@ -248,6 +284,12 @@ export default {
       type: Boolean,
       default: false,
       required: true,
+    },
+    calcrq: {
+      type: String,
+    },
+    calcbc: {
+      type: String,
     },
   },
   data() {
@@ -278,8 +320,11 @@ export default {
     };
   },
   mounted() {
-    let row = deepClone(this.scitem);
-    this.sclist.push(row);
+    if (!this.isread) {
+      let row = deepClone(this.scitem);
+      this.sclist.push(row);
+    }
+    this.get_cplist_data();
   },
   methods: {
     add_item_handle() {
@@ -289,24 +334,86 @@ export default {
     del_item_handle(index) {
       this.sclist.splice(index, 1);
     },
-    rq_change_handle(v){
-        this.$emit("rq_change",v);
+    get_cplist_data(){
+      ApiFn.requestapi('get','/cdgc/gtjjb/get_cplist',{}).then(res=>{
+        if(res.code ===1){
+          this.cplist = res.list;
+        }else{
+          this.$message.error(res.msg);
+        }
+      })
     },
-    save_handle(){
-        this.$emit("gtjjb_data",{
-            rq:this.dqrq,
-            bc:this.bc,
-            jbr:this.jbr,
-            dbzz:this.dbzz,
-            slgw:this.slgw,
-            mcgw:this.mcgw,
-            jygw:this.jygw,
-            zlqk:this.zlqk,
-            sbqk:this.sbqk,
-            qtqk:this.qtqk,
-            scdata:this.sclist,
-        });
-    }
+    rq_change_handle(v) {
+      this.$emit("rq_change", { rq: v, bc: this.bc });
+    },
+    bc_change_handle(v) {
+      this.$emit("bc_change", { rq: this.dqrq, bc: v });
+    },
+    //加载班次数据
+    load_bc_data(rq, bc) {
+      ApiFn.requestapi("get", "/cdgc/gtjjb/load_bc_data", {
+        rq: rq,
+        bc: bc,
+      }).then((res) => {
+        if (res.code === 1) {
+          if (res.list.length > 0) {
+            this.dqrq = res.list[0].rq;
+            this.bc = res.list[0].bc;
+            this.jbr = res.list[0].jbr;
+            this.zlqk = res.list[0].zlqk;
+            this.sbqk = res.list[0].sbqk;
+            this.qtqk = res.list[0].qtqk;
+            this.dbzz = res.list[0].dbzz;
+            this.slgw = res.list[0].slry;
+            this.mcgw = res.list[0].mcry;
+            this.jygw = res.list[0].jyry;
+            this.sclist = res.list[0].mxlist.map((i) => {
+              let rd = {
+                cpmc: i.cpmc,
+                up_mpys: i.sbcmpyl,
+                db_mpsl: i.dbmpsl,
+                hcsl: i.hcsl,
+                trjgs: i.trjgs,
+                gfs: i.gfsl,
+                lfs: i.lfsl,
+                hgs: i.hgsl,
+                dbmpys: i.dbmpyl,
+              };
+              return rd;
+            });
+          } else {
+            this.dqrq = "";
+            this.bc = "";
+            this.jbr = "";
+            this.zlqk = "";
+            this.sbqk = "";
+            this.qtqk = "";
+            this.dbzz = "";
+            this.slgw = "";
+            this.mcgw = "";
+            this.jygw = "";
+            this.sclist = [];
+          }
+        } else {
+          this.$message.error(res.msg);
+        }
+      });
+    },
+    save_handle() {
+      this.$emit("gtjjb_data", {
+        rq: this.dqrq,
+        bc: this.bc,
+        jbr: this.jbr,
+        dbzz: this.dbzz,
+        slgw: this.slgw,
+        mcgw: this.mcgw,
+        jygw: this.jygw,
+        zlqk: this.zlqk,
+        sbqk: this.sbqk,
+        qtqk: this.qtqk,
+        scdata: this.sclist,
+      });
+    },
   },
 };
 </script>
@@ -336,15 +443,22 @@ export default {
 }
 ::v-deep .gtjjb_form_body th,
 .gtjjb_form_body td {
-  padding: 5px;
   height: 30px;
   line-height: 30px;
   border: 1px solid rgb(199, 199, 199);
 }
-::v-deep .gtjjb_form_footer{
-    height: 50px;
-    line-height: 50px;
-    margin: 10px auto;
-    text-align: right;
+::v-deep .gtjjb_form_body th{
+  height: 40px;
+  line-height: 40px;
+}
+::v-deep .gtjjb_form_footer {
+  height: 50px;
+  line-height: 50px;
+  margin: 10px auto;
+  text-align: right;
+}
+::v-deep .tdlabel{
+  background-color: rgb(231, 231, 231);
+  font-weight: bold;
 }
 </style>

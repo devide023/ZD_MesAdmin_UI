@@ -11,7 +11,7 @@
           ></el-date-picker>
         </td>
         <td style="width: 25%">
-          班次：<el-select v-model="form.bc" placeholder="请选择班次">
+          班次：<el-select v-model="form.bc" clearable placeholder="请选择班次">
             <el-option label="白班" value="白班"></el-option>
             <el-option label="晚班" value="晚班"></el-option>
           </el-select>
@@ -19,6 +19,7 @@
         <td style="width: 25%">
           交接人：<el-input
             style="width: 150px"
+            clearable
             v-model="form.jjr"
             placeholder="请输入交接人"
           ></el-input>
@@ -26,6 +27,7 @@
         <td style="width: 25%">
           后序人员：<el-input
             style="width: 300px"
+            clearable
             v-model="form.hxry"
             placeholder="请输入后序人员"
           ></el-input>
@@ -35,15 +37,15 @@
     <table class="cdgc_table">
       <thead>
         <tr>
-          <th>岗位名称</th>
-          <th>产品名称</th>
-          <th>库存数</th>
-          <th>加工数</th>
-          <th>工废数</th>
-          <th>料废数</th>
-          <th>合格数</th>
-          <th>库存结余</th>
-          <th style="width: 50px; text-align: center">操作</th>
+          <th class="tdlabel">岗位名称</th>
+          <th class="tdlabel">产品名称</th>
+          <th class="tdlabel">库存数</th>
+          <th class="tdlabel">加工数</th>
+          <th class="tdlabel">工废数</th>
+          <th class="tdlabel">料废数</th>
+          <th class="tdlabel">合格数</th>
+          <th class="tdlabel">库存结余</th>
+          <th style="width: 50px; text-align: center" class="tdlabel">操作</th>
         </tr>
       </thead>
       <tbody>
@@ -52,6 +54,7 @@
             v-if="index === 0"
             :rowspan="form.jjlist.length"
             style="text-align: center"
+            class="tdlabel"
           >
             机加
           </td>
@@ -119,15 +122,15 @@
           </td>
         </tr>
         <tr>
-          <td style="text-align: center" :rowspan="form.hxlist.length + 1">
+          <td class="tdlabel" style="text-align: center" :rowspan="form.hxlist.length + 1">
             后序
           </td>
-          <td style="text-align: center"><b>项目</b></td>
-          <td style="text-align: center"><b>投入数</b></td>
-          <td colspan="2" style="text-align: center"><b>待评审</b></td>
-          <td style="text-align: center"><b>工废品</b></td>
-          <td style="text-align: center"><b>料废品</b></td>
-          <td colspan="2" style="text-align: center"><b>合格品</b></td>
+          <td class="tdlabel" style="text-align: center"><b>项目</b></td>
+          <td class="tdlabel" style="text-align: center"><b>投入数</b></td>
+          <td class="tdlabel" colspan="2" style="text-align: center"><b>待评审</b></td>
+          <td class="tdlabel" style="text-align: center"><b>工废品</b></td>
+          <td class="tdlabel" style="text-align: center"><b>料废品</b></td>
+          <td class="tdlabel" colspan="2" style="text-align: center"><b>合格品</b></td>
         </tr>
         <tr v-for="(item, index) in form.hxlist" :key="'hx' + index">
           <td style="text-align: center">{{ item.xm }}</td>
@@ -164,7 +167,7 @@
           </td>
         </tr>
         <tr>
-          <td style="text-align: center"><b>质量情况：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>质量情况：</b></td>
           <td colspan="8">
             <el-input
               type="textarea"
@@ -176,7 +179,7 @@
           </td>
         </tr>
         <tr>
-          <td style="text-align: center"><b>设备情况：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>设备情况：</b></td>
           <td colspan="8">
             <el-input
               type="textarea"
@@ -188,7 +191,7 @@
           </td>
         </tr>
         <tr>
-          <td style="text-align: center"><b>其它情况：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>其它情况：</b></td>
           <td colspan="8">
             <el-input
               type="textarea"
@@ -235,8 +238,6 @@ export default {
         jgs: 0,
         gfs: 0,
         lfs: 0,
-        hgs: 0,
-        kcjy: 0,
       },
       hxitem: {
         xm: "",
@@ -244,7 +245,6 @@ export default {
         dps: 0,
         gfp: 0,
         lfp: 0,
-        hgp: 0,
       },
     };
   },
@@ -279,6 +279,7 @@ export default {
     save_handle() {
       try {
         let postdata = {
+          id:0,
           rq: this.form.rq,
           bc: this.form.bc,
           jbr: this.form.jjr,
@@ -288,35 +289,41 @@ export default {
           qtqk: this.form.qtqk,
           lrr: this.$store.getters.name,
           lrsj: parseTime(new Date()),
-          jjmx: [],
-          hxmx:[],
+          djkjjbdetail: [],
+          djkjjbdetailhx:[],
         };
         for (let index = 0; index < this.form.jjlist.length; index++) {
           const ele = this.form.jjlist[index];
-          postdata.jjmx.push({
+          postdata.djkjjbdetail.push({
+            id:0,
+            billid:0,
             cpmc:ele.cpmc,
             kcsl:ele.kcs,
             jgsl:ele.jgs,
             gfsl:ele.gfs,
             lfsl:ele.lfs,
-            hgsl:ele.hgs,
-            kcsysl:ele.kcjy
+            hgsl:ele.jgs - ele.gfs - ele.lfs,
+            kcsysl:ele.kcs - ele.jgs
           });
         }
         for (let index = 0; index < this.form.hxlist.length; index++) {
           const ele = this.form.hxlist[index];
-          postdata.hxmx.push({
+          postdata.djkjjbdetailhx.push({
+            id:0,
+            billid:0,
             xmmc:ele.xm,
             trjgsl:ele.trs,
             dpssl:ele.dps,
             gfsl:ele.gfp,
             lfsl:ele.lfp,
-            hgsl:ele.hgp
+            hgsl:ele.trs - ele.dps - ele.gfp - ele.lfp
           });
         }
         ApiFn.requestapi("post", "/cdgc/djkjjb/save_jjb", postdata).then(
           (res) => {
             if (res.code === 1) {
+              this.$message.success(res.msg);
+              window.location.reload();
             } else {
               this.$message.error(res.msg);
             }
@@ -330,35 +337,42 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.cdgc_title {
+<style lang="scss" scoped>
+::v-deep .cdgc_title {
   font-size: 30px;
   font-weight: bold;
   text-align: center;
   margin: 20px auto;
 }
-.cdgc_bill_head {
+::v-deep .cdgc_bill_head {
   width: 99%;
   margin: 0px auto;
   margin-bottom: 10px;
 }
-.cdgc_table {
+::v-deep .cdgc_table {
   border-collapse: collapse;
   width: 99%;
   margin: 0px auto;
 }
-.cdgc_table thead th,
-.cdgc_table tbody td {
-  padding: 5px;
+::v-deep .cdgc_table thead th,
+::v-deep .cdgc_table tbody td {
   height: 30px;
   line-height: 30px;
   border: 1px solid rgb(199, 199, 199);
 }
-.cdgc_btn_bar {
+::v-deep .cdgc_table thead th{
+  height: 40px;
+  line-height: 40px;
+}
+::v-deep .cdgc_btn_bar {
   width: 100%;
   bottom: 0px;
   padding-right: 10px;
   margin: 10px 0px;
   text-align: right;
+}
+::v-deep .tdlabel{
+  background-color: rgb(231, 231, 231);
+  font-weight: bold;
 }
 </style>
