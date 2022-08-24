@@ -51,7 +51,13 @@
           <th class="tdlabel">料废数</th>
           <th class="tdlabel">合格数</th>
           <th class="tdlabel">当班毛坯余数</th>
-          <th class="tdlabel" v-if="!isread" style="width: 50px; text-align: center">操作</th>
+          <th
+            class="tdlabel"
+            v-if="!isread"
+            style="width: 50px; text-align: center"
+          >
+            操作
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -171,7 +177,7 @@
           </td>
         </tr>
         <tr>
-          <td  class="tdlabel" style="text-align: center"><b>当班组长：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>当班组长：</b></td>
           <td>
             <span v-if="isread">{{ dbzz }}</span>
             <el-input
@@ -181,7 +187,7 @@
               style="width: 100%"
             ></el-input>
           </td>
-          <td  class="tdlabel" style="text-align: center"><b>上料岗位：</b></td>
+          <td class="tdlabel" style="text-align: center"><b>上料岗位：</b></td>
           <td>
             <span v-if="isread">{{ slgw }}</span>
             <el-input
@@ -262,12 +268,8 @@
         </tr>
       </tbody>
     </table>
-    <div class="gtjjb_form_footer">
-      <el-button
-        v-if="!isread"
-        type="danger"
-        icon="el-icon-check"
-        @click="save_handle"
+    <div v-if="!isread" class="gtjjb_form_footer">
+      <el-button type="danger" icon="el-icon-check" @click="save_handle"
         >保存</el-button
       >
     </div>
@@ -323,6 +325,8 @@ export default {
     if (!this.isread) {
       let row = deepClone(this.scitem);
       this.sclist.push(row);
+    } else if (this.isread && this.calcrq && this.calcbc) {
+      this.load_bc_data(parseTime(this.calcrq), this.calcbc);
     }
     this.get_cplist_data();
   },
@@ -334,14 +338,14 @@ export default {
     del_item_handle(index) {
       this.sclist.splice(index, 1);
     },
-    get_cplist_data(){
-      ApiFn.requestapi('get','/cdgc/gtjjb/get_cplist',{}).then(res=>{
-        if(res.code ===1){
+    get_cplist_data() {
+      ApiFn.requestapi("get", "/cdgc/gtjjb/get_cplist", {}).then((res) => {
+        if (res.code === 1) {
           this.cplist = res.list;
-        }else{
+        } else {
           this.$message.error(res.msg);
         }
-      })
+      });
     },
     rq_change_handle(v) {
       this.$emit("rq_change", { rq: v, bc: this.bc });
@@ -447,7 +451,7 @@ export default {
   line-height: 30px;
   border: 1px solid rgb(199, 199, 199);
 }
-::v-deep .gtjjb_form_body th{
+::v-deep .gtjjb_form_body th {
   height: 40px;
   line-height: 40px;
 }
@@ -457,7 +461,7 @@ export default {
   margin: 10px auto;
   text-align: right;
 }
-::v-deep .tdlabel{
+::v-deep .tdlabel {
   background-color: rgb(231, 231, 231);
   font-weight: bold;
 }
