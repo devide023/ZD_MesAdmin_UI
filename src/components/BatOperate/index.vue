@@ -85,7 +85,7 @@ export default {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
-      action: process.env.VUE_APP_BASE_API + "/upload/xls",
+      action: window.winconfig.production.VUE_APP_BASE_API + "/upload/xls",
     };
   },
   methods: {

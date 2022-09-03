@@ -9,7 +9,7 @@
       label-position="left"
     >
       <div class="title-container">
-        <h3 class="title">机加MES系统登录</h3>
+        <h3 class="title">{{logintitle}}</h3>
       </div>
 
       <el-form-item prop="username">
@@ -80,6 +80,7 @@ export default {
       }
     };
     return {
+      logintitle:window.winconfig.logintitle,
       loginForm: {
         username: "",
         password: "",

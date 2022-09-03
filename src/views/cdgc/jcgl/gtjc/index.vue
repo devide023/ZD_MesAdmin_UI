@@ -423,6 +423,7 @@ export default {
       cplxlist: [],
       jylblist: [],
       billids: [0, 0, 0, 0],
+      sblist: [],
       form: {
         cplx: "", //缸体类型
         th: "", //图号
@@ -469,6 +470,7 @@ export default {
   },
   mounted() {
     this.get_cplx_list();
+    this.get_sbxx();
     this.jylblist = [
       {
         label: "首件",
@@ -485,6 +487,15 @@ export default {
     ];
   },
   methods: {
+    get_sbxx() {
+      ApiFn.requestapi("get", "/cdgc/jcxx/get_sbxx", {}).then((res) => {
+        if (res.code === 1) {
+          this.sblist = res.list;
+        } else if (res.code === 0) {
+          this.$message.error(res.msg);
+        }
+      });
+    },
     get_cplx_list() {
       try {
         ApiFn.requestapi("get", "/cdgc/gtjc/jcsj/cplx")
@@ -645,7 +656,7 @@ export default {
           ) {
             row[kname] = "txtok";
           } else if (inputval === "") {
-            row[kname] = "txtok";
+            row[kname] = "notxt";
           } else {
             row[kname] = "txterror";
           }
@@ -930,6 +941,9 @@ export default {
   background-color: rgb(127, 250, 123);
 }
 ::v-deep .txtok .el-input__inner {
+  background-color: rgb(127, 250, 123);
+}
+::v-deep .notxt .el-input__inner {
   background-color: none;
 }
 ::v-deep .tdjg {

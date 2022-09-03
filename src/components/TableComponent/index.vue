@@ -340,7 +340,7 @@ export default {
   data() {
     return {
       tableheight: 800,
-      rooturl: process.env.VUE_APP_ROOT,
+      rooturl: window.winconfig.production.VUE_APP_ROOT,
       fullpath: "",
       cur_page_permis: [],
       preview_list: [],
