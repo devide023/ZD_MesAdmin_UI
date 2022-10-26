@@ -1,41 +1,49 @@
 <template>
   <div>
-    <search-bar
-      :collist="colshowlist"
-      :isgrade="pageconfig.isgradequery"
-      @query="query_handle"
-      @gradequery="grade_query_handle"
-    >
-      <template #other>
-        <el-button
-          v-for="(item, index) in btnlist"
+    <div class="search_bar">
+      <el-input
+        v-model="searchform.ENGINE_NO"
+        ref="cpjh"
+        clearable
+        placeholder="请输入待评审件号"
+        style="width: 200px; margin-right: 10px"
+        @keyup.enter.native="getlist"
+      ></el-input>
+      <el-select
+        v-model="searchform.SCX"
+        style="width: 200px; margin-right: 10px"
+        clearable
+        placeholder="请选择生产线"
+      >
+        <el-option
+          v-for="(item, index) in scxxx_list"
           :key="index"
-          :type="item.btntype"
-          :icon="item.icon"
-          @click="invokfn(item.fnname)"
-          >{{ item.btntxt }}</el-button
+          :label="item.label"
+          :value="item.value"
         >
-        <template v-if="pageconfig.isbatoperate && batbtnlist.length > 0">
-          <bat-operate
-            :add_import_success_handle="import_by_add"
-            :replace_import_success_handle="import_by_replace"
-            :zh_import_success_handle="import_by_zh"
-            :export_excel_handle="export_excel"
-          >
-            <template #other>
-              <el-dropdown-item
-                v-for="(btn, index) in pageconfig.bat_btnlist"
-                :key="index"
-              >
-                <el-button type="text" @click="invokfn(btn.fnname)">{{
-                  btn.btntxt
-                }}</el-button>
-              </el-dropdown-item>
-            </template>
-          </bat-operate>
-        </template>
-      </template>
-    </search-bar>
+        <span style="float: left">{{ item.label }}</span>
+          <span style="float: right; color: #8492a6; font-size: 13px">{{
+            item.value
+          }}</span>
+        </el-option>
+      </el-select>
+      <el-select
+        v-model="searchform.STATUS"
+        placeholder="状态"
+        style="width: 150px; margin-right: 10px"
+      >
+        <el-option
+          v-for="(item, index) in statuslist"
+          :key="index"
+          :label="item.label"
+          :value="item.value"
+        >
+        </el-option>
+      </el-select>
+      <el-button type="primary" icon="el-icon-search" @click="search_handle"
+        >查询</el-button
+      >
+    </div>
     <table-component
       :isselect="pageconfig.isselect"
       :isoperate="pageconfig.isoperate"
@@ -45,8 +53,8 @@
       :collist="colshowlist"
       :multipleSelection.sync="selectlist"
       :trbginfo="trbginfo"
-      :pagesize.sync="queryform.pagesize"
-      :pageindex.sync="queryform.pageindex"
+      :pagesize.sync="searchform.PageSize"
+      :pageindex.sync="searchform.PageIndex"
       :pageindexHandle="pageindex_change_handle"
       :pagesizeHandle="pagesize_change_handle"
     >
@@ -131,7 +139,7 @@
                 <template v-else>
                   <el-button
                     type="text"
-                    @click.native="execpagefun(scope.row, item)"
+                    @click.native="execfun(scope.row, item.fnname)"
                     >{{ item.label }}</el-button
                   ></template
                 >
@@ -141,125 +149,120 @@
         </template>
       </template>
     </table-component>
-    <el-dialog
-      :title="dialog_title"
-      :visible.sync="dialogVisible"
-      :width="dialog_width"
-      top="10px"
-      :close-on-click-modal="false"
-      @opened="dialog_opend_handle"
-      @closed="dialog_closed_handle"
-    >
-      <div id="dialog_body"></div>
-      <div slot="footer" v-if="!dialog_hidefooter">
-        <el-button type="danger" @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialog_comfire_handle"
-          >确定</el-button
-        >
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
-import SearchBar from "@/components/QueryBar/index.vue";
+import ApiFn from "@/api/baseapi";
 import TableComponent from "@/components/TableComponent/index.vue";
-import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
+import { lbj_baseinfo_mixin } from "@/mixin/lbj_baseinfo_mixin";
 import { batoperatemixin } from "@/mixin/batoperate_mixin";
 import { export_xls_mixin } from "@/mixin/export_xls_mixin";
-import { GetComponentName } from "@/utils/index";
+import { GetComponentName,GetEnvInfo } from "@/utils/index";
 import { getToken } from "@/utils/auth";
 export default {
   name: GetComponentName(),
   components: {
     TableComponent,
-    SearchBar,
-    BatOperate,
   },
-  mixins: [basemixin, batoperatemixin, export_xls_mixin],
+  mixins: [basemixin, lbj_baseinfo_mixin, batoperatemixin, export_xls_mixin],
   data() {
     return {
-      dialogVisible: false,
-      dialog_title: "表单",
-      dialog_fnitem:{},
-      dialog_width: "",
-      dialog_viewpath: "",
-      dialog_props: {},
-      dialog_vm : null,
-      dialog_hidefooter:false,
       headers: {
         Authorization: "Bearer " + getToken(),
       },
+      statuslist: [
+        { label: "待审", value: 1 },
+        { label: "已完成", value: 2 },
+      ],
+      cpps_dialogVisible:false,
+      cpps_obj:{},
+      envinfo:GetEnvInfo(),
+      searchform: {
+        PageIndex: 1,
+        PageSize: 20,
+        GCDM: 9902,
+        SCX: "J503",
+        STATUS: 1,
+        ENGINE_NO: "",
+      },
     };
   },
-  mounted() {},
+  mounted() {
+    this.getlist();
+    this.get_scxxx_list();
+    this.$nextTick(()=>{
+        this.$refs.cpjh.focus();
+    });
+  },
   methods: {
-    dialog_opend_handle() {
-      this.create(this,this.dialog_viewpath, this.dialog_props);
-    },
-    dialog_closed_handle() {
-      let chil = document.getElementById("dialog_body").childNodes;
-      chil.forEach((i) => {
-        document.getElementById("dialog_body").removeChild(i);
+    getlist() {
+      ApiFn.request_thirdapi(
+        "post",
+        this.envinfo.VUE_APP_THIRD_URL+"/api/Product/GetPageListAuditRecord",
+        this.searchform
+      ).then((res) => {
+        if (res.rtn === 1) {
+          if (res.data) {
+            this.list = res.data.ResultList;
+            this.resultcount = res.data.TotalRecord;
+          } else {
+            this.list = [];
+            this.resultcount = 0;
+          }
+        } else {
+          this.$message.error(res.msg);
+        }
       });
     },
-    create(vm,viewpath, props) {
-      let Component = (resolve) =>
-        require.ensure([], () =>
-          resolve(require("@/views/" + viewpath + ".vue"))
-        );
-      vm.dialog_vm = new Vue({
-        mounted() {
-        },
-        destroyed () {
-        },
-        render(h) {
-          let node = h(Component, { props });
-          return node;
-        },
-      }).$mount();
-      document.getElementById("dialog_body").appendChild(this.dialog_vm.$el);
+    submit_data(data) {
+      ApiFn.request_thirdapi(
+        "post",
+        this.envinfo.VUE_APP_THIRD_URL+"/api/Product/SaveQualifiedProduct",
+        data
+      ).then((res) => {
+        if (res.rtn === 1) {
+          this.$message.success(res.msg);
+          let ucode = this.$store.getters.userinfo.code;
+          this.close_cpps({ ID: data.ID, USER_CODE: ucode });
+        } else {
+          this.$message.error(res.msg);
+        }
+      });
     },
-    dialog_comfire_handle() {
-      if(this.dialog_fnitem.callback && typeof this.dialog_fnitem.callback === 'string'){
-        this[this.dialog_fnitem.callback](this.dialog_vm);
-      }
-      else if(this.dialog_fnitem.callback && typeof this.dialog_fnitem.callback === 'function'){     
-        this.dialog_fnitem.callback(this.dialog_vm);
-      }
+    close_cpps(data) {
+      ApiFn.request_thirdapi(
+        "post",
+        this.envinfo.VUE_APP_THIRD_URL+"/api/Product/ClosedLoopAuditRecord",
+        data
+      ).then((res) => {
+        if (res.rtn === 1) {
+          this.$message.success("操作成功");
+          this.getlist();
+        } else {
+          this.$message.error(res.msg);
+        }
+      });
+    },
+    search_handle() {
+      this.searchform.PageIndex = 1;
+      this.getlist();
+    },
+    pageindex_change_handle(index) {
+      this.searchform.PageIndex = index;
+      this.getlist();
+    },
+    pagesize_change_handle(value) {
+      this.searchform.PageSize = value;
+      this.getlist();
     },
     execfun(row, fnname) {
       this[fnname](row);
     },
-    execpagefun(row,fnitem){
-      this[fnitem.fnname](row,fnitem);
-    }
   },
 };
 </script>
 
-<style lang="scss">
-.avatar-uploader .el-upload {
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
-  text-align: center;
-}
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  display: block;
-  margin: auto;
-}
+<style lang="scss" scoped>
 </style>

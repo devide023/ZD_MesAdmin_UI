@@ -284,6 +284,7 @@
               @change="sdmj_change_handle(item, 1)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
+            <span v-else-if="item.sdtype === 'T'">T</span>
           </td>
           <td colspan="3" :class="item.class2">
             <el-radio-group
@@ -312,6 +313,7 @@
               @change="sdmj_change_handle(item, 2)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
+            <span v-else-if="item.sdtype === 'T'">T</span>
           </td>
           <td colspan="3" :class="item.class3">
             <el-radio-group
@@ -340,6 +342,7 @@
               @change="sdmj_change_handle(item, 3)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
+            <span v-else-if="item.sdtype === 'T'">T</span>
           </td>
           <td colspan="3" :class="item.class4">
             <el-radio-group
@@ -368,6 +371,7 @@
               @change="sdmj_change_handle(item, 4)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
+            <span v-else-if="item.sdtype === 'T'">T</span>
           </td>
         </template>
         <template v-else>
@@ -553,11 +557,11 @@ export default {
     },
     get_jcdata_by_lx(lx) {
       try {
-        ApiFn.requestapi("get", "/cdgc/gtjc/checkdata/create_bill", {
-          rq: this.form.rq,
-          cplx: lx,
-        }).then((r) => {
-          if (r.code === 1) {
+        // ApiFn.requestapi("get", "/cdgc/gtjc/checkdata/create_bill", {
+        //   rq: this.form.rq,
+        //   cplx: lx,
+        // }).then((r) => {
+          // if (r.code === 1) {
             this.form.ewm1 = "";
             this.form.ewm2 = "";
             this.form.ewm3 = "";
@@ -566,7 +570,7 @@ export default {
             this.form.mh2 = "";
             this.form.mh3 = "";
             this.form.mh4 = "";
-            this.billids = r.ids;
+            //this.billids = r.ids;
             ApiFn.requestapi("get", "/cdgc/gtjc/jcsj/get_jcdata_lx", {
               lx: lx,
             }).then((res) => {
@@ -625,10 +629,10 @@ export default {
                 this.$message.error(res.msg);
               }
             });
-          } else {
-            this.$message.error(r.msg);
-          }
-        });
+          // } else {
+          //   this.$message.error(r.msg);
+          // }
+        // });
       } catch (error) {
         this.$message.error(error);
       }
@@ -647,8 +651,11 @@ export default {
         }
       } else if (row.kjtype === "text") {
         let inputval = row[keyname];
+        console.log(inputval);
+        console.log(parseFloat(inputval),parseFloat(row.kjccxx),parseFloat(row.kjccsx));
         if (isNaN(inputval)) {
           this.$message.error("输入的类型不合法");
+          row[kname] = "txterror";
         } else {
           if (
             parseFloat(inputval) >= parseFloat(row.kjccxx) &&
@@ -671,6 +678,7 @@ export default {
         let inputval = row[keyname];
         if (isNaN(inputval)) {
           this.$message.error("输入的类型不合法");
+          row[kname] = "txterror";
         } else {
           if (
             parseFloat(inputval) >= parseFloat(row.sdmjxx) &&
@@ -678,7 +686,7 @@ export default {
           ) {
             row[kname] = "txtok";
           } else if (inputval === "") {
-            row[kname] = "txtok";
+            row[kname] = "notxt";
           } else {
             row[kname] = "txterror";
           }
@@ -714,25 +722,27 @@ export default {
                   } else {
                     this.list[pos]["class" + index] = "";
                   }
-                } else if (this.list[pos].kjtype === "text") {
+                } 
+                 if (this.list[pos].kjtype === "text") {
                   if (
                     this.list[pos].kjccxx <= i.kjval &&
                     i.kjval <= this.list[pos].kjccsx
                   ) {
                     this.list[pos]["class" + index] = "txtok";
                   } else if (i.kjval === "") {
-                    this.list[pos]["class" + index] = "txtok";
+                    this.list[pos]["class" + index] = "notxt";
                   } else {
                     this.list[pos]["class" + index] = "txterror";
                   }
-                } else if (this.list[pos].sdtype === "text") {
+                } 
+                 if (this.list[pos].sdtype === "text") {
                   if (
                     this.list[pos].sdmjxx <= i.sdmjval &&
                     i.sdmjval <= this.list[pos].sdmjsx
                   ) {
                     this.list[pos]["sdclass" + index] = "txtok";
                   } else if (i.sdmjval === "") {
-                    this.list[pos]["sdclass" + index] = "txtok";
+                    this.list[pos]["sdclass" + index] = "notxt";
                   } else {
                     this.list[pos]["sdclass" + index] = "txterror";
                   }
@@ -790,6 +800,8 @@ export default {
               kjval: i.result1,
               sdmjval: i.size1,
               jcjg: i.jg1,
+              kjtype:i.kjtype,
+              sdtype:i.sdtype,
             };
             return mxobj;
           }),
@@ -816,6 +828,8 @@ export default {
               kjval: i.result2,
               sdmjval: i.size2,
               jcjg: i.jg2,
+              kjtype:i.kjtype,
+              sdtype:i.sdtype,
             };
             return mxobj;
           }),
@@ -842,6 +856,8 @@ export default {
               kjval: i.result3,
               sdmjval: i.size3,
               jcjg: i.jg3,
+              kjtype:i.kjtype,
+              sdtype:i.sdtype,
             };
             return mxobj;
           }),
@@ -868,6 +884,8 @@ export default {
               kjval: i.result4,
               sdmjval: i.size4,
               jcjg: i.jg4,
+              kjtype:i.kjtype,
+              sdtype:i.sdtype,
             };
             return mxobj;
           }),

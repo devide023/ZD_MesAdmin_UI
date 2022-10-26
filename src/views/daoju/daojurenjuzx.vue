@@ -15,7 +15,7 @@
           @click="invokfn(item.fnname)"
           >{{ item.btntxt }}</el-button
         >
-        <template v-if="pageconfig.isbatoperate && batbtnlist.length>0">
+        <template v-if="pageconfig.isbatoperate && batbtnlist.length > 0">
           <bat-operate
             :add_import_success_handle="import_by_add"
             :replace_import_success_handle="import_by_replace"
@@ -47,9 +47,8 @@
       :trbginfo="trbginfo"
       :pagesize.sync="queryform.pagesize"
       :pageindex.sync="queryform.pageindex"
-      :pageindexHandle = "pageindex_change_handle"
-      :pagesizeHandle = "pagesize_change_handle"
-
+      :pageindexHandle="pageindex_change_handle"
+      :pagesizeHandle="pagesize_change_handle"
     >
       <template #operate="scope">
         <el-dropdown>
@@ -349,6 +348,7 @@
           align="left"
           prop="rjlx"
           label="刃具类型"
+          width="120"
           sortable
         >
           <!-- <template slot-scope="scope">
@@ -376,6 +376,15 @@
               </el-select>
             </template> -->
         </el-table-column>
+        <el-table-column
+          prop="rjwz"
+          header-align="center"
+          align="left"
+          sortable
+          width="150"
+          label="加工位置"
+          show-overflow-tooltip
+        ></el-table-column>
         <el-table-column
           header-align="center"
           align="right"
@@ -567,7 +576,7 @@ export default {
       });
     },
     scx_change_handel(scx) {
-      this.form.sbbh='';
+      this.form.sbbh = "";
       ApiFn.requestapi("get", "/lbj/baseinfo/cnc_list_by_scx", {
         scx: scx,
       }).then((res) => {

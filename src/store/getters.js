@@ -12,6 +12,7 @@ const getters = {
   menus: state=>state.user.menus,
   userinfo:state=>state.user.userinfo,
   pagepermis: state => state.permission.page_permis,
+  batpagepermis: state => state.permission.bat_permis,
   permission_routes: state => state.permission.routes,
   errorLogs: state => state.errorLog.logs
 }

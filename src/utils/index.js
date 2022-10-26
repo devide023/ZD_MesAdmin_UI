@@ -45,7 +45,7 @@ export function parseTime(time, cFormat) {
   const time_str = format.replace(/{([ymdhisa])+}/g, (result, key) => {
     const value = formatObj[key]
     // Note: getDay() returns 0 on Sunday
-    if (key === 'a') { return ['日', '一', '二', '三', '四', '五', '六'][value ] }
+    if (key === 'a') { return ['日', '一', '二', '三', '四', '五', '六'][value] }
     return value.toString().padStart(2, '0')
   })
   return time_str
@@ -254,7 +254,7 @@ export function getTime(type) {
 export function debounce(func, wait, immediate) {
   let timeout, args, context, timestamp, result
 
-  const later = function() {
+  const later = function () {
     // 据上一次触发时间间隔
     const last = +new Date() - timestamp
 
@@ -271,7 +271,7 @@ export function debounce(func, wait, immediate) {
     }
   }
 
-  return function(...args) {
+  return function (...args) {
     context = this
     timestamp = +new Date()
     const callNow = immediate && !timeout
@@ -366,20 +366,30 @@ export function newGuid() {
   return guid;
 }
 
-export function GetComponentName(){
+export function GetComponentName() {
   let url = window.location.href;
   let pos = url.lastIndexOf('#');
   //console.log(url);
-  if(pos!==-1){
+  if (pos !== -1) {
     var routepath = url.substring(pos + 1, url.length);
     var idx = window.route_component.findIndex(i => i.routepath === routepath);
     //console.log(idx);
-    if (idx!==-1) {
+    if (idx !== -1) {
       //console.log(window.route_component[idx].component);
       return window.route_component[idx].component;
-    }else{
+    } else {
       return '';
     }
+  }
+}
+
+export function GetEnvInfo() {
+  if (process.env.NODE_ENV === 'development') {
+    return window.winconfig.development;
+  } else if (process.env.NODE_ENV === 'production') {
+    return window.winconfig.production;
+  }else{
+    return window.winconfig.staging;
   }
 }
 

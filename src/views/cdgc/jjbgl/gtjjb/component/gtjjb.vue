@@ -9,6 +9,7 @@
           <el-date-picker
             v-else
             v-model="dqrq"
+            :picker-options="pickeroptions"
             value-format="yyyy-MM-dd"
             placeholder="选择日期"
             @change="rq_change_handle"
@@ -277,6 +278,7 @@
 </template>
 
 <script>
+import store from '@/store/index'
 import ApiFn from "@/api/baseapi";
 import { deepClone, parseTime } from "@/utils/index";
 export default {
@@ -296,6 +298,11 @@ export default {
   },
   data() {
     return {
+      pickeroptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now() - 8.64e7;
+        },
+      },
       sclist: [],
       cplist: [], //产品列表
       dqrq: parseTime(new Date()), //当前日期
@@ -322,11 +329,12 @@ export default {
     };
   },
   mounted() {
+    if (this.calcrq && this.calcbc) {
+      this.load_bc_data(parseTime(this.calcrq), this.calcbc);
+    }
     if (!this.isread) {
       let row = deepClone(this.scitem);
       this.sclist.push(row);
-    } else if (this.isread && this.calcrq && this.calcbc) {
-      this.load_bc_data(parseTime(this.calcrq), this.calcbc);
     }
     this.get_cplist_data();
   },
@@ -404,19 +412,46 @@ export default {
       });
     },
     save_handle() {
-      this.$emit("gtjjb_data", {
+      let postdata = {
+        id: 0,
         rq: this.dqrq,
         bc: this.bc,
         jbr: this.jbr,
         dbzz: this.dbzz,
-        slgw: this.slgw,
-        mcgw: this.mcgw,
-        jygw: this.jygw,
+        slry: this.slgw,
+        mcry: this.mcgw,
+        jyry: this.jygw,
         zlqk: this.zlqk,
         sbqk: this.sbqk,
         qtqk: this.qtqk,
-        scdata: this.sclist,
+        lrr: store.getters.name,
+        lrsj: parseTime(new Date()),
+        mxlist: [],
+      };
+      this.sclist.forEach((i) => {
+        postdata.mxlist.push({
+          id: 0,
+          billid: 0,
+          cpmc: i.cpmc,
+          sbcmpyl: i.up_mpys,
+          dbmpsl: i.db_mpsl,
+          hcsl: i.hcsl,
+          trjgs: i.trjgs,
+          gfsl: i.gfs,
+          lfsl: i.lfs,
+          hgsl: i.hgs,
+          dbmpyl: i.dbmpys,
+        });
       });
+      ApiFn.requestapi("post", "/cdgc/gtjjb/save_gtjjb", postdata).then(
+        (res) => {
+          if (res.code === 1) {
+            this.$message.success(res.msg);
+          } else {
+            this.$message.error(res.msg);
+          }
+        }
+      );
     },
   },
 };

@@ -410,13 +410,32 @@
       </div>
     </el-dialog>
     <!-- 页面配置 -->
-    <el-dialog title="页面配置" :visible.sync="dialog_config_Visible">
+    <el-dialog
+      title="页面配置"
+      :visible.sync="dialog_config_Visible"
+      :close-on-click-modal="false"
+      :fullscreen="true"
+    >
       <el-tabs
         v-model="activatetab"
         type="border-card"
         @tab-click="tab_click_handle"
       >
         <el-tab-pane label="字段信息" name="fields">
+          <el-autocomplete
+            v-model="tablename"
+            placeholder="过滤当前数据库表名"
+            :fetch-suggestions="fetchSuggestions"
+            @select="tablename_handleSelect"
+            :trigger-on-focus="false"
+            style="width: 200px; margin-right: 10px"
+            popper-class="my-autocomplete"
+          >
+            <template slot-scope="{ item }">
+              <div class="name">{{ item.value }}</div>
+              <span class="addr">{{ item.label }}</span>
+            </template>
+          </el-autocomplete>
           <el-button type="primary" @click="add_pagefield_item">增加</el-button>
           <el-table :data="pageconfig_form.fields" style="width: 100%">
             <el-table-column prop="coltype" label="字段类型" width="100">
@@ -432,29 +451,35 @@
                 </el-select>
               </template>
             </el-table-column>
-            <el-table-column prop="label" label="字段标题" width="80">
+            <el-table-column prop="label" label="字段标题" width="250">
               <template slot-scope="scope">
                 <el-input v-model="scope.row.label" placeholder=""></el-input>
               </template>
             </el-table-column>
-            <el-table-column prop="prop" label="字段名称" width="80">
+            <el-table-column prop="prop" label="字段名称" width="130">
               <template slot-scope="scope">
                 <el-input v-model="scope.row.prop" placeholder=""></el-input>
               </template>
             </el-table-column>
-            <el-table-column prop="dbprop" label="数据库字段" width="80">
+            <el-table-column prop="dbprop" label="数据库字段" width="130">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.dbprop" placeholder=""></el-input>
+                <el-input
+                  v-model="scope.row.dbprop"
+                  placeholder="字段名称和数据库不一致时需填该字段"
+                ></el-input>
               </template>
             </el-table-column>
             <el-table-column
               prop="width"
               label="列宽"
-              width="60"
+              width="80"
               header-align="center"
             >
               <template slot-scope="scope">
-                <el-input v-model="scope.row.width" placeholder=""></el-input>
+                <el-input
+                  v-model="scope.row.width"
+                  placeholder="不填自动分配宽度"
+                ></el-input>
               </template>
             </el-table-column>
             <el-table-column
@@ -501,12 +526,13 @@
               label="数据源"
               prop="url"
               header-align="center"
-              width="150"
+              width="200"
             >
               <template slot-scope="scope">
                 <el-input
                   v-model="scope.row.url"
                   placeholder="初始化选项地址"
+                  clearable
                 ></el-input>
               </template>
             </el-table-column>
@@ -517,7 +543,7 @@
               header-align="center"
             >
               <template slot-scope="scope">
-                <el-select v-model="scope.row.method" placeholder="">
+                <el-select v-model="scope.row.method" placeholder="" clearable>
                   <el-option label="GET" value="get"></el-option>
                   <el-option label="POST" value="post"></el-option>
                 </el-select>
@@ -532,8 +558,9 @@
                 <el-input
                   type="textarea"
                   v-model="scope.row.callback"
-                  rows="2"
+                  rows="1"
                   placeholder="输入回调函数"
+                  clearable
                 ></el-input>
               </template>
             </el-table-column>
@@ -567,6 +594,32 @@
                 :inactive-value="false"
                 :active-value="true"
               ></el-switch>
+              <template v-if="pageconfig_form.baseconfig.isbatoperate">
+                <div>
+                  <el-input
+                    v-model="pageconfig_form.baseconfig.import_cnf.addurl"
+                    clearable
+                    placeholder="新增导入Url"
+                    style="width: 300px"
+                  ></el-input>
+                </div>
+                <div>
+                  <el-input
+                    v-model="pageconfig_form.baseconfig.import_cnf.replaceurl"
+                    clearable
+                    placeholder="替换导入Url"
+                    style="width: 300px"
+                  ></el-input>
+                </div>
+                <div>
+                  <el-input
+                    v-model="pageconfig_form.baseconfig.import_cnf.zongheurl"
+                    clearable
+                    placeholder="综合导入Url"
+                    style="width: 300px"
+                  ></el-input>
+                </div>
+              </template>
             </el-form-item>
             <el-form-item label="开启选择列">
               <el-switch
@@ -839,6 +892,7 @@ export default {
       allfields: [],
       AllColOptions: [],
       activatetab: "fields",
+      tablename: "", //表格名称
       btntypelist: [
         { label: "主要", value: "primary" },
         { label: "成功", value: "success" },
@@ -917,6 +971,12 @@ export default {
           isoperate: false,
           isfresh: true,
           isselect: true,
+          import_cnf: {
+            addurl: "", //新增导入
+            replaceurl: "", //替换导入
+            zongheurl: "", //综合导入
+            exportxlsurl: "", //导入excel
+          },
         },
       },
       operate_item: {
@@ -1036,6 +1096,41 @@ export default {
     _this = this;
   },
   methods: {
+    //过滤数据库表名
+    fetchSuggestions(key, cb) {
+      ApiFn.requestapi("get", "/dbinfo/tables", { key: key }).then((res) => {
+        if (res.code === 1) {
+          cb(
+            res.list.map((i) => {
+              return {
+                label: i.COMMENTS,
+                value: i.TABLE_NAME,
+              };
+            })
+          );
+        } else {
+          this.$message.error(res.msg);
+        }
+      });
+    },
+    //表名选择事件
+    tablename_handleSelect(item) {
+      console.log(item);
+      if (item.value) {
+        ApiFn.requestapi("get", "/dbinfo/tablecolinfo", {
+          table: item.value,
+        }).then((res) => {
+          if (res.code === 1) {
+            this.pageconfig_form.fields = res.list;
+            this.pageconfig_form.pageform = res.list.map((i) => {
+              return { fieldname: i.prop, fieldvalue: "" };
+            });
+          } else {
+            this.$message.error(res.msg);
+          }
+        });
+      }
+    },
     handleCheckAllChange(val) {
       this.fn_form.collist = val ? this.AllColOptions : [];
       this.isIndeterminate = false;
@@ -1074,6 +1169,7 @@ export default {
     },
     operate_change_handle(v) {
       if (v) {
+        console.log(v);
       } else {
         this.pageconfig_form.operate_fnlist = [];
       }
@@ -1136,13 +1232,49 @@ export default {
       this.fn_form.pid = row.id;
       this.fn_form.code = row.code;
       this.fn_form.batlist = [];
+      // this.fn_form.batlist.push({
+      //   pid: row.id,
+      //   code: row.code,
+      //   name: "bat",
+      //   btntxt: "批量操作",
+      //   menutype: "05",
+      //   seq: 10,
+      //   status: 1,
+      //   adduser: this.fn_form.adduser,
+      //   addtime: this.fn_form.addtime,
+      //   addusername: this.fn_form.addusername,
+      // });
       this.fn_form.batlist.push({
         pid: row.id,
         code: row.code,
-        name: "bat",
-        btntxt: "批量操作",
+        name: "bat_add",
+        btntxt: "新增批量操作",
         menutype: "05",
-        seq: 10,
+        seq: 20,
+        status: 1,
+        adduser: this.fn_form.adduser,
+        addtime: this.fn_form.addtime,
+        addusername: this.fn_form.addusername,
+      });
+      this.fn_form.batlist.push({
+        pid: row.id,
+        code: row.code,
+        name: "bat_replace",
+        btntxt: "替换批量操作",
+        menutype: "05",
+        seq: 30,
+        status: 1,
+        adduser: this.fn_form.adduser,
+        addtime: this.fn_form.addtime,
+        addusername: this.fn_form.addusername,
+      });
+      this.fn_form.batlist.push({
+        pid: row.id,
+        code: row.code,
+        name: "bat_zh",
+        btntxt: "综合批量操作",
+        menutype: "05",
+        seq: 30,
         status: 1,
         adduser: this.fn_form.adduser,
         addtime: this.fn_form.addtime,
@@ -1357,4 +1489,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+::v-deep .my-autocomplete {
+  li {
+    line-height: normal;
+    padding: 7px;
+
+    .name {
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .addr {
+      font-size: 12px;
+      color: #b4b4b4;
+    }
+
+    .highlighted .addr {
+      color: #ddd;
+    }
+  }
+}
 </style>

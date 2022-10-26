@@ -111,7 +111,7 @@ export default {
   },
   methods: {
     getlist() {
-      ApiFn.requestapi("post", "/log/list", this.queryform).then((res) => {
+      ApiFn.requestapi("post", "/operatelog/list", this.queryform).then((res) => {
         if (res.code === 1) {
           this.resultcount = res.resultcount;
           this.list = res.list;

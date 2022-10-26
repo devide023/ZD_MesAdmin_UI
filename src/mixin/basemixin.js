@@ -47,18 +47,27 @@ export const basemixin = {
         getpageconfig() {
             try {
                 let fullpath = this.$router.currentRoute.fullPath;
+                let pos = fullpath.indexOf('?');
+                if(pos!==-1){
+                    fullpath = fullpath.substr(0,pos);
+                }
                 ApiFn.pageconfig().then((res) => {
                     if (res.code === 1) {
                         //this.pageconfig = eval(res.pageconfig);
                         this.pageconfig = Function('return ' + res.pageconfig)();
                         this.pagepermis = res.pagepermis;
                         let permis_info = this.$store.getters.pagepermis;
+                        let batpermis = this.$store.getters.batpagepermis;
                         let pos = permis_info.findIndex(t=>t.path === fullpath);
                         if(pos === -1){
                             this.$store.commit('permission/SET_PAGE_PERMIS',{ path:fullpath,permis:res.pagepermis});
                         }
+                        let pos1 = batpermis.findIndex(t => t.path === fullpath);
                         this.btnlist = res.pagebtns;
                         this.batbtnlist = res.batbtns;
+                        if(pos1===-1){
+                            this.$store.commit('permission/SET_PAGE_BATPERMIS', { path: fullpath, permis: res.batbtns });
+                        }
                         let hidecols = this.pagepermis.hidefields;
                         var ddlcol = this.pageconfig.fields.filter(i => i.inioptionapi);
                         if (ddlcol) {
@@ -101,11 +110,18 @@ export const basemixin = {
         getlist(data) {
             try {
                 if (this.pageconfig.queryapi) {
+                    // this.$loading({
+                    //     lock: true,
+                    //     text: "数据加载中",
+                    //     spinner: "el-icon-loading",
+                    //     background: "rgba(0, 0, 0, 0.7)",
+                    // });
                     ApiFn.requestapi(
                         this.pageconfig.queryapi.method,
                         this.pageconfig.queryapi.url,
                         data
                     ).then((res) => {
+                        //this.$loading().close();
                         if (res.code === 1) {
                             this.$message.success(res.msg);
                             this.editstatus = false;

@@ -5,7 +5,6 @@
         <gtjjbform
           :isread="false"
           @rq_change="rq_change_handel"
-          @gtjjb_data="deal_gtjjb_data_handle"
           @bc_change="rq_change_handel"
         ></gtjjbform>
       </el-tab-pane>
@@ -64,48 +63,6 @@ export default {
           }
         });
       }
-    },
-    deal_gtjjb_data_handle(data) {
-      let postdata = {
-        id: 0,
-        rq: data.rq,
-        bc: data.bc,
-        jbr: data.jbr,
-        dbzz: data.dbzz,
-        slry: data.slgw,
-        mcry: data.mcgw,
-        jyry: data.jygw,
-        zlqk: data.zlqk,
-        sbqk: data.sbqk,
-        qtqk: data.qtqk,
-        lrr: this.$store.getters.name,
-        lrsj: parseTime(new Date()),
-        mxlist: [],
-      };
-      data.scdata.forEach((i) => {
-        postdata.mxlist.push({
-          id: 0,
-          billid: 0,
-          cpmc: i.cpmc,
-          sbcmpyl: i.up_mpys,
-          dbmpsl: i.db_mpsl,
-          hcsl: i.hcsl,
-          trjgs: i.trjgs,
-          gfsl: i.gfs,
-          lfsl: i.lfs,
-          hgsl: i.hgs,
-          dbmpyl: i.dbmpys,
-        });
-      });
-      ApiFn.requestapi("post", "/cdgc/gtjjb/save_gtjjb", postdata).then(
-        (res) => {
-          if (res.code === 1) {
-            this.$message.success(res.msg);
-          } else {
-            this.$message.error(res.msg);
-          }
-        }
-      );
     },
   },
 };

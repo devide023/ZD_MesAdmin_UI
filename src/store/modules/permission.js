@@ -39,6 +39,7 @@ const state = {
   routes: [],
   addRoutes: [],
   page_permis: [],
+  bat_permis:[],
 }
 
 const mutations = {
@@ -52,6 +53,15 @@ const mutations = {
   SET_PAGE_PERMIS:(state,permis)=>{
     state.page_permis.push(permis);
   },
+  SET_PAGE_BATPERMIS:(state,permis)=>{
+    state.bat_permis.push(permis);
+  },
+  DEL_PAGE_BATPERMIS:(state,path)=>{
+    let pos = state.bat_permis.findIndex(t => t.path === path);
+    if (pos !== -1) {
+      state.bat_permis.splice(pos, 1);
+    }
+  },
   Del_PAGE_PERMIS:(state,path)=>{
     let pos = state.page_permis.findIndex(t=>t.path === path);
     if(pos!==-1){
@@ -60,6 +70,9 @@ const mutations = {
   },
   DEL_ALL_PERMIS:(state)=>{
     state.page_permis=[];
+  },
+  DEL_ALL_BATPERMIS:(state)=>{
+    state.bat_permis = [];
   }
 }
 

@@ -4,29 +4,30 @@
     <table class="cdgc_bill_head">
       <tr>
         <td style="width: 25%">
-          日期：<el-date-picker
+           日期：<!--<el-date-picker
             v-if="!isread"
             v-model="form.rq"
             placeholder="请选择日期"
             value-format="yyyy-MM-dd"
           ></el-date-picker>
-          <span v-else>
+          <span v-else> -->
             {{ form.rq | parseTime('{y}-{m}-{d}') }}
-          </span>
+          <!-- </span> -->
         </td>
         <td style="width: 25%">
-          班次：<el-select
+           班次：<!--<el-select
             v-if="!isread"
             v-model="form.bc"
             clearable
             placeholder="请选择班次"
           >
             <el-option label="白班" value="白班"></el-option>
+            <el-option label="中班" value="中班"></el-option>
             <el-option label="晚班" value="晚班"></el-option>
           </el-select>
-          <span v-else>
+          <span v-else> -->
             {{ form.bc }}
-          </span>
+          <!-- </span> -->
         </td>
         <td style="width: 25%">
           交接人：<el-input
@@ -41,7 +42,7 @@
         <td style="width: 25%">
           后序人员：<el-input
             v-if="!isread"
-            style="width: 300px"
+            style="width: 200px"
             clearable
             v-model="form.hxry"
             placeholder="请输入后序人员"
@@ -256,7 +257,7 @@
         </tr>
       </tbody>
     </table>
-    <div class="cdgc_btn_bar" v-if="!isread">
+     <div class="cdgc_btn_bar" v-if="!isread">
       <el-button type="danger" icon="el-icon-check" @click="save_handle"
         >保存</el-button
       >
@@ -265,6 +266,7 @@
 </template>
 
 <script>
+import store from '@/store/index'
 import ApiFn from "@/api/baseapi";
 import { deepClone, parseTime } from "@/utils/index";
 export default {
@@ -312,6 +314,9 @@ export default {
     },
   },
   mounted() {
+    if (this.rq && this.bc) {
+      this.load_data(this.rq, this.bc);
+    }
     if (!this.isread) {
       this.cplist.push(
         { label: "E115", value: "E115" },
@@ -331,9 +336,6 @@ export default {
       let row4 = deepClone(this.hxitem);
       row4.xm = "捡漏、产品打包";
       this.form.hxlist.push(row4);
-    }
-    if (this.isread && this.rq && this.bc) {
-      this.load_data(this.rq, this.bc);
     }
   },
   methods: {
@@ -355,7 +357,7 @@ export default {
           zlqk: this.form.zlqk,
           sbqk: this.form.sbqk,
           qtqk: this.form.qtqk,
-          lrr: this.$store.getters.name,
+          lrr: store.getters.name,
           lrsj: parseTime(new Date()),
           djkjjbdetail: [],
           djkjjbdetailhx: [],
@@ -391,7 +393,6 @@ export default {
           (res) => {
             if (res.code === 1) {
               this.$message.success(res.msg);
-              window.location.reload();
             } else {
               this.$message.error(res.msg);
             }

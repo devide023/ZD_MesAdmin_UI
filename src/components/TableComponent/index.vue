@@ -33,10 +33,14 @@
               <template v-if="col.suggest">
                 <el-autocomplete
                   popper-class="my-autocomplete"
-                  v-model.trim="scope.row[col.prop]"
-                  :fetch-suggestions="col.suggest"
-                  @select="selectHandle(col.select_handlename)"
+                  v-model="scope.row[col.prop]"
+                  :trigger-on-focus="false"
+                  :fetch-suggestions="
+                    (key, cb) => fetchSuggestions(key, cb, scope.row, col)
+                  "
+                  @select="(item) => ddl_handleSelect(item, scope.row, col)"
                   placeholder="关键字过滤"
+                  style="width:100%;"
                 >
                   <i class="el-icon-search el-input__icon" slot="suffix"> </i>
                   <template slot-scope="{ item }">
@@ -69,11 +73,13 @@
                     :label="item.label"
                     :value="item.value"
                   >
-                    <span style="float: left">{{ item.label }}</span>
-                    <span
-                      style="float: right; color: #8492a6; font-size: 13px"
-                      >{{ item.value }}</span
-                    >
+                    <template v-if="!col.hideoptionval">
+                      <span style="float: left">{{ item.label }}</span>
+                      <span
+                        style="float: right; color: #8492a6; font-size: 13px"
+                        >{{ item.value }}</span
+                      >
+                    </template>
                   </el-option>
                 </el-select>
               </template>
@@ -82,6 +88,7 @@
                   v-model="scope.row[col.prop]"
                   clearable
                   filterable
+                  :allow-create="col.allowcreate"
                   :multiple="col.multiple"
                   placeholder="请选择"
                   style="width: 100%"
@@ -97,11 +104,13 @@
                     :value="item.value"
                     :disabled="item.disabled"
                   >
-                    <span style="float: left">{{ item.label }}</span>
-                    <span
-                      style="float: right; color: #8492a6; font-size: 13px"
-                      >{{ item.value }}</span
-                    >
+                    <template v-if="!col.hideoptionval">
+                      <span style="float: left">{{ item.label }}</span>
+                      <span
+                        style="float: right; color: #8492a6; font-size: 13px"
+                        >{{ item.value }}</span
+                      >
+                    </template>
                   </el-option>
                 </el-select>
               </template>
@@ -590,6 +599,20 @@ export default {
         }
       } else {
         this.$message.error("远程查询不是一个函数");
+      }
+    },
+    fetchSuggestions(key, cb, row, col) {
+      if (typeof col.suggest_fn_name === "function") {
+        col.suggest_fn_name(this, key, cb, row, col);
+      } else {
+        this.$basepage[col.suggest_fn_name](this, key, cb, row, col);
+      }
+    },
+    ddl_handleSelect(item, row, col) {
+      if (typeof col.select_fn_name === "function") {
+        col.select_fn_name(this, item, row, col);
+      } else {
+        this.$basepage[col.select_fn_name](this, item, row, col);
       }
     },
   },

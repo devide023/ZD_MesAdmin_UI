@@ -3,50 +3,57 @@
     <el-dropdown trigger="click" style="margin-left: 10px">
       <el-button>批量操作</el-button>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item>
-          <el-upload
-            :action="action"
-            :headers="headers"
-            :multiple="false"
-            :show-file-list="false"
-            accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            :before-upload="before_upload_xls_handle"
-            :on-success="add_upload_success"
-          >
-            <el-button type="text">新增导入</el-button>
-          </el-upload>
-        </el-dropdown-item>
-        <el-dropdown-item>
-          <el-upload
-            :action="action"
-            :headers="headers"
-            :multiple="false"
-            :show-file-list="false"
-            accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            :before-upload="before_upload_xls_handle"
-            :on-success="replace_upload_success"
-          >
-            <el-button type="text">替换导入</el-button>
-          </el-upload>
-        </el-dropdown-item>
-        <el-dropdown-item>
-          <el-upload
-            :action="action"
-            :headers="headers"
-            :multiple="false"
-            :show-file-list="false"
-            accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            :before-upload="before_upload_xls_handle"
-            :on-success="zh_upload_success"
-          >
-            <el-button type="text">综合导入</el-button>
-          </el-upload>
-        </el-dropdown-item>
+        <template v-if="IsBatAdd">
+          <el-dropdown-item>
+            <el-upload
+              :action="action"
+              :headers="headers"
+              :multiple="false"
+              :show-file-list="false"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              :before-upload="before_upload_xls_handle"
+              :on-success="add_upload_success"
+            >
+              <el-button type="text">新增导入</el-button>
+            </el-upload>
+          </el-dropdown-item>
+        </template>
+        <template v-if="IsBatReplace">
+          <el-dropdown-item>
+            <el-upload
+              :action="action"
+              :headers="headers"
+              :multiple="false"
+              :show-file-list="false"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              :before-upload="before_upload_xls_handle"
+              :on-success="replace_upload_success"
+            >
+              <el-button type="text">替换导入</el-button>
+            </el-upload>
+          </el-dropdown-item>
+        </template>
+        <template v-if="IsBatZh">
+          <el-dropdown-item>
+            <el-upload
+              :action="action"
+              :headers="headers"
+              :multiple="false"
+              :show-file-list="false"
+              accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              :before-upload="before_upload_xls_handle"
+              :on-success="zh_upload_success"
+            >
+              <el-button type="text">综合导入</el-button>
+            </el-upload>
+          </el-dropdown-item>
+        </template>
         <el-dropdown-item>
           <el-button type="text" @click.prevent.native="export_excel_handle"
             >导出Excel</el-button
           >
         </el-dropdown-item>
+
         <!-- <el-dropdown-item>
           <el-button type="text" @click.native.prevent="visiable = true"
             >复制数据</el-button
@@ -59,6 +66,7 @@
 </template>
 <script>
 import { getToken } from "@/utils/auth";
+import { GetEnvInfo } from "@/utils/index";
 export default {
   name: "BatOperateComponent",
   components: {},
@@ -82,11 +90,40 @@ export default {
   },
   data() {
     return {
+      urlinfo: GetEnvInfo(),
+      page_bat_permis: [],
       headers: {
         Authorization: "Bearer " + getToken(),
       },
-      action: window.winconfig.production.VUE_APP_BASE_API + "/upload/xls",
+      action: GetEnvInfo().VUE_APP_BASE_API + "/upload/xls",
     };
+  },
+  mounted() {
+    let batpermis = this.$store.getters.batpagepermis;
+    let fullpath = this.$router.currentRoute.fullPath;
+    let pos = fullpath.indexOf("?");
+    if (pos !== -1) {
+      fullpath = fullpath.substr(0, pos);
+    }
+    if (batpermis) {
+      let pos = batpermis.findIndex((i) => i.path === fullpath);
+      if (pos !== -1) {
+        this.page_bat_permis = batpermis[pos].permis;
+      }
+    }
+  },
+  computed: {
+    IsBatAdd() {
+      return this.page_bat_permis.findIndex((i) => i.name === "bat_add") !== -1;
+    },
+    IsBatReplace() {
+      return (
+        this.page_bat_permis.findIndex((i) => i.name === "bat_replace") !== -1
+      );
+    },
+    IsBatZh() {
+      return this.page_bat_permis.findIndex((i) => i.name === "bat_zh") !== -1;
+    },
   },
   methods: {
     before_upload_xls_handle(file) {

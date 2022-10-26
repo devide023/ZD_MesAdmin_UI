@@ -131,7 +131,7 @@
                 <template v-else>
                   <el-button
                     type="text"
-                    @click.native="execpagefun(scope.row, item)"
+                    @click.native="execfun(scope.row, item.fnname)"
                     >{{ item.label }}</el-button
                   ></template
                 >
@@ -141,38 +141,21 @@
         </template>
       </template>
     </table-component>
-    <el-dialog
-      :title="dialog_title"
-      :visible.sync="dialogVisible"
-      :width="dialog_width"
-      top="10px"
-      :close-on-click-modal="false"
-      @opened="dialog_opend_handle"
-      @closed="dialog_closed_handle"
-    >
-      <div id="dialog_body"></div>
-      <div slot="footer" v-if="!dialog_hidefooter">
-        <el-button type="danger" @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialog_comfire_handle"
-          >确定</el-button
-        >
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
 import SearchBar from "@/components/QueryBar/index.vue";
 import TableComponent from "@/components/TableComponent/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
 import { basemixin } from "@/mixin/basemixin";
 import { batoperatemixin } from "@/mixin/batoperate_mixin";
 import { export_xls_mixin } from "@/mixin/export_xls_mixin";
-import { GetComponentName } from "@/utils/index";
 import { getToken } from "@/utils/auth";
+import condition from "@/mixin/search_form";
+import { deepClone } from "@/utils/index";
 export default {
-  name: GetComponentName(),
+  name: "CgJhComponent",
   components: {
     TableComponent,
     SearchBar,
@@ -181,85 +164,32 @@ export default {
   mixins: [basemixin, batoperatemixin, export_xls_mixin],
   data() {
     return {
-      dialogVisible: false,
-      dialog_title: "表单",
-      dialog_fnitem:{},
-      dialog_width: "",
-      dialog_viewpath: "",
-      dialog_props: {},
-      dialog_vm : null,
-      dialog_hidefooter:false,
       headers: {
         Authorization: "Bearer " + getToken(),
       },
     };
   },
-  mounted() {},
+  activated() {
+    var orderno = this.$route.query.order_no;
+    if (orderno) {
+      this.queryform.search_condition = [];
+      let exp = deepClone(condition.form);
+      exp.colname = "order_no";
+      exp.coltype = "string";
+      exp.oper = "=";
+      exp.value = orderno;
+      this.queryform.search_condition.push(exp);
+      this.queryform.pageindex = 1;
+      this.getlist(this.queryform);
+    }
+  },
   methods: {
-    dialog_opend_handle() {
-      this.create(this,this.dialog_viewpath, this.dialog_props);
-    },
-    dialog_closed_handle() {
-      let chil = document.getElementById("dialog_body").childNodes;
-      chil.forEach((i) => {
-        document.getElementById("dialog_body").removeChild(i);
-      });
-    },
-    create(vm,viewpath, props) {
-      let Component = (resolve) =>
-        require.ensure([], () =>
-          resolve(require("@/views/" + viewpath + ".vue"))
-        );
-      vm.dialog_vm = new Vue({
-        mounted() {
-        },
-        destroyed () {
-        },
-        render(h) {
-          let node = h(Component, { props });
-          return node;
-        },
-      }).$mount();
-      document.getElementById("dialog_body").appendChild(this.dialog_vm.$el);
-    },
-    dialog_comfire_handle() {
-      if(this.dialog_fnitem.callback && typeof this.dialog_fnitem.callback === 'string'){
-        this[this.dialog_fnitem.callback](this.dialog_vm);
-      }
-      else if(this.dialog_fnitem.callback && typeof this.dialog_fnitem.callback === 'function'){     
-        this.dialog_fnitem.callback(this.dialog_vm);
-      }
-    },
     execfun(row, fnname) {
       this[fnname](row);
     },
-    execpagefun(row,fnitem){
-      this[fnitem.fnname](row,fnitem);
-    }
   },
 };
 </script>
 
-<style lang="scss">
-.avatar-uploader .el-upload {
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
-  text-align: center;
-}
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  display: block;
-  margin: auto;
-}
+<style lang="scss" scoped>
 </style>

@@ -6,6 +6,7 @@
         <td style="width: 25%">
           日期：<el-date-picker
             v-model="form.rq"
+            :picker-options="pickeroptions"
             placeholder="请选择日期"
             value-format="yyyy-MM-dd"
           ></el-date-picker>
@@ -13,6 +14,7 @@
         <td style="width: 25%">
           班次：<el-select v-model="form.bc" clearable placeholder="请选择班次">
             <el-option label="白班" value="白班"></el-option>
+            <el-option label="中班" value="中班"></el-option>
             <el-option label="晚班" value="晚班"></el-option>
           </el-select>
         </td>
@@ -221,6 +223,11 @@ export default {
     return {
       cplist: [],
       list: [],
+      pickeroptions:{
+        disabledDate(time){
+          return time.getTime()<Date.now()-8.64e7;
+        }
+      },
       form: {
         rq: parseTime(new Date()),
         bc: "",

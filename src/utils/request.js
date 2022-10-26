@@ -1,11 +1,12 @@
 import axios from 'axios'
 import { MessageBox, Message, Loading } from 'element-ui'
 import store from '@/store'
+import {GetEnvInfo} from '@/utils/index';
 import { getToken } from '@/utils/auth'
-
+const urlinfo = GetEnvInfo();
 // create an axios instance
 const service = axios.create({
-  baseURL: window.winconfig.production.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: urlinfo.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 300000 // request timeout
 })
@@ -16,7 +17,7 @@ service.interceptors.request.use(
     // do something before request is sent
     loadingInstance = Loading.service({
       lock: true,
-      text: 'Loading',
+      text: '数据加载中',
       spinner: 'el-icon-loading',
       background: 'rgba(0, 0, 0, 0.7)'
     });
@@ -50,9 +51,9 @@ service.interceptors.response.use(
    */
   response => {
     // if the custom code is not 20000, it is judged as an error.
-    loadingInstance.close();
     let errormsg = '';
     const res = response.data;
+    loadingInstance.close();
     if (response.status !== 200) {
       switch (response.status) {
         case 400:
