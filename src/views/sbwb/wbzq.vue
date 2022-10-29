@@ -91,7 +91,7 @@
         inline
         :rules="rules"
       >
-        <el-form-item label="生产线">
+        <el-form-item label="生产线" prop="scx">
           <el-select
             v-model="wbzq_form.scx"
             placeholder="生产线"
@@ -112,7 +112,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="设备名称">
+        <el-form-item label="设备名称" prop="sbbh">
           <el-select
             v-model="wbzq_form.sbbh"
             placeholder="设备选择"
@@ -120,6 +120,7 @@
             clearable
             collapse-tags
             style="width: 200px"
+            @change="sbbh_change_handle"
           >
             <el-option
               v-for="(item, index) in scx_sbxx_list"
@@ -330,6 +331,20 @@ export default {
       },
       scx_sbxx_list: [],
       rules: {
+        scx:[
+          {
+            required: true,
+            message: "生产线不能为空",
+            trigger: "change",
+          },
+        ],
+        sbbh:[
+          {
+            required: true,
+            message: "设备名称不能为空",
+            trigger: "change",
+          },
+        ],
         next_date: [
           {
             required: true,
@@ -399,6 +414,9 @@ export default {
       } catch (error) {
         this.$message.error(error);
       }
+    },
+    sbbh_change_handle(){
+      this.sbwbxx_search_handle();
     },
     sbwbxx_search_handle() {
       ApiFn.requestapi("post", "/lbj/wbzq/query", {
