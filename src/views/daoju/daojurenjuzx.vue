@@ -242,6 +242,7 @@
             clearable
             filterable
             placeholder="选择设备编号"
+            @change="change_handle_sbbh"
           >
             <el-option
               v-for="(item, index) in sbinfo_list"
@@ -447,6 +448,46 @@
         <el-button type="primary" @click="dbrjgh_save_handle">确定</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog
+      title="刃磨明细"
+      :visible.sync="dialog_rmmx_Visible"
+      @opened="rmmx_open_handle"
+    >
+      <div>
+        <el-table :data="rmmxlist" style="width: 100%">
+          <el-table-column
+            prop="rjlx"
+            align="center"
+            header-align="center"
+            label="刃具类型"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="rmr"
+            align="center"
+            header-align="center"
+            label="刃磨人"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="rmsj"
+            align="center"
+            header-align="center"
+            label="刃磨时间"
+          >
+          <template slot-scope="scope">
+            {{scope.row.rmsj | parseTime("{y}-{m}-{d} {h}:{i}:{s}")}}
+          </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div slot="footer">
+        <el-button type="primary" @click="dialog_rmmx_Visible = false"
+          >确 定</el-button
+        >
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -476,6 +517,7 @@ export default {
       dialogVisible: false,
       installVisible: false,
       dbrjghVisible: false, //刀具刃具更换
+      dialog_rmmx_Visible: false,
       dbrj_tree_data: [],
       tree_props: {
         label: "label",
@@ -486,6 +528,8 @@ export default {
       rjlxoptions: [],
       dbrjgxlist: [],
       sbinfo_list: [],
+      rmmxlist: [],
+      rmmx_rjid: 0,
       rjlxprops: { multiple: true, expandTrigger: "hover" },
       form: {
         gcdm: "9902",
@@ -548,6 +592,7 @@ export default {
       this[fnname](row);
     },
     form_scx_change_handle(scx) {
+      this.iform.sbbh = "";
       ApiFn.requestapi("get", "/lbj/baseinfo/cnc_list_by_scx", {
         scx: scx,
       }).then((res) => {
@@ -593,6 +638,9 @@ export default {
       } catch (error) {
         this.$message.error(error);
       }
+    },
+    change_handle_sbbh() {
+      this.search_dbrjzx_handle();
     },
     db_change_handle() {
       ApiFn.requestapi("post", "/lbj/dbrjly/dbrjgx", this.form.dbh).then(
@@ -843,6 +891,19 @@ export default {
           }
         }
       });
+    },
+    rmmx_open_handle() {
+      try {
+        ApiFn.requestapi("get", "/lbj/dbrjly/viewrmmx", { id: this.rmmx_rjid }).then((res) => {
+          if (res.code === 1) {
+            this.rmmxlist = res.list;
+          } else {
+            this.$message.error(res.msg);
+          }
+        });
+      } catch (error) {
+        this.$message.error(error);
+      }
     },
   },
 };
