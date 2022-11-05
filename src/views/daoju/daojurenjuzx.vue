@@ -455,12 +455,59 @@
       @opened="rmmx_open_handle"
     >
       <div>
-        <el-table :data="rmmxlist" style="width: 100%">
+        <el-table
+          border
+          stripe
+          header-cell-class-name="tb_header_bg"
+          :data="rmmxlist"
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="scx"
+            align="center"
+            header-align="center"
+            label="生产线"
+            show-overflow-tooltip
+          >
+          </el-table-column>
+          <el-table-column
+            prop="dbh"
+            align="center"
+            header-align="center"
+            label="刀柄号"
+            show-overflow-tooltip
+          >
+          </el-table-column>
+          <el-table-column
+            prop="dblx"
+            align="center"
+            header-align="center"
+            label="刀柄类型"
+            show-overflow-tooltip
+          >
+          </el-table-column>
+          <el-table-column
+            prop="sbbh"
+            align="center"
+            header-align="center"
+            label="资产编号"
+            show-overflow-tooltip
+          >
+          </el-table-column>
           <el-table-column
             prop="rjlx"
             align="center"
             header-align="center"
             label="刃具类型"
+            show-overflow-tooltip
+          >
+          </el-table-column>
+          <el-table-column
+            prop="dqsm"
+            align="center"
+            header-align="center"
+            label="刃磨时寿命"
+            show-overflow-tooltip
           >
           </el-table-column>
           <el-table-column
@@ -468,6 +515,7 @@
             align="center"
             header-align="center"
             label="刃磨人"
+            show-overflow-tooltip
           >
           </el-table-column>
           <el-table-column
@@ -475,10 +523,11 @@
             align="center"
             header-align="center"
             label="刃磨时间"
+            show-overflow-tooltip
           >
-          <template slot-scope="scope">
-            {{scope.row.rmsj | parseTime("{y}-{m}-{d} {h}:{i}:{s}")}}
-          </template>
+            <template slot-scope="scope">
+              {{ scope.row.rmsj | parseTime("{y}-{m}-{d} {h}:{i}:{s}") }}
+            </template>
           </el-table-column>
         </el-table>
       </div>
@@ -894,7 +943,9 @@ export default {
     },
     rmmx_open_handle() {
       try {
-        ApiFn.requestapi("get", "/lbj/dbrjly/viewrmmx", { id: this.rmmx_rjid }).then((res) => {
+        ApiFn.requestapi("get", "/lbj/dbrjly/viewrmmx", {
+          id: this.rmmx_rjid,
+        }).then((res) => {
           if (res.code === 1) {
             this.rmmxlist = res.list;
           } else {

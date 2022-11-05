@@ -20,11 +20,15 @@ export function parseTime(time, cFormat) {
     if ((typeof time === 'string')) {
       if ((/^[0-9]+$/.test(time))) {
         // support "1548221490638"
-        time = parseInt(time)
+        time = parseInt(time);
       } else {
-        // support safari
-        // https://stackoverflow.com/questions/4310953/invalid-date-in-safari
-        time = time.replace(new RegExp(/-/gm), '/').replace(new RegExp(/T/gm), ' ')
+        if (time !== '0001-01-01T00:00:00') {
+          // support safari
+          // https://stackoverflow.com/questions/4310953/invalid-date-in-safari
+          time = time.replace(new RegExp(/-/gm), '/').replace(new RegExp(/T/gm), ' ')
+        } else {
+          return null;
+        }
       }
     }
 
@@ -388,7 +392,7 @@ export function GetEnvInfo() {
     return window.winconfig.development;
   } else if (process.env.NODE_ENV === 'production') {
     return window.winconfig.production;
-  }else{
+  } else {
     return window.winconfig.staging;
   }
 }

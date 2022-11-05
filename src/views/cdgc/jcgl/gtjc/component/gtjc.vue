@@ -47,14 +47,14 @@
         <td colspan="4" class="td_label">实测数据</td>
       </tr>
       <tr>
-        <td  class="td_label" style="width: 50px">序号</td>
-        <td  class="td_label" style="width: 70px">产品方位</td>
-        <td  class="td_label" style="width: 50px">孔系名称</td>
-        <td  class="td_label" style="width: 70px">孔径尺寸</td>
-        <td  class="td_label" style="width: 70px">深度面距</td>
+        <td class="td_label" style="width: 50px">序号</td>
+        <td class="td_label" style="width: 70px">产品方位</td>
+        <td class="td_label" style="width: 50px">孔系名称</td>
+        <td class="td_label" style="width: 70px">孔径尺寸</td>
+        <td class="td_label" style="width: 70px">深度面距</td>
         <!-- 实测数据 -->
         <td colspan="3" class="td_label">孔径尺寸</td>
-        <td  class="td_label">深度面距尺寸</td>
+        <td class="td_label">深度面距尺寸</td>
       </tr>
       <tr v-for="(item, idx) in list" :key="'item' + idx">
         <td class="td_check_label">{{ idx + 1 }}</td>
@@ -89,15 +89,15 @@
           </td>
           <td colspan="3" :class="item.class1">
             <span v-if="item.kjtype === 'radio'">
-              {{item.result1 | jgformat}}
+              <span :class="[item.kjsfhg?'':'red']">{{ item.result1 | jgformat }}</span>
             </span>
             <span v-else-if="item.kjtype === 'text'">
-                {{item.result1}}
+              <span :class="[item.kjsfhg?'':'red']">{{ item.result1 }}</span>
             </span>
           </td>
           <td :class="item.sdclass1">
             <span v-if="item.sdtype === 'text'">
-                {{item.size1}}
+              <span :class="[item.sdsfhg?'':'red']">{{ item.size1 }}</span>
             </span>
             <span v-else-if="item.sdtype === 'none'">/</span>
           </td>
@@ -105,7 +105,7 @@
         <template v-else>
           <td class="td_check_label" colspan="3">{{ item.kxmc }}</td>
           <td colspan="4">
-            <span>{{item.jg1}}</span>
+            <span>{{ item.jg1 }}</span>
           </td>
         </template>
       </tr>
@@ -142,10 +142,10 @@ export default {
       type: Number,
       default: 0,
     },
-    lx:{
-        type:String,
-        default:''
-    }
+    lx: {
+      type: String,
+      default: "",
+    },
   },
   mounted() {
     this.get_cplx_list(this.lx);
@@ -166,19 +166,17 @@ export default {
     this.load_data();
   },
   filters: {
-    jgformat: function(value) {
-        if(value === 'TZ'){
-            return 'T进Z止'
-        }
-        else if(value === 'T'){
-             return 'T不进'
-        }
-        else if(value === 'Z'){
-             return 'Z不止'
-        }else{
+    jgformat: function (value) {
+      if (value === "TZ") {
+        return "T进Z止";
+      } else if (value === "T") {
+        return "T不进";
+      } else if (value === "Z") {
+        return "Z不止";
+      } else {
         return value;
-        }
-    }
+      }
+    },
   },
   methods: {
     load_data() {
@@ -186,26 +184,53 @@ export default {
         billid: this.billid,
       }).then((res) => {
         if (res.code === 1) {
-          console.log(res.bill);
-          if(res.bill){
+          if (res.bill) {
             this.form.cplx = res.bill.cplx;
             this.form.rq = res.bill.rq;
             this.form.th = res.bill.th;
             this.form.mh = res.bill.mh;
-            this.form.jyy = res.bill.jyy;
+            this.form.jyy = res.bill.jyry;
             this.form.jth = res.bill.jth;
             this.form.ewm = res.bill.vin;
             this.form.jylb = res.bill.jylb;
-            console.log(res.bill);
             this.form.datalist = res.bill.zxjcgtjcdetail;
-            console.log(res.bill.zxjcgtjcdetail);
-            res.bill.zxjcgtjcdetail.forEach(e=>{
-               let elindex = this.list.findIndex(i=>i.id === e.jcid);
-                if(elindex!==-1){
-                    this.list[elindex].result1 = e.kjval;
-                    this.list[elindex].size1 = e.sdmjval;
-                    this.list[elindex].jg1 = e.jcjg;
+            res.bill.zxjcgtjcdetail.forEach((e) => {
+              let elindex = this.list.findIndex((i) => i.id === e.jcid);
+              if (elindex !== -1) {
+                this.list[elindex].result1 = e.kjval;
+                this.list[elindex].size1 = e.sdmjval;
+                this.list[elindex].jg1 = e.jcjg;
+                let base_gtjc = this.list[elindex];
+                if(base_gtjc){
+                  if(base_gtjc.kjtype==='text'){
+                    let kjsx = parseFloat(base_gtjc.kjccsx);
+                    let kjxx = parseFloat(base_gtjc.kjccxx);
+                    let kjcc = parseFloat(e.kjval);
+                    if(kjcc>=kjxx && kjcc <=kjsx){
+                      this.list[elindex].kjsfhg = true;
+                    }else{
+                      this.list[elindex].kjsfhg = false;
+                    }
+                  }
+                  if(base_gtjc.kjtype==='radio'){
+                    if(e.kjval==='TZ'){
+                      this.list[elindex].kjsfhg = true;
+                    }else{
+                      this.list[elindex].kjsfhg = false;
+                    }
+                  }
+                  if(base_gtjc.sdtype ==='text'){
+                    let sdsx = parseFloat(base_gtjc.sdmjsx);
+                    let sdxx = parseFloat(base_gtjc.sdmjxx);
+                    let sdmjcc = parseFloat(e.sdmjval);
+                    if(sdmjcc>=sdxx && sdmjcc <=sdsx){
+                      this.list[elindex].sdsfhg = true;
+                    }else{
+                      this.list[elindex].sdsfhg = false;
+                    }
+                  }
                 }
+              }
             });
           }
         } else {
@@ -215,60 +240,61 @@ export default {
     },
     get_cplx_list(lx) {
       try {
-        ApiFn.requestapi("get", "/cdgc/gtjc/jcsj/get_jcdata_lx",{lx:lx})
+        ApiFn.requestapi("get", "/cdgc/gtjc/jcsj/get_jcdata_lx", { lx: lx })
           .then((res) => {
             if (res.code === 1) {
-                console.log(res.list);
               this.list = res.list.map((i) => {
-                  i.cpfwrowspan = 1;
-                  i.kxmcrowspan = 1;
-                  i.kjzszrowspan = 1;
-                  i.sdzszrowspan = 1;
-                  i.cpfwisshow = true;
-                  i.kxmcisshow = true;
-                  i.kjzszisshow = true;
-                  i.sdzszisshow = true;
-                  i.result1 = "";
-                  i.result2 = "";
-                  i.result3 = "";
-                  i.result4 = "";
-                  //
-                  i.size1 = "";
-                  i.size2 = "";
-                  i.size3 = "";
-                  i.size4 = "";
-                  //
-                  i.jg1 = "";
-                  i.jg2 = "";
-                  i.jg3 = "";
-                  i.jg4 = "";
-                  //样式
-                  i.class1 = "";
-                  i.class2 = "";
-                  i.class3 = "";
-                  i.class4 = "";
-                  i.sdclass1 = "";
-                  i.sdclass2 = "";
-                  i.sdclass3 = "";
-                  i.sdclass4 = "";
-                  return i;
-                });
-                for (let i = 0; i < this.list.length; i++) {
-                  const elcpfwi = this.list[i].cpfw;
-                  const elkxmci = this.list[i].kxmc;
-                  const elkjzszi = this.list[i].kjzsz;
-                  const elsdzszi = this.list[i].sdzsz;
-                  for (let j = i + 1; j < this.list.length; j++) {
-                    const elcpfwj = this.list[j].cpfw;
-                    if (elcpfwi === elcpfwj) {
-                      this.list[i].cpfwrowspan++;
-                      this.list[j].cpfwisshow = false;
-                    }
+                i.cpfwrowspan = 1;
+                i.kxmcrowspan = 1;
+                i.kjzszrowspan = 1;
+                i.sdzszrowspan = 1;
+                i.cpfwisshow = true;
+                i.kxmcisshow = true;
+                i.kjzszisshow = true;
+                i.sdzszisshow = true;
+                i.kjsfhg=true;
+                i.sdsfhg=true;
+                i.result1 = "";
+                i.result2 = "";
+                i.result3 = "";
+                i.result4 = "";
+                //
+                i.size1 = "";
+                i.size2 = "";
+                i.size3 = "";
+                i.size4 = "";
+                //
+                i.jg1 = "";
+                i.jg2 = "";
+                i.jg3 = "";
+                i.jg4 = "";
+                //样式
+                i.class1 = "";
+                i.class2 = "";
+                i.class3 = "";
+                i.class4 = "";
+                i.sdclass1 = "";
+                i.sdclass2 = "";
+                i.sdclass3 = "";
+                i.sdclass4 = "";
+                return i;
+              });
+              for (let i = 0; i < this.list.length; i++) {
+                const elcpfwi = this.list[i].cpfw;
+                const elkxmci = this.list[i].kxmc;
+                const elkjzszi = this.list[i].kjzsz;
+                const elsdzszi = this.list[i].sdzsz;
+                for (let j = i + 1; j < this.list.length; j++) {
+                  const elcpfwj = this.list[j].cpfw;
+                  if (elcpfwi === elcpfwj) {
+                    this.list[i].cpfwrowspan++;
+                    this.list[j].cpfwisshow = false;
                   }
-                  this.set_rowspan(i, "kxmc", elkxmci, "cpfw", elcpfwi);
-                  this.set_rowspan(i, "kjzsz", elkjzszi, "cpfw", elcpfwi);
-                  this.set_rowspan(i, "sdzsz", elsdzszi, "cpfw", elcpfwi);
                 }
+                this.set_rowspan(i, "kxmc", elkxmci, "cpfw", elcpfwi);
+                this.set_rowspan(i, "kjzsz", elkjzszi, "cpfw", elcpfwi);
+                this.set_rowspan(i, "sdzsz", elsdzszi, "cpfw", elcpfwi);
+              }
             } else {
               this.$message.error(res.msg);
             }
@@ -353,5 +379,11 @@ export default {
   text-align: right;
   position: sticky;
   bottom: 0;
+}
+::v-deep .red{
+  display: block;
+  background-color: red;
+  font-weight: bold;
+  color: white;
 }
 </style>
