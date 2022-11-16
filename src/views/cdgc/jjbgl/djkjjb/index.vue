@@ -225,7 +225,7 @@ export default {
       list: [],
       pickeroptions:{
         disabledDate(time){
-          return time.getTime()<Date.now()-8.64e7;
+          return (time.getTime()<Date.now()-2*24*60*60*1000) || (time.getTime()> Date.now());
         }
       },
       form: {

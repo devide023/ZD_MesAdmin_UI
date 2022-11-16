@@ -450,6 +450,9 @@ export default {
     },
   },
   computed: {},
+  activated () {
+    this.$refs.maintable.doLayout();
+  },
   mounted() {
     window._this = this;
     this.fullpath = this.$router.currentRoute.fullPath;

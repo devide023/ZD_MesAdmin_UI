@@ -6,14 +6,25 @@
       <tr>
         <td style="width: 33.3%">
           日期：<span v-if="isread">{{ dqrq | parseTime("{y}-{m}-{d}") }}</span>
-          <el-date-picker
-            v-else
-            v-model="dqrq"
-            :picker-options="pickeroptions"
-            value-format="yyyy-MM-dd"
-            placeholder="选择日期"
-            @change="rq_change_handle"
-          ></el-date-picker>
+          <span>
+            <el-date-picker
+              v-if="isadmin"
+              v-model="dqrq"
+              value-format="yyyy-MM-dd"
+              :editable="false"
+              placeholder="选择日期"
+              @change="rq_change_handle"
+            ></el-date-picker>
+            <el-date-picker
+              v-else
+              v-model="dqrq"
+              :picker-options="pickeroptions"
+              :editable="false"
+              value-format="yyyy-MM-dd"
+              placeholder="选择日期"
+              @change="rq_change_handle"
+            ></el-date-picker>
+          </span>
         </td>
         <td style="width: 33.3%">
           班次：<span v-if="isread">{{ bc }}</span>
@@ -278,7 +289,7 @@
 </template>
 
 <script>
-import store from '@/store/index'
+import store from "@/store/index";
 import ApiFn from "@/api/baseapi";
 import { deepClone, parseTime } from "@/utils/index";
 export default {
@@ -288,6 +299,10 @@ export default {
       type: Boolean,
       default: false,
       required: true,
+    },
+    isadmin: {
+      type: Boolean,
+      default: false,
     },
     calcrq: {
       type: String,
@@ -300,7 +315,10 @@ export default {
     return {
       pickeroptions: {
         disabledDate(time) {
-          return time.getTime() < Date.now() - 8.64e7;
+          return (
+            time.getTime() < Date.now() - 2 * 24 * 60 * 60 * 1000 ||
+            time.getTime() > Date.now()
+          );
         },
       },
       sclist: [],
@@ -414,6 +432,7 @@ export default {
     save_handle() {
       let postdata = {
         id: 0,
+        isadmin: this.isadmin,
         rq: this.dqrq,
         bc: this.bc,
         jbr: this.jbr,
@@ -447,6 +466,8 @@ export default {
         (res) => {
           if (res.code === 1) {
             this.$message.success(res.msg);
+            this.$basepage.dialogVisible = false;
+            this.$basepage.getlist(this.$basepage.queryform);
           } else {
             this.$message.error(res.msg);
           }

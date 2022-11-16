@@ -4,18 +4,31 @@
     <table class="cdgc_bill_head">
       <tr>
         <td style="width: 25%">
-           日期：<!--<el-date-picker
-            v-if="!isread"
-            v-model="form.rq"
-            placeholder="请选择日期"
-            value-format="yyyy-MM-dd"
-          ></el-date-picker>
-          <span v-else> -->
-            {{ form.rq | parseTime('{y}-{m}-{d}') }}
-          <!-- </span> -->
+          日期：<template v-if="isread">
+            {{ form.rq | parseTime("{y}-{m}-{d}") }}
+          </template>
+          <template v-else>
+            <template v-if="isadmin">
+              <el-date-picker
+                v-model="form.rq"
+                placeholder="请选择日期"
+                value-format="yyyy-MM-dd"
+                :editable="false"
+              ></el-date-picker>
+            </template>
+            <template v-else>
+              <el-date-picker
+                v-model="form.rq"
+                :picker-options="pickeroptions"
+                :editable="false"
+                placeholder="请选择日期"
+                value-format="yyyy-MM-dd"
+              ></el-date-picker>
+            </template>
+          </template>
         </td>
         <td style="width: 25%">
-           班次：<!--<el-select
+          班次：<el-select
             v-if="!isread"
             v-model="form.bc"
             clearable
@@ -25,9 +38,9 @@
             <el-option label="中班" value="中班"></el-option>
             <el-option label="晚班" value="晚班"></el-option>
           </el-select>
-          <span v-else> -->
+          <span v-else>
             {{ form.bc }}
-          <!-- </span> -->
+          </span>
         </td>
         <td style="width: 25%">
           交接人：<el-input
@@ -62,7 +75,13 @@
           <th class="tdlabel">料废数</th>
           <th class="tdlabel">合格数</th>
           <th class="tdlabel">库存结余</th>
-          <th v-if="!isread" style="width: 50px; text-align: center" class="tdlabel">操作</th>
+          <th
+            v-if="!isread"
+            style="width: 50px; text-align: center"
+            class="tdlabel"
+          >
+            操作
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -145,7 +164,9 @@
             <td style="text-align: center">{{ item.jgs }}</td>
             <td style="text-align: center">{{ item.gfs }}</td>
             <td style="text-align: center">{{ item.lfs }}</td>
-            <td style="text-align: center">{{ item.jgs - item.gfs - item.lfs }}</td>
+            <td style="text-align: center">
+              {{ item.jgs - item.gfs - item.lfs }}
+            </td>
             <td style="text-align: center">{{ item.kcs - item.jgs }}</td>
           </template>
         </tr>
@@ -257,21 +278,29 @@
         </tr>
       </tbody>
     </table>
-     <div class="cdgc_btn_bar" v-if="!isread">
-      <el-button type="danger" icon="el-icon-check" @click="save_handle"
-        >保存</el-button
-      >
+    <div class="cdgc_btn_bar" v-if="!isread">
+        <el-button type="danger" icon="el-icon-check" @click="save_handle"
+          >保存</el-button
+        >
     </div>
   </div>
 </template>
 
 <script>
-import store from '@/store/index'
+import store from "@/store/index";
 import ApiFn from "@/api/baseapi";
 import { deepClone, parseTime } from "@/utils/index";
 export default {
   data() {
     return {
+      pickeroptions: {
+        disabledDate(time) {
+          return (
+            time.getTime() < Date.now() - 2 * 24 * 60 * 60 * 1000 ||
+            time.getTime() > Date.now()
+          );
+        },
+      },
       cplist: [],
       list: [],
       form: {
@@ -305,6 +334,10 @@ export default {
     isread: {
       type: Boolean,
       default: true,
+    },
+    isadmin: {
+      type: Boolean,
+      default: false,
     },
     rq: {
       type: String,
@@ -350,6 +383,7 @@ export default {
       try {
         let postdata = {
           id: 0,
+          isadmin:this.isadmin,
           rq: this.form.rq,
           bc: this.form.bc,
           jbr: this.form.jjr,
@@ -393,6 +427,8 @@ export default {
           (res) => {
             if (res.code === 1) {
               this.$message.success(res.msg);
+              this.$basepage.dialogVisible = false;
+              this.$basepage.getlist(this.$basepage.queryform);
             } else {
               this.$message.error(res.msg);
             }
@@ -426,8 +462,8 @@ export default {
               };
               return o;
             });
-            this.form.hxlist = res.bill.djkjjbdetailhx.map(i=>{
-                let o = {
+            this.form.hxlist = res.bill.djkjjbdetailhx.map((i) => {
+              let o = {
                 xm: i.xmmc,
                 trs: i.trjgsl,
                 dps: i.dpssl,

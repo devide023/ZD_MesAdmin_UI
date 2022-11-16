@@ -51,7 +51,6 @@ export default {
       if (v.rq && v.bc) {
         ApiFn.requestapi("get", "/cdgc/gtjjb/get_rq_bc", v).then((res) => {
           if (res.code === 1) {
-            console.log(res);
             this.sybc_rq = res.bcinfo.sybc_rq;
             this.sybc_bc = res.bcinfo.sybc;
             this.ssbc_rq = res.bcinfo.ssbc_rq;
