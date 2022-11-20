@@ -126,11 +126,15 @@
               ></el-input-number>
             </td>
             <td style="text-align: center">
-              <el-input-number
+              <!-- <el-input-number
                 v-model="item.gfs"
                 :min="0"
                 :step="1"
-              ></el-input-number>
+              ></el-input-number> -->
+              {{ item.gfs }}
+              <el-button type="text" @click="input_gfmx_handle(item)"
+                >工废明细</el-button
+              >
             </td>
             <td style="text-align: center">
               <el-input-number
@@ -162,7 +166,12 @@
             <td style="text-align: center">{{ item.cpmc }}</td>
             <td style="text-align: center">{{ item.kcs }}</td>
             <td style="text-align: center">{{ item.jgs }}</td>
-            <td style="text-align: center">{{ item.gfs }}</td>
+            <td style="text-align: center">
+              {{ item.gfs
+              }}<el-button type="text" @click="input_gfmx_handle(item)"
+                >工废明细</el-button
+              >
+            </td>
             <td style="text-align: center">{{ item.lfs }}</td>
             <td style="text-align: center">
               {{ item.jgs - item.gfs - item.lfs }}
@@ -279,18 +288,43 @@
       </tbody>
     </table>
     <div class="cdgc_btn_bar" v-if="!isread">
-        <el-button type="danger" icon="el-icon-check" @click="save_handle"
-          >保存</el-button
-        >
+      <el-button type="danger" icon="el-icon-check" @click="save_handle"
+        >保存</el-button
+      >
     </div>
+
+    <el-dialog
+      title="工废明细"
+      :visible.sync="dialogVisible"
+      :close-on-click-modal="false"
+      append-to-body
+      @opened="gfmx_opened_handle"
+      width="40%"
+    >
+      <div>
+        <gfmxform
+          ref="fgmx_form"
+          :isread="isread"
+          :isadmin="isadmin"
+          :datalist="currentrow.gfmxlist"
+        ></gfmxform>
+      </div>
+      <div slot="footer">
+        <el-button type="primary" @click="gfmx_ok_handle">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import store from "@/store/index";
 import ApiFn from "@/api/baseapi";
-import { deepClone, parseTime } from "@/utils/index";
+import { deepClone, newGuid, parseTime } from "@/utils/index";
+import GFMX from "../../gfmx.vue";
 export default {
+  components: {
+    gfmxform: GFMX,
+  },
   data() {
     return {
       pickeroptions: {
@@ -301,6 +335,8 @@ export default {
           );
         },
       },
+      dialogVisible: false,
+      currentrow: {},
       cplist: [],
       list: [],
       form: {
@@ -315,11 +351,13 @@ export default {
         hxlist: [],
       },
       jjitem: {
+        rid:'',
         cpmc: "",
         kcs: 0,
         jgs: 0,
         gfs: 0,
         lfs: 0,
+        gfmxlist: [],
       },
       hxitem: {
         xm: "",
@@ -347,15 +385,13 @@ export default {
     },
   },
   mounted() {
+    this.get_cplist();
     if (this.rq && this.bc) {
       this.load_data(this.rq, this.bc);
     }
     if (!this.isread) {
-      this.cplist.push(
-        { label: "E115", value: "E115" },
-        { label: "E111", value: "E111" }
-      );
       let row = deepClone(this.jjitem);
+      row.rid = newGuid();
       this.form.jjlist.push(row);
       let row1 = deepClone(this.hxitem);
       row1.xm = "全检";
@@ -374,16 +410,46 @@ export default {
   methods: {
     add_item_handle() {
       let row = deepClone(this.jjitem);
+      row.rid = newGuid();
       this.form.jjlist.push(row);
     },
     del_item_handle(index) {
       this.form.jjlist.splice(index, 1);
     },
+    get_cplist() {
+      ApiFn.requestapi("get", "/cdgc/djkjjb/get_cplist", {}).then((res) => {
+        if (res.code === 1) {
+          this.cplist = res.list;
+        }
+      });
+    },
+    //工废明细录入
+    input_gfmx_handle(row) {
+      this.currentrow = row;
+      console.log(this.currentrow);
+      this.dialogVisible = true;
+    },
+    gfmx_opened_handle() {
+      this.$refs.fgmx_form.init();
+    },
+    gfmx_ok_handle() {
+      let gfdata = this.$refs.fgmx_form.get_gfdata();
+      let newgfdata = deepClone(gfdata);
+      if (this.currentrow.rid) {
+        let pos = this.form.jjlist.findIndex((t) => t.rid === this.currentrow.rid);
+        if (pos !== -1) {
+          this.form.jjlist[pos].gfmxlist = newgfdata;
+          this.form.jjlist[pos].gfs = newgfdata.length;
+        }
+      }
+      this.dialogVisible = false;
+      this.$refs.fgmx_form.empty_gfdata();
+    },
     save_handle() {
       try {
         let postdata = {
           id: 0,
-          isadmin:this.isadmin,
+          isadmin: this.isadmin,
           rq: this.form.rq,
           bc: this.form.bc,
           jbr: this.form.jjr,
@@ -408,6 +474,7 @@ export default {
             lfsl: ele.lfs,
             hgsl: ele.jgs - ele.gfs - ele.lfs,
             kcsysl: ele.kcs - ele.jgs,
+            gfmxlist:ele.gfmxlist,
           });
         }
         for (let index = 0; index < this.form.hxlist.length; index++) {
@@ -454,11 +521,13 @@ export default {
             this.form.qtqk = res.bill.qtqk;
             this.form.jjlist = res.bill.djkjjbdetail.map((i) => {
               let o = {
+                rid : newGuid(),
                 cpmc: i.cpmc,
                 kcs: i.kcsl,
                 jgs: i.jgsl,
                 gfs: i.gfsl,
                 lfs: i.lfsl,
+                gfmxlist:i.gfmxlist,
               };
               return o;
             });

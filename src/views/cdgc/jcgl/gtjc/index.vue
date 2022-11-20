@@ -15,12 +15,28 @@
         </td>
         <td class="td_label" style="width: 100px">检验员</td>
         <td>
-          <el-input
+          <!-- <el-input
             v-model="form.jyy"
             clearable
             style="width: 120px"
             placeholder="请输入检验员"
-          ></el-input>
+          ></el-input> -->
+          <el-select
+            v-model="form.jyy"
+            placeholder="请输入检验员"
+            allow-create
+            clearable
+            filterable
+            style="width: 120px;"
+          >
+            <el-option
+              v-for="(item, idx) in jyylist"
+              :key="idx"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
         </td>
         <td colspan="3" class="td_label" style="width: 100px">检验类别</td>
         <td>
@@ -423,6 +439,7 @@ export default {
   name: "GtjcComponent",
   data() {
     return {
+      jyylist: [],
       list: [],
       cplxlist: [],
       jylblist: [],
@@ -473,6 +490,7 @@ export default {
     };
   },
   mounted() {
+    this.get_jyylist();
     this.get_cplx_list();
     this.get_sbxx();
     this.jylblist = [
@@ -491,6 +509,15 @@ export default {
     ];
   },
   methods: {
+    get_jyylist() {
+      ApiFn.requestapi("get", "/cdgc/jcxx/get_jcrylist", {}).then((res) => {
+        if (res.code === 1) {
+          this.jyylist = res.list;
+        } else if (res.code === 0) {
+          this.$message.error(res.msg);
+        }
+      });
+    },
     get_sbxx() {
       ApiFn.requestapi("get", "/cdgc/jcxx/get_sbxx", {}).then((res) => {
         if (res.code === 1) {
@@ -561,77 +588,77 @@ export default {
         //   rq: this.form.rq,
         //   cplx: lx,
         // }).then((r) => {
-          // if (r.code === 1) {
-            this.form.ewm1 = "";
-            this.form.ewm2 = "";
-            this.form.ewm3 = "";
-            this.form.ewm4 = "";
-            this.form.mh1 = "";
-            this.form.mh2 = "";
-            this.form.mh3 = "";
-            this.form.mh4 = "";
-            //this.billids = r.ids;
-            ApiFn.requestapi("get", "/cdgc/gtjc/jcsj/get_jcdata_lx", {
-              lx: lx,
-            }).then((res) => {
-              if (res.code === 1) {
-                this.list = res.list.map((i) => {
-                  i.cpfwrowspan = 1;
-                  i.kxmcrowspan = 1;
-                  i.kjzszrowspan = 1;
-                  i.sdzszrowspan = 1;
-                  i.cpfwisshow = true;
-                  i.kxmcisshow = true;
-                  i.kjzszisshow = true;
-                  i.sdzszisshow = true;
-                  i.result1 = "";
-                  i.result2 = "";
-                  i.result3 = "";
-                  i.result4 = "";
-                  //
-                  i.size1 = "";
-                  i.size2 = "";
-                  i.size3 = "";
-                  i.size4 = "";
-                  //
-                  i.jg1 = "";
-                  i.jg2 = "";
-                  i.jg3 = "";
-                  i.jg4 = "";
-                  //样式
-                  i.class1 = "";
-                  i.class2 = "";
-                  i.class3 = "";
-                  i.class4 = "";
-                  i.sdclass1 = "";
-                  i.sdclass2 = "";
-                  i.sdclass3 = "";
-                  i.sdclass4 = "";
-                  return i;
-                });
-                for (let i = 0; i < this.list.length; i++) {
-                  const elcpfwi = this.list[i].cpfw;
-                  const elkxmci = this.list[i].kxmc;
-                  const elkjzszi = this.list[i].kjzsz;
-                  const elsdzszi = this.list[i].sdzsz;
-                  for (let j = i + 1; j < this.list.length; j++) {
-                    const elcpfwj = this.list[j].cpfw;
-                    if (elcpfwi === elcpfwj) {
-                      this.list[i].cpfwrowspan++;
-                      this.list[j].cpfwisshow = false;
-                    }
-                  }
-                  this.set_rowspan(i, "kxmc", elkxmci, "cpfw", elcpfwi);
-                  this.set_rowspan(i, "kjzsz", elkjzszi, "cpfw", elcpfwi);
-                  this.set_rowspan(i, "sdzsz", elsdzszi, "cpfw", elcpfwi);
-                }
-              } else {
-                this.$message.error(res.msg);
-              }
+        // if (r.code === 1) {
+        this.form.ewm1 = "";
+        this.form.ewm2 = "";
+        this.form.ewm3 = "";
+        this.form.ewm4 = "";
+        this.form.mh1 = "";
+        this.form.mh2 = "";
+        this.form.mh3 = "";
+        this.form.mh4 = "";
+        //this.billids = r.ids;
+        ApiFn.requestapi("get", "/cdgc/gtjc/jcsj/get_jcdata_lx", {
+          lx: lx,
+        }).then((res) => {
+          if (res.code === 1) {
+            this.list = res.list.map((i) => {
+              i.cpfwrowspan = 1;
+              i.kxmcrowspan = 1;
+              i.kjzszrowspan = 1;
+              i.sdzszrowspan = 1;
+              i.cpfwisshow = true;
+              i.kxmcisshow = true;
+              i.kjzszisshow = true;
+              i.sdzszisshow = true;
+              i.result1 = "";
+              i.result2 = "";
+              i.result3 = "";
+              i.result4 = "";
+              //
+              i.size1 = "";
+              i.size2 = "";
+              i.size3 = "";
+              i.size4 = "";
+              //
+              i.jg1 = "";
+              i.jg2 = "";
+              i.jg3 = "";
+              i.jg4 = "";
+              //样式
+              i.class1 = "";
+              i.class2 = "";
+              i.class3 = "";
+              i.class4 = "";
+              i.sdclass1 = "";
+              i.sdclass2 = "";
+              i.sdclass3 = "";
+              i.sdclass4 = "";
+              return i;
             });
-          // } else {
-          //   this.$message.error(r.msg);
-          // }
+            for (let i = 0; i < this.list.length; i++) {
+              const elcpfwi = this.list[i].cpfw;
+              const elkxmci = this.list[i].kxmc;
+              const elkjzszi = this.list[i].kjzsz;
+              const elsdzszi = this.list[i].sdzsz;
+              for (let j = i + 1; j < this.list.length; j++) {
+                const elcpfwj = this.list[j].cpfw;
+                if (elcpfwi === elcpfwj) {
+                  this.list[i].cpfwrowspan++;
+                  this.list[j].cpfwisshow = false;
+                }
+              }
+              this.set_rowspan(i, "kxmc", elkxmci, "cpfw", elcpfwi);
+              this.set_rowspan(i, "kjzsz", elkjzszi, "cpfw", elcpfwi);
+              this.set_rowspan(i, "sdzsz", elsdzszi, "cpfw", elcpfwi);
+            }
+          } else {
+            this.$message.error(res.msg);
+          }
+        });
+        // } else {
+        //   this.$message.error(r.msg);
+        // }
         // });
       } catch (error) {
         this.$message.error(error);
@@ -652,7 +679,11 @@ export default {
       } else if (row.kjtype === "text") {
         let inputval = row[keyname];
         console.log(inputval);
-        console.log(parseFloat(inputval),parseFloat(row.kjccxx),parseFloat(row.kjccsx));
+        console.log(
+          parseFloat(inputval),
+          parseFloat(row.kjccxx),
+          parseFloat(row.kjccsx)
+        );
         if (isNaN(inputval)) {
           this.$message.error("输入的类型不合法");
           row[kname] = "txterror";
@@ -722,8 +753,8 @@ export default {
                   } else {
                     this.list[pos]["class" + index] = "";
                   }
-                } 
-                 if (this.list[pos].kjtype === "text") {
+                }
+                if (this.list[pos].kjtype === "text") {
                   if (
                     this.list[pos].kjccxx <= i.kjval &&
                     i.kjval <= this.list[pos].kjccsx
@@ -734,8 +765,8 @@ export default {
                   } else {
                     this.list[pos]["class" + index] = "txterror";
                   }
-                } 
-                 if (this.list[pos].sdtype === "text") {
+                }
+                if (this.list[pos].sdtype === "text") {
                   if (
                     this.list[pos].sdmjxx <= i.sdmjval &&
                     i.sdmjval <= this.list[pos].sdmjsx
@@ -800,8 +831,8 @@ export default {
               kjval: i.result1,
               sdmjval: i.size1,
               jcjg: i.jg1,
-              kjtype:i.kjtype,
-              sdtype:i.sdtype,
+              kjtype: i.kjtype,
+              sdtype: i.sdtype,
             };
             return mxobj;
           }),
@@ -828,8 +859,8 @@ export default {
               kjval: i.result2,
               sdmjval: i.size2,
               jcjg: i.jg2,
-              kjtype:i.kjtype,
-              sdtype:i.sdtype,
+              kjtype: i.kjtype,
+              sdtype: i.sdtype,
             };
             return mxobj;
           }),
@@ -856,8 +887,8 @@ export default {
               kjval: i.result3,
               sdmjval: i.size3,
               jcjg: i.jg3,
-              kjtype:i.kjtype,
-              sdtype:i.sdtype,
+              kjtype: i.kjtype,
+              sdtype: i.sdtype,
             };
             return mxobj;
           }),
@@ -884,8 +915,8 @@ export default {
               kjval: i.result4,
               sdmjval: i.size4,
               jcjg: i.jg4,
-              kjtype:i.kjtype,
-              sdtype:i.sdtype,
+              kjtype: i.kjtype,
+              sdtype: i.sdtype,
             };
             return mxobj;
           }),

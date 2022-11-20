@@ -53,53 +53,8 @@
       <template #operate="scope">
         <template v-if="pageconfig.operate_type === 'text'">
           <span v-for="(item, index) in pageconfig.operate_fnlist" :key="index">
-            <template v-if="item.btntype === 'upload'">
-              <el-upload
-                v-if="scope.row.isedit"
-                :headers="headers"
-                :action="item.action"
-                :show-file-list="false"
-                accept=".pdf,application/pdf"
-                :data="scope.row"
-                :before-upload="before_upload_PDFHandle"
-                :on-success="item.callback"
-              >
-                <el-button type="text">{{ item.label }}</el-button>
-              </el-upload>
-            </template>
-            <template v-else-if="item.btntype === 'uploadvideo'">
-              <el-upload
-                v-if="scope.row.isedit"
-                :headers="headers"
-                :action="item.action"
-                :show-file-list="false"
-                accept=".mp4,video/mp4,application/mp4"
-                :data="scope.row"
-                :before-upload="before_upload_Mp4Handle"
-                :on-success="item.callback"
-              >
-                <el-button type="text">{{ item.label }}</el-button>
-              </el-upload>
-            </template>
-            <template v-else>
-              <el-button
-                type="text"
-                @click.native="execfun(scope.row, item.fnname)"
-                >{{ item.label }}</el-button
-              ></template
-            >
-          </span>
-        </template>
-        <template v-else>
-          <el-dropdown>
-            <span class="el-dropdown-link">
-              <i class="el-icon-setting" style="font-size: 16px" />
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item
-                v-for="(item, index) in pageconfig.operate_fnlist"
-                :key="index"
-              >
+            <template v-if="item.condition">
+              <template v-if="isshow_operatebtn(scope.row, item.condition)">
                 <template v-if="item.btntype === 'upload'">
                   <el-upload
                     v-if="scope.row.isedit"
@@ -131,10 +86,137 @@
                 <template v-else>
                   <el-button
                     type="text"
-                    @click.native="execpagefun(scope.row, item)"
+                    @click.native="execfun(scope.row, item.fnname)"
                     >{{ item.label }}</el-button
                   ></template
                 >
+              </template>
+            </template>
+            <template v-else>
+              <template v-if="item.btntype === 'upload'">
+                <el-upload
+                  v-if="scope.row.isedit"
+                  :headers="headers"
+                  :action="item.action"
+                  :show-file-list="false"
+                  accept=".pdf,application/pdf"
+                  :data="scope.row"
+                  :before-upload="before_upload_PDFHandle"
+                  :on-success="item.callback"
+                >
+                  <el-button type="text">{{ item.label }}</el-button>
+                </el-upload>
+              </template>
+              <template v-else-if="item.btntype === 'uploadvideo'">
+                <el-upload
+                  v-if="scope.row.isedit"
+                  :headers="headers"
+                  :action="item.action"
+                  :show-file-list="false"
+                  accept=".mp4,video/mp4,application/mp4"
+                  :data="scope.row"
+                  :before-upload="before_upload_Mp4Handle"
+                  :on-success="item.callback"
+                >
+                  <el-button type="text">{{ item.label }}</el-button>
+                </el-upload>
+              </template>
+              <template v-else>
+                <el-button
+                  type="text"
+                  @click.native="execfun(scope.row, item.fnname)"
+                  >{{ item.label }}</el-button
+                ></template
+              >
+            </template>
+          </span>
+        </template>
+        <template v-else>
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              <i class="el-icon-setting" style="font-size: 16px" />
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item
+                v-for="(item, index) in pageconfig.operate_fnlist"
+                :key="index"
+              >
+                <template v-if="item.condition">
+                  <template v-if="isshow_operatebtn(scope.row, item.condition)">
+                    <template v-if="item.btntype === 'upload'">
+                      <el-upload
+                        v-if="scope.row.isedit"
+                        :headers="headers"
+                        :action="item.action"
+                        :show-file-list="false"
+                        accept=".pdf,application/pdf"
+                        :data="scope.row"
+                        :before-upload="before_upload_PDFHandle"
+                        :on-success="item.callback"
+                      >
+                        <el-button type="text">{{ item.label }}</el-button>
+                      </el-upload>
+                    </template>
+                    <template v-else-if="item.btntype === 'uploadvideo'">
+                      <el-upload
+                        v-if="scope.row.isedit"
+                        :headers="headers"
+                        :action="item.action"
+                        :show-file-list="false"
+                        accept=".mp4,video/mp4,application/mp4"
+                        :data="scope.row"
+                        :before-upload="before_upload_Mp4Handle"
+                        :on-success="item.callback"
+                      >
+                        <el-button type="text">{{ item.label }}</el-button>
+                      </el-upload>
+                    </template>
+                    <template v-else>
+                      <el-button
+                        type="text"
+                        @click.native="execpagefun(scope.row, item)"
+                        >{{ item.label }}</el-button
+                      ></template
+                    >
+                  </template>
+                </template>
+                <template v-else>
+                  <template v-if="item.btntype === 'upload'">
+                    <el-upload
+                      v-if="scope.row.isedit"
+                      :headers="headers"
+                      :action="item.action"
+                      :show-file-list="false"
+                      accept=".pdf,application/pdf"
+                      :data="scope.row"
+                      :before-upload="before_upload_PDFHandle"
+                      :on-success="item.callback"
+                    >
+                      <el-button type="text">{{ item.label }}</el-button>
+                    </el-upload>
+                  </template>
+                  <template v-else-if="item.btntype === 'uploadvideo'">
+                    <el-upload
+                      v-if="scope.row.isedit"
+                      :headers="headers"
+                      :action="item.action"
+                      :show-file-list="false"
+                      accept=".mp4,video/mp4,application/mp4"
+                      :data="scope.row"
+                      :before-upload="before_upload_Mp4Handle"
+                      :on-success="item.callback"
+                    >
+                      <el-button type="text">{{ item.label }}</el-button>
+                    </el-upload>
+                  </template>
+                  <template v-else>
+                    <el-button
+                      type="text"
+                      @click.native="execpagefun(scope.row, item)"
+                      >{{ item.label }}</el-button
+                    ></template
+                  >
+                </template>
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -183,12 +265,12 @@ export default {
     return {
       dialogVisible: false,
       dialog_title: "表单",
-      dialog_fnitem:{},
+      dialog_fnitem: {},
       dialog_width: "",
       dialog_viewpath: "",
       dialog_props: {},
-      dialog_vm : null,
-      dialog_hidefooter:false,
+      dialog_vm: null,
+      dialog_hidefooter: false,
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -197,7 +279,7 @@ export default {
   mounted() {},
   methods: {
     dialog_opend_handle() {
-      this.create(this,this.dialog_viewpath, this.dialog_props);
+      this.create(this, this.dialog_viewpath, this.dialog_props);
     },
     dialog_closed_handle() {
       let chil = document.getElementById("dialog_body").childNodes;
@@ -205,16 +287,14 @@ export default {
         document.getElementById("dialog_body").removeChild(i);
       });
     },
-    create(vm,viewpath, props) {
+    create(vm, viewpath, props) {
       let Component = (resolve) =>
         require.ensure([], () =>
           resolve(require("@/views/" + viewpath + ".vue"))
         );
       vm.dialog_vm = new Vue({
-        mounted() {
-        },
-        destroyed () {
-        },
+        mounted() {},
+        destroyed() {},
         render(h) {
           let node = h(Component, { props });
           return node;
@@ -223,19 +303,54 @@ export default {
       document.getElementById("dialog_body").appendChild(this.dialog_vm.$el);
     },
     dialog_comfire_handle() {
-      if(this.dialog_fnitem.callback && typeof this.dialog_fnitem.callback === 'string'){
+      if (
+        this.dialog_fnitem.callback &&
+        typeof this.dialog_fnitem.callback === "string"
+      ) {
         this[this.dialog_fnitem.callback](this.dialog_vm);
-      }
-      else if(this.dialog_fnitem.callback && typeof this.dialog_fnitem.callback === 'function'){     
+      } else if (
+        this.dialog_fnitem.callback &&
+        typeof this.dialog_fnitem.callback === "function"
+      ) {
         this.dialog_fnitem.callback(this.dialog_vm);
       }
     },
     execfun(row, fnname) {
       this[fnname](row);
     },
-    execpagefun(row,fnitem){
-      this[fnitem.fnname](row,fnitem);
-    }
+    isshow_operatebtn(row, conditions) {
+      let ret = [];
+      conditions.forEach((i) => {
+        if (i.oper === "=") {
+          let isok = row[i.field] === i.val ? true : false;
+          ret.push(isok);
+        }
+        else if (i.oper === "!=") {
+          let isok = row[i.field] !== i.val ? true : false;
+          ret.push(isok);
+        }
+        else if (i.oper === ">") {
+          let isok = row[i.field] > i.val ? true : false;
+          ret.push(isok);
+        }
+        else if (i.oper === ">=") {
+          let isok = row[i.field] >= i.val ? true : false;
+          ret.push(isok);
+        }
+        else if (i.oper === "<") {
+          let isok = row[i.field] < i.val ? true : false;
+          ret.push(isok);
+        }
+        else if (i.oper === "<=") {
+          let isok = row[i.field] <= i.val ? true : false;
+          ret.push(isok);
+        }
+      });
+      return ret.filter((i) => i).length === ret.length ? true : false;
+    },
+    execpagefun(row, fnitem) {
+      this[fnitem.fnname](row, fnitem);
+    },
   },
 };
 </script>

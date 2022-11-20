@@ -31,7 +31,6 @@
 <script>
 import ApiFn from "@/api/baseapi";
 import GtjjbForm from "./component/gtjjb.vue";
-import { parseTime } from "@/utils";
 export default {
   name: "GtjjbComponent",
   components: {

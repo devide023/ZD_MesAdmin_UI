@@ -5,8 +5,10 @@
     <table class="gtjjb_form_head">
       <tr>
         <td style="width: 33.3%">
-          日期：<span v-if="isread">{{ dqrq | parseTime("{y}-{m}-{d}") }}</span>
-          <span>
+          日期：<template v-if="isread">{{
+            dqrq | parseTime("{y}-{m}-{d}")
+          }}</template>
+          <template v-else>
             <el-date-picker
               v-if="isadmin"
               v-model="dqrq"
@@ -24,7 +26,7 @@
               placeholder="选择日期"
               @change="rq_change_handle"
             ></el-date-picker>
-          </span>
+          </template>
         </td>
         <td style="width: 33.3%">
           班次：<span v-if="isread">{{ bc }}</span>
@@ -131,15 +133,25 @@
             {{ item.up_mpys + item.db_mpsl + item.hcsl - item.dbmpys }}
           </td>
           <td style="text-align: center">
-            <span v-if="isread">
+            <template v-if="isread">
               {{ item.gfs }}
-            </span>
-            <el-input-number
+              <el-button type="text" @click="input_gfmx_handle(item)"
+                >工废明细</el-button
+              >
+            </template>
+            <template v-else>
+              {{ item.gfs }}
+              <el-button type="text" @click="input_gfmx_handle(item)"
+                >工废明细</el-button
+              >
+            </template>
+
+            <!-- <el-input-number
               v-else
               v-model="item.gfs"
               :min="0"
               :step="1"
-            ></el-input-number>
+            ></el-input-number> -->
           </td>
           <td style="text-align: center">
             <span v-if="isread">
@@ -285,16 +297,45 @@
         >保存</el-button
       >
     </div>
+    <el-dialog
+      title="工废明细"
+      :visible.sync="dialogVisible"
+      :close-on-click-modal="false"
+      append-to-body
+      @opened="gfmx_opened_handle"
+      width="40%"
+    >
+      <div>
+        <gfmxform
+          ref="fgmx_form"
+          :isread="isread"
+          :isadmin="isadmin"
+          :datalist="currentrow.gfmxlist"
+        ></gfmxform>
+      </div>
+      <div slot="footer">
+        <el-button type="primary" @click="gfmx_ok_handle">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import store from "@/store/index";
 import ApiFn from "@/api/baseapi";
-import { deepClone, parseTime } from "@/utils/index";
+import { deepClone, newGuid, parseTime } from "@/utils/index";
+import GFMX from "../../gfmx.vue";
+import { number } from 'echarts/lib/export';
 export default {
   name: "Gtjjb_Form_Component",
+  components: {
+    gfmxform: GFMX,
+  },
   props: {
+    id:{
+      type:number,
+      default:0
+    },
     isread: {
       type: Boolean,
       default: false,
@@ -321,6 +362,8 @@ export default {
           );
         },
       },
+      dialogVisible: false,
+      currentrow: {},
       sclist: [],
       cplist: [], //产品列表
       dqrq: parseTime(new Date()), //当前日期
@@ -334,6 +377,7 @@ export default {
       mcgw: "", //毛刺岗位
       jygw: "", //检验岗位
       scitem: {
+        rid: "",
         cpmc: "",
         up_mpys: 0, //上个班次毛坯余数
         db_mpsl: 0, //当班毛坯数量
@@ -343,6 +387,7 @@ export default {
         lfs: 0, //料废数
         hgs: 0, //合格数
         dbmpys: 0, //当班毛坯余数
+        gfmxlist: [], //工废明细
       },
     };
   },
@@ -352,6 +397,7 @@ export default {
     }
     if (!this.isread) {
       let row = deepClone(this.scitem);
+      row.rid = newGuid();
       this.sclist.push(row);
     }
     this.get_cplist_data();
@@ -359,6 +405,7 @@ export default {
   methods: {
     add_item_handle() {
       let row = deepClone(this.scitem);
+      row.rid = newGuid();
       this.sclist.push(row);
     },
     del_item_handle(index) {
@@ -378,6 +425,28 @@ export default {
     },
     bc_change_handle(v) {
       this.$emit("bc_change", { rq: this.dqrq, bc: v });
+    },
+    //工废明细录入
+    input_gfmx_handle(row) {
+      this.currentrow = row;
+      console.log(this.currentrow);
+      this.dialogVisible = true;
+    },
+    gfmx_opened_handle() {
+      this.$refs.fgmx_form.init();
+    },
+    gfmx_ok_handle() {
+      let gfdata = this.$refs.fgmx_form.get_gfdata();
+      let newgfdata = deepClone(gfdata);
+      if (this.currentrow.rid) {
+        let pos = this.sclist.findIndex((t) => t.rid === this.currentrow.rid);
+        if (pos !== -1) {
+          this.sclist[pos].gfmxlist = newgfdata;
+          this.sclist[pos].gfs = newgfdata.length;
+        }
+      }
+      this.dialogVisible = false;
+      this.$refs.fgmx_form.empty_gfdata();
     },
     //加载班次数据
     load_bc_data(rq, bc) {
@@ -399,6 +468,7 @@ export default {
             this.jygw = res.list[0].jyry;
             this.sclist = res.list[0].mxlist.map((i) => {
               let rd = {
+                rid:newGuid(),
                 cpmc: i.cpmc,
                 up_mpys: i.sbcmpyl,
                 db_mpsl: i.dbmpsl,
@@ -408,6 +478,7 @@ export default {
                 lfs: i.lfsl,
                 hgs: i.hgsl,
                 dbmpys: i.dbmpyl,
+                gfmxlist:i.gfmxlist
               };
               return rd;
             });
@@ -460,6 +531,7 @@ export default {
           lfsl: i.lfs,
           hgsl: i.hgs,
           dbmpyl: i.dbmpys,
+          gfmxlist: i.gfmxlist,
         });
       });
       ApiFn.requestapi("post", "/cdgc/gtjjb/save_gtjjb", postdata).then(

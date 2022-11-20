@@ -91,11 +91,15 @@
             ></el-input-number>
           </td>
           <td style="text-align: center">
-            <el-input-number
+            <!-- <el-input-number
               v-model="item.gfs"
               :min="0"
               :step="1"
-            ></el-input-number>
+            ></el-input-number> -->
+            {{item.gfs}}
+            <el-button type="text" @click="input_gfmx_handle(item)"
+              >工废明细</el-button
+            >
           </td>
           <td style="text-align: center">
             <el-input-number
@@ -124,15 +128,23 @@
           </td>
         </tr>
         <tr>
-          <td class="tdlabel" style="text-align: center" :rowspan="form.hxlist.length + 1">
+          <td
+            class="tdlabel"
+            style="text-align: center"
+            :rowspan="form.hxlist.length + 1"
+          >
             后序
           </td>
           <td class="tdlabel" style="text-align: center"><b>项目</b></td>
           <td class="tdlabel" style="text-align: center"><b>投入数</b></td>
-          <td class="tdlabel" colspan="2" style="text-align: center"><b>待评审</b></td>
+          <td class="tdlabel" colspan="2" style="text-align: center">
+            <b>待评审</b>
+          </td>
           <td class="tdlabel" style="text-align: center"><b>工废品</b></td>
           <td class="tdlabel" style="text-align: center"><b>料废品</b></td>
-          <td class="tdlabel" colspan="2" style="text-align: center"><b>合格品</b></td>
+          <td class="tdlabel" colspan="2" style="text-align: center">
+            <b>合格品</b>
+          </td>
         </tr>
         <tr v-for="(item, index) in form.hxlist" :key="'hx' + index">
           <td style="text-align: center">{{ item.xm }}</td>
@@ -211,28 +223,59 @@
         >保存</el-button
       >
     </div>
+    <el-dialog
+      title="工废明细"
+      :visible.sync="dialogVisible"
+      :close-on-click-modal="false"
+      append-to-body
+      @opened="gfmx_opened_handle"
+      width="40%"
+    >
+      <div>
+        <gfmxform
+          ref="fgmx_form"
+          :isread="isread"
+          :isadmin="isadmin"
+          :datalist="currentrow.gfmxlist"
+        ></gfmxform>
+      </div>
+      <div slot="footer">
+        <el-button type="primary" @click="gfmx_ok_handle">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import ApiFn from "@/api/baseapi";
-import { deepClone, parseTime } from "@/utils/index";
+import { deepClone, newGuid, parseTime } from "@/utils/index";
+import GFMX from "../gfmx.vue";
 export default {
   name: "DjkjjbComponent",
+  components: {
+    gfmxform: GFMX,
+  },
   data() {
     return {
       cplist: [],
       list: [],
-      pickeroptions:{
-        disabledDate(time){
-          return (time.getTime()<Date.now()-2*24*60*60*1000) || (time.getTime()> Date.now());
-        }
+      isread:false,
+      isadmin:false,
+      dialogVisible: false,
+      currentrow: {},
+      pickeroptions: {
+        disabledDate(time) {
+          return (
+            time.getTime() < Date.now() - 2 * 24 * 60 * 60 * 1000 ||
+            time.getTime() > Date.now()
+          );
+        },
       },
       form: {
         rq: parseTime(new Date()),
         bc: "",
         jjr: "",
-        hxry:'',
+        hxry: "",
         zlqk: "",
         sbqk: "",
         qtqk: "",
@@ -240,11 +283,13 @@ export default {
         hxlist: [],
       },
       jjitem: {
+        rid:'',
         cpmc: "",
         kcs: 0,
         jgs: 0,
         gfs: 0,
         lfs: 0,
+        gfmxlist: [],
       },
       hxitem: {
         xm: "",
@@ -256,11 +301,9 @@ export default {
     };
   },
   mounted() {
-    this.cplist.push(
-      { label: "E115", value: "E115" },
-      { label: "E111", value: "E111" }
-    );
+    this.get_cplist();
     let row = deepClone(this.jjitem);
+    row.rid = newGuid();
     this.form.jjlist.push(row);
     let row1 = deepClone(this.hxitem);
     row1.xm = "全检";
@@ -278,52 +321,83 @@ export default {
   methods: {
     add_item_handle() {
       let row = deepClone(this.jjitem);
+      row.rid = newGuid();
       this.form.jjlist.push(row);
     },
     del_item_handle(index) {
       this.form.jjlist.splice(index, 1);
     },
+    get_cplist() {
+      ApiFn.requestapi("get", "/cdgc/djkjjb/get_cplist", {}).then((res) => {
+        if (res.code === 1) {
+          this.cplist = res.list;
+        }
+      });
+    },
+    //工废明细录入
+    input_gfmx_handle(row) {
+      this.currentrow = row;
+      console.log(this.currentrow);
+      this.dialogVisible = true;
+    },
+    gfmx_opened_handle() {
+      this.$refs.fgmx_form.init();
+    },
+    gfmx_ok_handle() {
+      let gfdata = this.$refs.fgmx_form.get_gfdata();
+      let newgfdata = deepClone(gfdata);
+      if (this.currentrow.rid) {
+        let pos = this.form.jjlist.findIndex((t) => t.rid === this.currentrow.rid);
+        if (pos !== -1) {
+          this.form.jjlist[pos].gfmxlist = newgfdata;
+          this.form.jjlist[pos].gfs = newgfdata.length;
+        }
+      }
+      this.dialogVisible = false;
+      this.$refs.fgmx_form.empty_gfdata();
+    },
     save_handle() {
       try {
         let postdata = {
-          id:0,
+          id: 0,
           rq: this.form.rq,
           bc: this.form.bc,
           jbr: this.form.jjr,
-          hxry:this.form.hxry,
+          hxry: this.form.hxry,
           zlqk: this.form.zlqk,
           sbqk: this.form.sbqk,
           qtqk: this.form.qtqk,
           lrr: this.$store.getters.name,
           lrsj: parseTime(new Date()),
           djkjjbdetail: [],
-          djkjjbdetailhx:[],
+          djkjjbdetailhx: [],
         };
         for (let index = 0; index < this.form.jjlist.length; index++) {
           const ele = this.form.jjlist[index];
           postdata.djkjjbdetail.push({
-            id:0,
-            billid:0,
-            cpmc:ele.cpmc,
-            kcsl:ele.kcs,
-            jgsl:ele.jgs,
-            gfsl:ele.gfs,
-            lfsl:ele.lfs,
-            hgsl:ele.jgs - ele.gfs - ele.lfs,
-            kcsysl:ele.kcs - ele.jgs
+            id: 0,
+            billid: 0,
+            cpmc: ele.cpmc,
+            kcsl: ele.kcs,
+            jgsl: ele.jgs,
+            gfsl: ele.gfs,
+            lfsl: ele.lfs,
+            hgsl: ele.jgs - ele.gfs - ele.lfs,
+            kcsysl: ele.kcs - ele.jgs,
+            gfmxlist:ele.gfmxlist
           });
         }
         for (let index = 0; index < this.form.hxlist.length; index++) {
           const ele = this.form.hxlist[index];
           postdata.djkjjbdetailhx.push({
-            id:0,
-            billid:0,
-            xmmc:ele.xm,
-            trjgsl:ele.trs,
-            dpssl:ele.dps,
-            gfsl:ele.gfp,
-            lfsl:ele.lfp,
-            hgsl:ele.trs - ele.dps - ele.gfp - ele.lfp
+            id: 0,
+            billid: 0,
+            xmmc: ele.xm,
+            trjgsl: ele.trs,
+            dpssl: ele.dps,
+            gfsl: ele.gfp,
+            lfsl: ele.lfp,
+            hgsl: ele.trs - ele.dps - ele.gfp - ele.lfp,
           });
         }
         ApiFn.requestapi("post", "/cdgc/djkjjb/save_jjb", postdata).then(
@@ -367,7 +441,7 @@ export default {
   line-height: 30px;
   border: 1px solid rgb(199, 199, 199);
 }
-::v-deep .cdgc_table thead th{
+::v-deep .cdgc_table thead th {
   height: 40px;
   line-height: 40px;
 }
@@ -378,7 +452,7 @@ export default {
   margin: 10px 0px;
   text-align: right;
 }
-::v-deep .tdlabel{
+::v-deep .tdlabel {
   background-color: rgb(231, 231, 231);
   font-weight: bold;
 }

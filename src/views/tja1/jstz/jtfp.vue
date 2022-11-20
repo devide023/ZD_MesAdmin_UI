@@ -53,7 +53,7 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="状态编码" prop="statusno">
+      <el-form-item label="状态编码">
         <el-select
           v-model="form.statusno"
           clearable
