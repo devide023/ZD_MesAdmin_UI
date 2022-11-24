@@ -154,7 +154,7 @@ import { batoperatemixin } from "@/mixin/batoperate_mixin";
 import { export_xls_mixin } from "@/mixin/export_xls_mixin";
 import { getToken } from "@/utils/auth";
 import condition from "@/mixin/search_form";
-import { deepClone } from "@/utils/index";
+import { deepClone,newGuid } from "@/utils/index";
 export default {
   name: "CgJhComponent",
   components: {
