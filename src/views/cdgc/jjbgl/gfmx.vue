@@ -21,6 +21,8 @@
               v-model="scope.row.vin"
               clearable
               placeholder="请输入件号"
+              ref="gfmx_vin_txt"
+              @keyup.enter.native="vin_keyup_handle"
             ></el-input>
           </template>
           <template v-else>
@@ -105,8 +107,7 @@ export default {
       },
     };
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
     init() {
       if (this.datalist.length > 0) {
@@ -116,11 +117,18 @@ export default {
         this.list.push(row);
       }
     },
+    vin_keyup_handle() {
+      this.add_item_handle();
+      this.$nextTick(() => {
+        var ref = this.$refs.gfmx_vin_txt;
+        ref.$el.querySelector('input').focus();
+      });
+    },
     get_gfdata() {
       return this.list;
     },
-    empty_gfdata(){
-        this.list = [];
+    empty_gfdata() {
+      this.list = [];
     },
     add_item_handle() {
       var row = deepClone(this.form);

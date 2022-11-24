@@ -324,24 +324,46 @@ export default {
         if (i.oper === "=") {
           let isok = row[i.field] === i.val ? true : false;
           ret.push(isok);
-        }
-        else if (i.oper === "!=") {
+        } else if (i.oper === "in") {
+          if (Object.prototype.toString.call(i.val) === "[object Array]") {
+            let isconst = i.field.indexOf("const") !== -1 ? true : false;
+            if (isconst) {
+              if (i.field === "const_userid") {
+                let cuid = this.$store.getters.userinfo.id;
+                let elepos = i.val.findIndex((e) => e === cuid);
+                if (elepos !== -1) {
+                  ret.push(true);
+                } else {
+                  ret.push(false);
+                }
+              }else{
+                ret.push(false);
+              }
+            } else {
+              let elepos = i.val.findIndex((e) => e === row[i.field]);
+
+              if (elepos !== -1) {
+                ret.push(true);
+              } else {
+                ret.push(false);
+              }
+            }
+          } else {
+            ret.push(false);
+          }
+        } else if (i.oper === "!=") {
           let isok = row[i.field] !== i.val ? true : false;
           ret.push(isok);
-        }
-        else if (i.oper === ">") {
+        } else if (i.oper === ">") {
           let isok = row[i.field] > i.val ? true : false;
           ret.push(isok);
-        }
-        else if (i.oper === ">=") {
+        } else if (i.oper === ">=") {
           let isok = row[i.field] >= i.val ? true : false;
           ret.push(isok);
-        }
-        else if (i.oper === "<") {
+        } else if (i.oper === "<") {
           let isok = row[i.field] < i.val ? true : false;
           ret.push(isok);
-        }
-        else if (i.oper === "<=") {
+        } else if (i.oper === "<=") {
           let isok = row[i.field] <= i.val ? true : false;
           ret.push(isok);
         }

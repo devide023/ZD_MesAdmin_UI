@@ -375,7 +375,7 @@ export default {
     },
     isadmin: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     rq: {
       type: String,
@@ -426,7 +426,6 @@ export default {
     //工废明细录入
     input_gfmx_handle(row) {
       this.currentrow = row;
-      console.log(this.currentrow);
       this.dialogVisible = true;
     },
     gfmx_opened_handle() {

@@ -145,6 +145,7 @@
 </template>
 
 <script>
+import ApiFn from "@/api/baseapi";
 import SearchBar from "@/components/QueryBar/index.vue";
 import TableComponent from "@/components/TableComponent/index.vue";
 import BatOperate from "@/components/BatOperate/index.vue";
@@ -184,6 +185,41 @@ export default {
     }
   },
   methods: {
+    getlist(data) {
+      try {
+        if (this.pageconfig.queryapi) {
+          this.$loading({
+            lock: true,
+            text: "数据加载中",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)",
+          });
+          ApiFn.requestapi(
+            this.pageconfig.queryapi.method,
+            this.pageconfig.queryapi.url,
+            data
+          ).then((res) => {
+            this.$loading().close();
+            if (res.code === 1) {
+              this.$message.success(res.msg);
+              this.editstatus = false;
+              this.resultcount = res.resultcount;
+              this.list = res.list.map((i) => {
+                i.rowkey = newGuid();
+                i.isdb = true;
+                i.isedit = false;
+                return i;
+              });
+              this.pageconfig.queryapi.callback(this, res);
+            } else {
+              this.$message.error(res.msg);
+            }
+          });
+        }
+      } catch (error) {
+        this.$message.error(error);
+      }
+    },
     execfun(row, fnname) {
       this[fnname](row);
     },

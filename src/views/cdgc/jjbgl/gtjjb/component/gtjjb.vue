@@ -325,7 +325,6 @@ import store from "@/store/index";
 import ApiFn from "@/api/baseapi";
 import { deepClone, newGuid, parseTime } from "@/utils/index";
 import GFMX from "../../gfmx.vue";
-import { number } from 'echarts/lib/export';
 export default {
   name: "Gtjjb_Form_Component",
   components: {
@@ -333,7 +332,7 @@ export default {
   },
   props: {
     id:{
-      type:number,
+      type:Number,
       default:0
     },
     isread: {
@@ -343,7 +342,7 @@ export default {
     },
     isadmin: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     calcrq: {
       type: String,
@@ -429,7 +428,6 @@ export default {
     //工废明细录入
     input_gfmx_handle(row) {
       this.currentrow = row;
-      console.log(this.currentrow);
       this.dialogVisible = true;
     },
     gfmx_opened_handle() {

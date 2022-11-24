@@ -260,7 +260,7 @@ export default {
       cplist: [],
       list: [],
       isread:false,
-      isadmin:false,
+      isadmin:true,
       dialogVisible: false,
       currentrow: {},
       pickeroptions: {

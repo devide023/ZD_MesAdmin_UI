@@ -46,6 +46,15 @@ module.exports = {
       alias: {
         '@': resolve('src')
       }
+    },
+    performance:{
+      hints:'warning',
+      maxEntrypointSize: 50000000,
+      maxAssetSize: 30000000,
+      // 只给出 js 文件的性能提示
+      assetFilter: function (assetFilename) {
+        return assetFilename.endsWith('.js')
+      }
     }
   },
   chainWebpack(config) {
