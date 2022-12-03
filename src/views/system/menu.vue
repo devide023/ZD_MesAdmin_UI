@@ -422,6 +422,7 @@
         @tab-click="tab_click_handle"
       >
         <el-tab-pane label="字段信息" name="fields">
+          <field-com></field-com>
           <el-autocomplete
             v-model="tablename"
             placeholder="过滤当前数据库表名"
@@ -874,11 +875,13 @@ import { basemixin } from "@/mixin/basemixin";
 import { menutypelist } from "./menutypelist";
 import { defaultfuns } from "./defaultfuns";
 import { parseTime, deepClone } from "@/utils";
+import FieldCom from './component/fieldinfo.vue';
 export default {
   name: "MenuComponent",
   components: {
     SearchBar,
     TableComponent,
+    FieldCom
   },
   data() {
     return {

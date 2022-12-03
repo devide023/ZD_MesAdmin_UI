@@ -250,7 +250,9 @@ export default {
       },
     };
   },
-  mounted() {},
+  mounted() {
+    
+  },
   methods: {
     execfun(row, fnname) {
       this[fnname](row);
@@ -273,7 +275,7 @@ export default {
                 } else {
                   ret.push(false);
                 }
-              }else{
+              } else {
                 ret.push(false);
               }
             } else {

@@ -31,6 +31,18 @@ export default {
             })
         }
     },
+    scopefunconfig:()=>{
+        let fullPath = router.currentRoute.fullPath;
+        let pos = fullPath.indexOf('?');
+        if (pos !== -1) {
+            fullPath = fullPath.substr(0, pos);
+        }
+        return request({
+            url: '/common/scopefuns',
+            method: 'get',
+            params: { path: fullPath }
+        })
+    },
     pageconfig: () => {
         let fullPath = router.currentRoute.fullPath;
         let pos = fullPath.indexOf('?');

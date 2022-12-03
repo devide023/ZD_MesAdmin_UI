@@ -21,6 +21,7 @@
         <template v-if="IsBatReplace">
           <el-dropdown-item>
             <el-upload
+              ref="ref_upload_replace"
               :action="action"
               :headers="headers"
               :multiple="false"
@@ -28,14 +29,19 @@
               accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               :before-upload="before_upload_xls_handle"
               :on-success="replace_upload_success"
+              style="display: none"
             >
-              <el-button type="text">替换导入</el-button>
+              <!-- <el-button type="text">替换导入</el-button> -->
             </el-upload>
+            <el-button type="text" @click="replace_tip_handle"
+              >替换导入</el-button
+            >
           </el-dropdown-item>
         </template>
         <template v-if="IsBatZh">
           <el-dropdown-item>
             <el-upload
+              ref="ref_upload_zh"
               :action="action"
               :headers="headers"
               :multiple="false"
@@ -43,9 +49,11 @@
               accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               :before-upload="before_upload_xls_handle"
               :on-success="zh_upload_success"
+              style="display: none"
             >
-              <el-button type="text">综合导入</el-button>
+              <!-- <el-button type="text">综合导入</el-button> -->
             </el-upload>
+            <el-button type="text" @click="zh_tip_handle">综合导入</el-button>
           </el-dropdown-item>
         </template>
         <el-dropdown-item>
@@ -208,6 +216,36 @@ export default {
         this.$message.error(error);
         this.$loading().close();
       }
+    },
+    replace_tip_handle() {
+      this.$confirm("替换导入将删除原数据再新增,确定要替换导入?", "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        cancelButtonClass: "el-button--primary",
+        confirmButtonClass: "el-button--danger",
+        type: "warning",
+      })
+        .then(() => {
+          this.$refs["ref_upload_replace"].$refs["upload-inner"].handleClick();
+        })
+        .catch((error) => error);
+    },
+    zh_tip_handle() {
+      this.$confirm(
+        "存在记录将更新原数据,否则将新增。确定要综合导入?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          cancelButtonClass: "el-button--primary",
+          confirmButtonClass: "el-button--danger",
+          type: "info",
+        }
+      )
+        .then(() => {
+          this.$refs["ref_upload_zh"].$refs["upload-inner"].handleClick();
+        })
+        .catch((error) => error);
     },
   },
 };

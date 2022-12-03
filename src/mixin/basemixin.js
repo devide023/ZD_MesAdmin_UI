@@ -41,15 +41,53 @@ export const basemixin = {
         this.getpageconfig();
         Vue.prototype.$basepage = this;
     },
+    activated() {
+        try {
+            if (this.pageconfig.isactivated) {
+                let vm = this;
+                ApiFn.scopefunconfig().then(res => {
+                    if (res.code === 1) {
+                        let scopeobj = Function('return ' + res.js)();
+                        if (Object.keys(scopeobj).length > 0) {
+                            if (scopeobj.activated) {
+                                scopeobj.activated(vm);
+                            }
+                        }
+                    } else {
+                        this.$message.error(res.msg);
+                    }
+                });
+            }
+        } catch (error) {
+            this.$message.error(error);
+        }
+    },
     mounted() {
+        try {
+            let vm = this;
+            ApiFn.scopefunconfig().then(res => {
+                if (res.code === 1) {
+                    let scopeobj = Function('return ' + res.js)();
+                    if (Object.keys(scopeobj).length > 0) {
+                        if (scopeobj.mounted) {
+                            scopeobj.mounted(vm);
+                        }
+                    }
+                } else {
+                    this.$message.error(res.msg);
+                }
+            });
+        } catch (error) {
+            this.$message.error(error);
+        }
     },
     methods: {
         getpageconfig() {
             try {
                 let fullpath = this.$router.currentRoute.fullPath;
                 let pos = fullpath.indexOf('?');
-                if(pos!==-1){
-                    fullpath = fullpath.substr(0,pos);
+                if (pos !== -1) {
+                    fullpath = fullpath.substr(0, pos);
                 }
                 ApiFn.pageconfig().then((res) => {
                     if (res.code === 1) {
@@ -58,14 +96,14 @@ export const basemixin = {
                         this.pagepermis = res.pagepermis;
                         let permis_info = this.$store.getters.pagepermis;
                         let batpermis = this.$store.getters.batpagepermis;
-                        let pos = permis_info.findIndex(t=>t.path === fullpath);
-                        if(pos === -1){
-                            this.$store.commit('permission/SET_PAGE_PERMIS',{ path:fullpath,permis:res.pagepermis});
+                        let pos = permis_info.findIndex(t => t.path === fullpath);
+                        if (pos === -1) {
+                            this.$store.commit('permission/SET_PAGE_PERMIS', { path: fullpath, permis: res.pagepermis });
                         }
                         let pos1 = batpermis.findIndex(t => t.path === fullpath);
                         this.btnlist = res.pagebtns;
                         this.batbtnlist = res.batbtns;
-                        if(pos1===-1){
+                        if (pos1 === -1) {
                             this.$store.commit('permission/SET_PAGE_BATPERMIS', { path: fullpath, permis: res.batbtns });
                         }
                         let hidecols = this.pagepermis.hidefields;
