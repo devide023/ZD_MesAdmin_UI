@@ -332,6 +332,9 @@ export default {
     remove_options_item_handle(row, idx) {
       row.options.splice(idx, 1);
     },
+    get_list_data(){
+      return this.list;
+    }
   },
 };
 </script>

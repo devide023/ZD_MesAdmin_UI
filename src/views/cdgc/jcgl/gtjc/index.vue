@@ -27,7 +27,7 @@
             allow-create
             clearable
             filterable
-            style="width: 120px;"
+            style="width: 120px"
           >
             <el-option
               v-for="(item, idx) in jyylist"
@@ -109,7 +109,7 @@
       </tr>
       <tr>
         <td rowspan="3" colspan="2" class="td_label">图号</td>
-        <td rowspan="3" colspan="3">
+        <td rowspan="3">
           <el-select
             v-model="form.th"
             placeholder="请选择图号"
@@ -127,6 +127,14 @@
                 item.cplx
               }}</span>
             </el-option>
+          </el-select>
+        </td>
+        <td rowspan="3" class="td_label">班次</td>
+        <td rowspan="3">
+          <el-select v-model="form.bc" clearable placeholder="请选择班次">
+            <el-option label="白班" value="白班"></el-option>
+            <el-option label="中班" value="中班"></el-option>
+            <el-option label="夜班" value="夜班"></el-option>
           </el-select>
         </td>
         <td colspan="3" class="td_label" style="width: 100px">机台号</td>
@@ -284,19 +292,23 @@
               <el-radio label="Z">{{ "" }}</el-radio>
             </el-radio-group>
             <el-input
+              :ref="'kjinput1' + idx"
               v-else-if="item.kjtype === 'text'"
               v-model="item.result1"
               placeholder="请输入孔径尺寸"
               clearable
+              @keydown.native="move_to_downcel('kjinput1', idx, $event)"
               @change="kj_change_handle(item, 1)"
             ></el-input>
           </td>
           <td :class="item.sdclass1">
             <el-input
+              :ref="'sdinput1' + idx"
               v-if="item.sdtype === 'text'"
               v-model="item.size1"
               clearable
               placeholder="请输入深度/面距尺寸"
+              @keydown.native="move_to_downcel('sdinput1', idx, $event)"
               @change="sdmj_change_handle(item, 1)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
@@ -313,19 +325,23 @@
               <el-radio label="Z">{{ "" }}</el-radio>
             </el-radio-group>
             <el-input
+              :ref="'kjinput2' + idx"
               v-else-if="item.kjtype === 'text'"
               v-model="item.result2"
               placeholder="请输入孔径尺寸"
               clearable
+              @keydown.native="move_to_downcel('kjinput2', idx, $event)"
               @change="kj_change_handle(item, 2)"
             ></el-input>
           </td>
           <td :class="item.sdclass2">
             <el-input
+              :ref="'sdinput2' + idx"
               v-if="item.sdtype === 'text'"
               v-model="item.size2"
               placeholder="请输入深度/面距尺寸"
               clearable
+              @keydown.native="move_to_downcel('sdinput2', idx, $event)"
               @change="sdmj_change_handle(item, 2)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
@@ -342,19 +358,23 @@
               <el-radio label="Z">{{ "" }}</el-radio>
             </el-radio-group>
             <el-input
+              :ref="'kjinput3' + idx"
               v-else-if="item.kjtype === 'text'"
               v-model="item.result3"
               placeholder="请输入孔径尺寸"
               clearable
+              @keydown.native="move_to_downcel('kjinput3', idx, $event)"
               @change="kj_change_handle(item, 3)"
             ></el-input>
           </td>
           <td :class="item.sdclass3">
             <el-input
+              :ref="'sdinput3' + idx"
               v-if="item.sdtype === 'text'"
               v-model="item.size3"
               placeholder="请输入深度/面距尺寸"
               clearable
+              @keydown.native="move_to_downcel('sdinput3', idx, $event)"
               @change="sdmj_change_handle(item, 3)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
@@ -371,19 +391,23 @@
               <el-radio label="Z">{{ "" }}</el-radio>
             </el-radio-group>
             <el-input
+              :ref="'kjinput4' + idx"
               v-else-if="item.kjtype === 'text'"
               v-model="item.result4"
               placeholder="请输入孔径尺寸"
               clearable
+              @keydown.native="move_to_downcel('kjinput4', idx, $event)"
               @change="kj_change_handle(item, 4)"
             ></el-input>
           </td>
           <td :class="item.sdclass4">
             <el-input
+              :ref="'sdinput4' + idx"
               v-if="item.sdtype === 'text'"
               v-model="item.size4"
               placeholder="请输入深度/面距尺寸"
               clearable
+              @keydown.native="move_to_downcel('sdinput4', idx, $event)"
               @change="sdmj_change_handle(item, 4)"
             ></el-input>
             <span v-else-if="item.sdtype === 'none'">/</span>
@@ -449,6 +473,7 @@ export default {
         cplx: "", //缸体类型
         th: "", //图号
         mh: "", //模号
+        bc:'',//班次
         rq: parseTime(new Date()),
         jyy: "",
         jth1: "1",
@@ -808,6 +833,22 @@ export default {
         }
       });
     },
+    move_to_downcel(name, idx, e) {
+      var keyCode = e.keyCode || e.which || e.charCode;
+      if (keyCode === 13) {
+        let ref = this.$refs[name + idx];
+        if (ref) {
+          ref[0].$el.blur();
+          for (let ii = idx + 1; ii < this.list.length; ii++) {
+            let nextref = this.$refs[name + ii];
+            if (nextref) {
+              nextref[0].focus();
+              break;
+            }
+          }
+        }
+      }
+    },
     save_gtjc_bill() {
       let postdata = [];
       if (this.form.jth1 && this.form.ewm1) {
@@ -816,6 +857,7 @@ export default {
           rq: this.form.rq,
           cplx: this.form.cplx,
           th: this.form.th,
+          bc:this.form.bc,
           jyry: this.form.jyy,
           jth: this.form.jth1,
           vin: this.form.ewm1,
@@ -844,6 +886,7 @@ export default {
           rq: this.form.rq,
           cplx: this.form.cplx,
           th: this.form.th,
+          bc:this.form.bc,
           jyry: this.form.jyy,
           jth: this.form.jth2,
           vin: this.form.ewm2,
@@ -872,6 +915,7 @@ export default {
           rq: this.form.rq,
           cplx: this.form.cplx,
           th: this.form.th,
+          bc:this.form.bc,
           jyry: this.form.jyy,
           jth: this.form.jth3,
           vin: this.form.ewm3,
@@ -900,6 +944,7 @@ export default {
           rq: this.form.rq,
           cplx: this.form.cplx,
           th: this.form.th,
+          bc:this.form.bc,
           jyry: this.form.jyy,
           jth: this.form.jth4,
           vin: this.form.ewm4,

@@ -40,7 +40,7 @@
                   "
                   @select="(item) => ddl_handleSelect(item, scope.row, col)"
                   placeholder="关键字过滤"
-                  style="width:100%;"
+                  style="width: 100%"
                 >
                   <i class="el-icon-search el-input__icon" slot="suffix"> </i>
                   <template slot-scope="{ item }">
@@ -392,12 +392,14 @@ export default {
       type: Number,
     }, //行背景信息
     trbginfo: {
-      type: Object,
+      type: Array,
       default: function () {
-        return {
-          colname: "",
-          logiclist: [],
-        };
+        return [
+          {
+            colname: "",
+            logiclist: [],
+          },
+        ];
       },
     },
     pageindex: {
@@ -450,7 +452,7 @@ export default {
     },
   },
   computed: {},
-  activated () {
+  activated() {
     this.$refs.maintable.doLayout();
   },
   mounted() {
@@ -494,49 +496,61 @@ export default {
       }
     },
     tableRowClassName({ row, idx }) {
-      let cellvalue = row[this.trbginfo.colname];
-      let logiclist = this.trbginfo.logiclist;
-      if (logiclist instanceof Array) {
-        for (let index = 0; index < logiclist.length; index++) {
-          const i = logiclist[index];
-          if (i.logic === "=") {
-            if (i.val0 === cellvalue) {
-              return i.classname;
-            }
-          } else if (i.logic === "in") {
-            if (i.val0 instanceof Array) {
-              let _pos = i.val0.findIndex((i) => i === cellvalue);
-              if (_pos !== -1) {
-                return i.classname;
+      let rowclassname='';
+      this.trbginfo.forEach((bginfoitem) => {
+        let cellvalue = row[bginfoitem.colname];
+        let logiclist = bginfoitem.logiclist;
+        if (logiclist instanceof Array) {
+          for (let index = 0; index < logiclist.length; index++) {        
+            const i = logiclist[index];
+            if (i.logic === "=") {
+              if (i.val0 === cellvalue) {      
+                rowclassname = i.classname;
+                break;
               }
-            }
-          } else if (i.logic === "between") {
-            if (i.val0 <= cellvalue && cellvalue < i.val1) {
-              return i.classname;
-            }
-          } else if (i.logic === ">") {
-            if (cellvalue > i.val0) {
-              return i.classname;
-            }
-          } else if (i.logic === ">=") {
-            if (cellvalue >= i.val0) {
-              return i.classname;
-            }
-          } else if (i.logic === "<") {
-            if (cellvalue < i.val0) {
-              return i.classname;
-            }
-          } else if (i.logic === "<=") {
-            if (cellvalue <= i.val0) {
-              return i.classname;
-            }
-          } else if (i.logic === "<>") {
-            if (cellvalue !== i.val0) {
-              return i.classname;
+            } else if (i.logic === "in") {
+              if (i.val0 instanceof Array) {
+                let _pos = i.val0.findIndex((i) => i === cellvalue);
+                if (_pos !== -1) {
+                  rowclassname = i.classname;
+                  break;
+                }
+              }
+            } else if (i.logic === "between") {
+              if (i.val0 <= cellvalue && cellvalue < i.val1) {
+                rowclassname = i.classname;
+                break;
+              }
+            } else if (i.logic === ">") {
+              if (cellvalue > i.val0) {
+                rowclassname = i.classname;
+                break;
+              }
+            } else if (i.logic === ">=") {
+              if (cellvalue >= i.val0) {
+                rowclassname = i.classname;
+                break;
+              }
+            } else if (i.logic === "<") {
+              if (cellvalue < i.val0) {
+                rowclassname = i.classname;
+                break;
+              }
+            } else if (i.logic === "<=") {
+              if (cellvalue <= i.val0) {
+                rowclassname = i.classname;
+                break;
+              }
+            } else if (i.logic === "<>") {
+              if (cellvalue !== i.val0) {
+                rowclassname = i.classname;
+                break;
+              }
             }
           }
         }
-      }
+      });
+      return rowclassname;
     },
     iscoledit(colname) {
       let path = this.fullpath;

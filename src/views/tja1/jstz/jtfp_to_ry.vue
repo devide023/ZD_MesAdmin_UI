@@ -14,7 +14,7 @@
         {{ form.jcmc }}
       </el-form-item>
       <el-form-item label="生产线">
-        <el-select v-model="form.scx" placeholder="请选择生产线" prop="scx">
+        <el-select v-model="form.scx" multiple filterable placeholder="请选择生产线" prop="scx">
           <el-option
             v-for="(item, idx) in scxlist"
             :key="idx"
@@ -43,7 +43,7 @@ export default {
     return {
       scxlist: [],
       form: {
-        scx: "1",
+        scx: [],
         jcbh: "",
         jcmc: "",
       },
@@ -52,7 +52,7 @@ export default {
           {
             required: true,
             message: "生产线不能为空",
-            trigger: "blur",
+            trigger: "change",
           },
         ],
       },

@@ -31,7 +31,7 @@
             <el-dropdown-item divided>个人中心</el-dropdown-item>
           </router-link>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">退出</span>
+            <span style="display:block;">注销[{{this.$store.getters.userinfo.name}}]</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -61,7 +61,7 @@ export default {
     ...mapGetters([
       'sidebar',
       'avatar',
-      'device'
+      'device',
     ])
   },
   methods: {

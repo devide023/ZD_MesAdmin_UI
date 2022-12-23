@@ -121,7 +121,7 @@ export default {
       this.add_item_handle();
       this.$nextTick(() => {
         var ref = this.$refs.gfmx_vin_txt;
-        ref.$el.querySelector('input').focus();
+        console.log(ref.$el);
       });
     },
     get_gfdata() {

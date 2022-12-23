@@ -25,7 +25,7 @@ export const basemixin = {
                 pageindex: 1,
                 pagesize: 20,
             },
-            trbginfo: {},
+            trbginfo: [{}],
         }
     },
     computed: {

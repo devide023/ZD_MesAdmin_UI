@@ -81,7 +81,7 @@
       :visible.sync="dialogVisible"
       top="10px"
       :close-on-click-modal="false"
-      width="80%"
+      width="50%"
     >
       <el-form
         ref="wbzq_form"
@@ -89,9 +89,8 @@
         label-width="120px"
         label-position="right"
         inline
-        :rules="rules"
       >
-        <el-form-item label="生产线" prop="scx">
+        <el-form-item label="生产线">
           <el-select
             v-model="wbzq_form.scx"
             placeholder="生产线"
@@ -112,7 +111,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="设备名称" prop="sbbh">
+        <!-- <el-form-item label="设备名称">
           <el-select
             v-model="wbzq_form.sbbh"
             placeholder="设备选择"
@@ -134,8 +133,8 @@
               }}</span>
             </el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="下次维保时间段" prop="next_date">
+        </el-form-item> -->
+        <el-form-item label="下次维保时间段">
           <el-date-picker
             value-format="yyyy-MM-dd HH:mm:ss"
             v-model="wbzq_form.next_date[0]"
@@ -161,14 +160,27 @@
             placeholder="下次维保时间段"
           ></el-date-picker> -->
         </el-form-item>
-        <el-button
+        <!-- <el-button
           type="primary"
           icon="el-icon-search"
           @click="sbwbxx_search_handle"
           >查询</el-button
+        > -->
+        <el-table
+          ref="wbTable"
+          :data="wbzqlist"
+          header-cell-class-name="tb_header_bg"
+          border
+          @selection-change="wb_select_handle"
         >
-        <el-table :data="wbzqlist" header-cell-class-name="tb_header_bg" border>
           <el-table-column
+            header-align="center"
+            align="center"
+            type="selection"
+            label="是否维保"
+          >
+          </el-table-column>
+          <!-- <el-table-column
             header-align="center"
             align="center"
             label="是否维保"
@@ -182,7 +194,7 @@
               ></el-switch>
             </template>
           </el-table-column>
-          <!-- <el-table-column
+          <el-table-column
             header-align="center"
             align="center"
             prop="gcdm"
@@ -234,7 +246,7 @@
             show-overflow-tooltip
           >
           </el-table-column>
-          <el-table-column
+          <!-- <el-table-column
             header-align="center"
             align="center"
             prop="wbzt"
@@ -287,7 +299,7 @@
             width="80"
             label="完成人"
           >
-          </el-table-column>
+          </el-table-column> -->
         </el-table>
       </el-form>
       <div slot="footer">
@@ -322,6 +334,7 @@ export default {
     return {
       dialogVisible: false,
       wbzqlist: [],
+      wbitems: [],
       wbzq_form: {
         kssj: "",
         jssj: "",
@@ -330,29 +343,6 @@ export default {
         sbbh: [],
       },
       scx_sbxx_list: [],
-      rules: {
-        scx:[
-          {
-            required: true,
-            message: "生产线不能为空",
-            trigger: "change",
-          },
-        ],
-        sbbh:[
-          {
-            required: true,
-            message: "设备名称不能为空",
-            trigger: "change",
-          },
-        ],
-        next_date: [
-          {
-            required: true,
-            message: "下次维保时间不能为空",
-            trigger: "change",
-          },
-        ],
-      },
     };
   },
   mounted() {
@@ -384,14 +374,15 @@ export default {
     },
     add_handle() {
       try {
-        this.$request("get", "/lbj/wbzq/wbzq_list", {}).then((res) => {
+        this.$request("post", "/lbj/wbzq/wbzq_list", {}).then((res) => {
           if (res.code === 1) {
-            this.wbzqlist = res.list.map((i) => {
-              i.rowkey = newGuid();
-              i.sfwb = "Y";
-              return i;
-            });
+            this.wbzqlist = res.list;
             this.dialogVisible = true;
+            this.$nextTick(() => {
+              this.wbzqlist.forEach((i) => {
+                this.$refs.wbTable.toggleRowSelection(i);
+              });
+            });
           } else if (res.code === 0) {
             this.$message.error(res.msg);
           }
@@ -400,12 +391,20 @@ export default {
         this.$message.error(error);
       }
     },
+    wb_select_handle(vals) {
+      this.wbitems = vals;
+    },
     scx_change_handel(scx) {
       try {
-        ApiFn.requestapi("get", "/lbj/baseinfo/scx_sbxx", { scx: scx }).then(
+        ApiFn.requestapi("post", "/lbj/wbzq/wbzq_list", { scx: scx }).then(
           (res) => {
             if (res.code === 1) {
-              this.scx_sbxx_list = res.list;
+              this.wbzqlist = res.list;
+              this.$nextTick(() => {
+                this.wbzqlist.forEach((i) => {
+                  this.$refs.wbTable.toggleRowSelection(i);
+                });
+              });
             } else if (res.code === 0) {
               this.$message.error(res.msg);
             }
@@ -415,7 +414,7 @@ export default {
         this.$message.error(error);
       }
     },
-    sbbh_change_handle(){
+    sbbh_change_handle() {
       this.sbwbxx_search_handle();
     },
     sbwbxx_search_handle() {
@@ -441,28 +440,25 @@ export default {
             let rq0 = this.wbzq_form.next_date[0];
             let rq1 = this.wbzq_form.next_date[1];
             if (rq0 && rq1) {
-              if (Date.parse(rq1) > Date.parse(rq0)) {
-                try {
-                  this.wbzq_form.sbwbls = this.wbzqlist.filter(
-                    (i) => i.sfwb === "Y"
-                  );
-                  this.$request("post", "/lbj/wbzq/add", this.wbzq_form).then(
-                    (res) => {
-                      if (res.code === 1) {
-                        this.dialogVisible = false;
-                        this.wbzq_form.next_date = "";
-                        this.wbzq_form.sbwbls = [];
-                        this.getlist(this.queryform);
-                      } else if (res.code === 0) {
-                        this.$message.error(res.msg);
-                      }
+              try {
+                this.wbzq_form.sbwbls = this.wbitems;
+                this.$request("post", "/lbj/wbzq/add", this.wbzq_form).then(
+                  (res) => {
+                    if (res.code === 1) {
+                      this.dialogVisible = false;
+                      this.wbzq_form.next_date = [];
+                      this.wbzq_form.sbwbls = [];
+                      this.wbzq_form.kssj="";
+                      this.wbzq_form.jssj="";
+                      this.wbzq_form.sbbh=[];
+                      this.getlist(this.queryform);
+                    } else if (res.code === 0) {
+                      this.$message.error(res.msg);
                     }
-                  );
-                } catch (error) {
-                  this.$message.error(error);
-                }
-              } else {
-                this.$message.error("结束日期应大于开始日期");
+                  }
+                );
+              } catch (error) {
+                this.$message.error(error);
               }
             } else {
               this.$message.error("起止时间需选择");

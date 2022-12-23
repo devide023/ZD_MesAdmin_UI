@@ -38,7 +38,7 @@
           >
             <el-option label="白班" value="白班"></el-option>
             <el-option label="中班" value="中班"></el-option>
-            <el-option label="晚班" value="晚班"></el-option>
+            <el-option label="夜班" value="夜班"></el-option>
           </el-select>
         </td>
         <td style="width: 33.3%">
@@ -242,6 +242,43 @@
             ></el-input>
           </td>
         </tr>
+
+        <tr>
+          <td class="tdlabel" style="text-align: center"><b>一单元：</b></td>
+          <td :colspan="isread ? 9 : 10">
+            <span v-if="isread">
+              OK:{{unit1OK}}&nbsp;&nbsp;NG:{{unit1NG}}
+            </span>
+            <template v-else>
+              OK:<el-input-number v-model="unit1OK" :min="0"></el-input-number>
+              NG:<el-input-number v-model="unit1NG" :min="0"></el-input-number>
+            </template>
+          </td>
+        </tr>
+        <tr>
+          <td class="tdlabel" style="text-align: center"><b>二单元：</b></td>
+          <td :colspan="isread ? 9 : 10">
+            <span v-if="isread">
+              OK:{{unit2OK}}&nbsp;&nbsp;NG:{{unit2NG}}
+            </span>
+            <template v-else>
+              OK:<el-input-number v-model="unit2OK" :min="0"></el-input-number>
+              NG:<el-input-number v-model="unit2NG" :min="0"></el-input-number>
+            </template>
+          </td>
+        </tr>
+        <tr>
+          <td class="tdlabel" style="text-align: center"><b>三单元：</b></td>
+          <td :colspan="isread ? 9 : 10">
+            <span v-if="isread">
+              OK:{{unit3OK}} &nbsp;&nbsp; NG:{{unit3NG}}
+            </span>
+            <template v-else>
+              OK:<el-input-number v-model="unit3OK" :min="0"></el-input-number>
+              NG:<el-input-number v-model="unit3NG" :min="0"></el-input-number>
+            </template>
+          </td>
+        </tr>
         <tr>
           <td class="tdlabel" style="text-align: center"><b>质量情况：</b></td>
           <td :colspan="isread ? 9 : 10">
@@ -331,9 +368,9 @@ export default {
     gfmxform: GFMX,
   },
   props: {
-    id:{
-      type:Number,
-      default:0
+    id: {
+      type: Number,
+      default: 0,
     },
     isread: {
       type: Boolean,
@@ -375,6 +412,12 @@ export default {
       slgw: "", //上料岗位
       mcgw: "", //毛刺岗位
       jygw: "", //检验岗位
+      unit1OK: 0,
+      unit1NG: 0,
+      unit2OK: 0,
+      unit2NG: 0,
+      unit3OK: 0,
+      unit3NG: 0,
       scitem: {
         rid: "",
         cpmc: "",
@@ -464,9 +507,15 @@ export default {
             this.slgw = res.list[0].slry;
             this.mcgw = res.list[0].mcry;
             this.jygw = res.list[0].jyry;
+            this.unit1OK = res.list[0].unit1ok;
+            this.unit1NG = res.list[0].unit1ng;
+            this.unit2OK = res.list[0].unit2ok;
+            this.unit2NG = res.list[0].unit2ng;
+            this.unit3OK = res.list[0].unit3ok;
+            this.unit3NG = res.list[0].unit3ng;
             this.sclist = res.list[0].mxlist.map((i) => {
               let rd = {
-                rid:newGuid(),
+                rid: newGuid(),
                 cpmc: i.cpmc,
                 up_mpys: i.sbcmpyl,
                 db_mpsl: i.dbmpsl,
@@ -476,7 +525,7 @@ export default {
                 lfs: i.lfsl,
                 hgs: i.hgsl,
                 dbmpys: i.dbmpyl,
-                gfmxlist:i.gfmxlist
+                gfmxlist: i.gfmxlist,
               };
               return rd;
             });
@@ -514,6 +563,12 @@ export default {
         qtqk: this.qtqk,
         lrr: store.getters.name,
         lrsj: parseTime(new Date()),
+        unit1ok:this.unit1OK,
+        unit1ng:this.unit1NG,
+        unit2ok:this.unit2OK,
+        unit2ng:this.unit2NG,
+        unit3ok:this.unit3OK,
+        unit3ng:this.unit3NG,
         mxlist: [],
       };
       this.sclist.forEach((i) => {

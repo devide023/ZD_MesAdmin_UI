@@ -36,7 +36,7 @@
           >
             <el-option label="白班" value="白班"></el-option>
             <el-option label="中班" value="中班"></el-option>
-            <el-option label="晚班" value="晚班"></el-option>
+            <el-option label="夜班" value="夜班"></el-option>
           </el-select>
           <span v-else>
             {{ form.bc }}

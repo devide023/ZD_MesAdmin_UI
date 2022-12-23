@@ -19,8 +19,14 @@
       </tr>
       <tr>
         <td rowspan="3" colspan="2" class="td_label">图号</td>
-        <td rowspan="3" colspan="3">
+        <td rowspan="3">
           {{ form.th }}
+        </td>
+        <td rowspan="3" class="td_label">
+          班次
+        </td>
+        <td rowspan="3">
+          {{ form.bc }}
         </td>
         <td colspan="3" class="td_label" style="width: 100px">机台号</td>
         <td>

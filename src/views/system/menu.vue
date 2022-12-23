@@ -422,8 +422,8 @@
         @tab-click="tab_click_handle"
       >
         <el-tab-pane label="字段信息" name="fields">
-          <field-com></field-com>
-          <el-autocomplete
+          <field-com ref="field_info_component"></field-com>
+          <!-- <el-autocomplete
             v-model="tablename"
             placeholder="过滤当前数据库表名"
             :fetch-suggestions="fetchSuggestions"
@@ -574,7 +574,7 @@
                 >
               </template>
             </el-table-column>
-          </el-table>
+          </el-table> -->
         </el-tab-pane>
         <el-tab-pane label="基本配置" name="pagecnf">
           <el-form
@@ -975,9 +975,9 @@ export default {
           isfresh: true,
           isselect: true,
           import_cnf: {
-            addurl: "", //新增导入
-            replaceurl: "", //替换导入
-            zongheurl: "", //综合导入
+            addurl: "/**/**/readxls", //新增导入
+            replaceurl: "/**/**/readxls_by_replace", //替换导入
+            zongheurl: "/**/**/readxls_by_zh", //综合导入
             exportxlsurl: "", //导入excel
           },
         },
@@ -1165,6 +1165,7 @@ export default {
     tab_click_handle(tab, event) {
       if (tab.name === "pageform") {
         this.pageconfig_form.pageform = [];
+        this.pageconfig_form.fields = this.$refs.field_info_component.get_list_data();
         this.pageconfig_form.pageform = this.pageconfig_form.fields.map((i) => {
           return { fieldname: i.prop, fieldvalue: "" };
         });
@@ -1464,6 +1465,8 @@ export default {
       this.dialog_config_Visible = true;
     },
     save_page_config() {
+      var dt = this.$refs.field_info_component.get_list_data();
+      this.pageconfig_form.fields = dt;
       try {
         ApiFn.requestapi(
           "post",

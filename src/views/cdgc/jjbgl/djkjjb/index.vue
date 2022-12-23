@@ -15,7 +15,7 @@
           班次：<el-select v-model="form.bc" clearable placeholder="请选择班次">
             <el-option label="白班" value="白班"></el-option>
             <el-option label="中班" value="中班"></el-option>
-            <el-option label="晚班" value="晚班"></el-option>
+            <el-option label="夜班" value="夜班"></el-option>
           </el-select>
         </td>
         <td style="width: 25%">
@@ -337,7 +337,6 @@ export default {
     //工废明细录入
     input_gfmx_handle(row) {
       this.currentrow = row;
-      console.log(this.currentrow);
       this.dialogVisible = true;
     },
     gfmx_opened_handle() {
