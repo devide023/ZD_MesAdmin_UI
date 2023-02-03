@@ -8,6 +8,27 @@
       style="width: 100%"
     >
       <el-table-column
+        header-align="center"
+        align="center"
+        prop="jth"
+        label="机台号"
+        show-overflow-tooltip
+        width="150"
+         >
+        <template slot-scope="scope">
+          <template v-if="!isread">
+            <el-input
+              v-model="scope.row.jth"
+              clearable
+              placeholder="请输入机台号"
+            ></el-input>
+          </template>
+          <template v-else>
+            {{ scope.row.vin }}
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="vin"
         label="件号"
         align="center"
@@ -102,6 +123,7 @@ export default {
     return {
       list: [],
       form: {
+        jth:'',
         vin: "",
         yx: "",
       },

@@ -91,6 +91,7 @@ export default {
       row.adduser = this.$store.getters.userinfo.id;
       row.addusername = this.$store.getters.name;
       row.addtime = parseTime(new Date());
+      row.role= [];
       this.list.unshift(row);
     },
     dialog_show_handle(row) {

@@ -58,61 +58,128 @@
             </template>
             <template v-else-if="col.coltype === 'list' && iscoledit(col.prop)">
               <template v-if="col.remote">
-                <el-select
-                  v-model.trim="scope.row[col.prop]"
-                  filterable
-                  remote
-                  :multiple="col.multiple"
-                  :remote-method="(q) => remote_method(q, col, scope.row)"
-                  placeholder="关键字过滤"
-                  style="width: 100%"
-                >
-                  <el-option
-                    v-for="(item, i) in scope.row.remotelist"
-                    :key="i"
-                    :label="item.label"
-                    :value="item.value"
+                <!-- 多选情况 -->
+                <template v-if="col.multiple && col.selectedvals && !scope.row.isdb">
+                  <el-select
+                    v-model.trim="scope.row[col.selectedvals]"
+                    filterable
+                    remote
+                    :multiple="col.multiple"
+                    collapse-tags
+                    :remote-method="(q) => remote_method(q, col, scope.row)"
+                    placeholder="关键字过滤"
+                    style="width: 100%"
                   >
-                    <template v-if="!col.hideoptionval">
-                      <span style="float: left">{{ item.label }}</span>
-                      <span
-                        style="float: right; color: #8492a6; font-size: 13px"
-                        >{{ item.value }}</span
-                      >
-                    </template>
-                  </el-option>
-                </el-select>
+                    <el-option
+                      v-for="(item, i) in scope.row.remotelist"
+                      :key="i"
+                      :label="item.label"
+                      :value="item.value"
+                    >
+                      <template v-if="!col.hideoptionval">
+                        <span style="float: left">{{ item.label }}</span>
+                        <span
+                          style="float: right; color: #8492a6; font-size: 13px"
+                          >{{ item.value }}</span
+                        >
+                      </template>
+                    </el-option>
+                  </el-select>
+                </template>
+                <template v-else>
+                  <el-select
+                    v-model.trim="scope.row[col.prop]"
+                    filterable
+                    remote
+                    :remote-method="(q) => remote_method(q, col, scope.row)"
+                    placeholder="关键字过滤"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="(item, i) in scope.row.remotelist"
+                      :key="i"
+                      :label="item.label"
+                      :value="item.value"
+                    >
+                      <template v-if="!col.hideoptionval">
+                        <span style="float: left">{{ item.label }}</span>
+                        <span
+                          style="float: right; color: #8492a6; font-size: 13px"
+                          >{{ item.value }}</span
+                        >
+                      </template>
+                    </el-option>
+                  </el-select>
+                </template>
               </template>
               <template v-else>
-                <el-select
-                  v-model="scope.row[col.prop]"
-                  clearable
-                  filterable
-                  :allow-create="col.allowcreate"
-                  :multiple="col.multiple"
-                  placeholder="请选择"
-                  style="width: 100%"
-                  @change="(val) => col_ddl_change_handle(val, scope.row, col)"
-                  @clear="() => col_ddl_clear_handle(scope.row, col)"
-                >
-                  <el-option
-                    v-for="(item, i) in col.relation
-                      ? scope.row[col.relation]
-                      : col.options"
-                    :key="i"
-                    :label="item.label"
-                    :value="item.value"
-                    :disabled="item.disabled"
+                <!-- 多选情况 -->
+                <template v-if="col.multiple && col.selectedvals && !scope.row.isdb">
+                  <el-select
+                    v-model="scope.row[col.selectedvals]"
+                    clearable
+                    filterable
+                    :allow-create="col.allowcreate"
+                    :multiple="col.multiple"
+                    collapse-tags
+                    placeholder="请选择"
+                    style="width: 100%"
+                    @change="
+                      (val) => col_ddl_change_handle(val, scope.row, col)
+                    "
+                    @clear="() => col_ddl_clear_handle(scope.row, col)"
                   >
-                    <template v-if="!col.hideoptionval">
-                      <span style="float: left">{{ item.label }}</span>
-                      <span
-                        style="float: right; color: #8492a6; font-size: 13px"
-                        >{{ item.value }}</span
-                      >
-                    </template>
-                  </el-option>
-                </el-select>
+                    <el-option
+                      v-for="(item, i) in col.relation
+                        ? scope.row[col.relation]
+                        : col.options"
+                      :key="i"
+                      :label="item.label"
+                      :value="item.value"
+                      :disabled="item.disabled"
+                    >
+                      <template v-if="!col.hideoptionval">
+                        <span style="float: left">{{ item.label }}</span>
+                        <span
+                          style="float: right; color: #8492a6; font-size: 13px"
+                          >{{ item.value }}</span
+                        >
+                      </template>
+                    </el-option>
+                  </el-select>
+                </template>
+                <template v-else>
+                  <el-select
+                    v-model="scope.row[col.prop]"
+                    clearable
+                    filterable
+                    :allow-create="col.allowcreate"
+                    placeholder="请选择"
+                    style="width: 100%"
+                    @change="
+                      (val) => col_ddl_change_handle(val, scope.row, col)
+                    "
+                    @clear="() => col_ddl_clear_handle(scope.row, col)"
+                  >
+                    <el-option
+                      v-for="(item, i) in col.relation
+                        ? scope.row[col.relation]
+                        : col.options"
+                      :key="i"
+                      :label="item.label"
+                      :value="item.value"
+                      :disabled="item.disabled"
+                    >
+                      <template v-if="!col.hideoptionval">
+                        <span style="float: left">{{ item.label }}</span>
+                        <span
+                          style="float: right; color: #8492a6; font-size: 13px"
+                          >{{ item.value }}</span
+                        >
+                      </template>
+                    </el-option>
+                  </el-select>
+                </template>
               </template>
             </template>
             <template v-else-if="col.coltype === 'bool' && iscoledit(col.prop)">
@@ -496,15 +563,15 @@ export default {
       }
     },
     tableRowClassName({ row, idx }) {
-      let rowclassname='';
+      let rowclassname = "";
       this.trbginfo.forEach((bginfoitem) => {
         let cellvalue = row[bginfoitem.colname];
         let logiclist = bginfoitem.logiclist;
         if (logiclist instanceof Array) {
-          for (let index = 0; index < logiclist.length; index++) {        
+          for (let index = 0; index < logiclist.length; index++) {
             const i = logiclist[index];
             if (i.logic === "=") {
-              if (i.val0 === cellvalue) {      
+              if (i.val0 === cellvalue) {
                 rowclassname = i.classname;
                 break;
               }

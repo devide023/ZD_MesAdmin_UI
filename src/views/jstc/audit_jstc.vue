@@ -51,48 +51,95 @@
       :pagesizeHandle="pagesize_change_handle"
     >
       <template #operate="scope">
-        <template v-if="pageconfig.operate_type === 'text'">
-          <span
-            style="margin: 0px 5px"
-            v-for="(item, index) in pageconfig.operate_fnlist"
-            :key="index"
-          >
-            <template v-if="item.btntype === 'upload'">
-              <el-upload
-                v-if="scope.row.isedit"
-                :headers="headers"
-                :action="item.action"
-                :show-file-list="false"
-                accept=".pdf,application/pdf"
-                :data="scope.row"
-                :before-upload="before_upload_PDFHandle"
-                :on-success="item.callback"
+        <template>
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              <i class="el-icon-setting" style="font-size: 16px" />
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item
+                v-for="(item, index) in pageconfig.operate_fnlist"
+                :key="index"
               >
-                <el-button type="text">{{ item.label }}</el-button>
-              </el-upload>
-            </template>
-            <template v-else-if="item.btntype === 'uploadvideo'">
-              <el-upload
-                v-if="scope.row.isedit"
-                :headers="headers"
-                :action="item.action"
-                :show-file-list="false"
-                accept=".mp4,video/mp4,application/mp4"
-                :data="scope.row"
-                :before-upload="before_upload_Mp4Handle"
-                :on-success="item.callback"
-              >
-                <el-button type="text">{{ item.label }}</el-button>
-              </el-upload>
-            </template>
-            <template v-else>
-              <el-button
-                type="text"
-                @click.native="execfun(scope.row, item.fnname)"
-                >{{ item.label }}</el-button
-              ></template
-            >
-          </span>
+                <template v-if="item.condition">
+                  <template v-if="isshow_operatebtn(scope.row, item.condition)">
+                    <template v-if="item.btntype === 'upload'">
+                      <el-upload
+                        v-if="scope.row.isedit"
+                        :headers="headers"
+                        :action="item.action"
+                        :show-file-list="false"
+                        accept=".pdf,application/pdf"
+                        :data="scope.row"
+                        :before-upload="before_upload_PDFHandle"
+                        :on-success="item.callback"
+                      >
+                        <el-button type="text">{{ item.label }}</el-button>
+                      </el-upload>
+                    </template>
+                    <template v-else-if="item.btntype === 'uploadvideo'">
+                      <el-upload
+                        v-if="scope.row.isedit"
+                        :headers="headers"
+                        :action="item.action"
+                        :show-file-list="false"
+                        accept=".mp4,video/mp4,application/mp4"
+                        :data="scope.row"
+                        :before-upload="before_upload_Mp4Handle"
+                        :on-success="item.callback"
+                      >
+                        <el-button type="text">{{ item.label }}</el-button>
+                      </el-upload>
+                    </template>
+                    <template v-else>
+                      <el-button
+                        type="text"
+                        @click.native="execfun(scope.row, item.fnname)"
+                        >{{ item.label }}</el-button
+                      ></template
+                    >
+                  </template>
+                </template>
+                <template v-else>
+                  <template v-if="item.btntype === 'upload'">
+                    <el-upload
+                      v-if="scope.row.isedit"
+                      :headers="headers"
+                      :action="item.action"
+                      :show-file-list="false"
+                      accept=".pdf,application/pdf"
+                      :data="scope.row"
+                      :before-upload="before_upload_PDFHandle"
+                      :on-success="item.callback"
+                    >
+                      <el-button type="text">{{ item.label }}</el-button>
+                    </el-upload>
+                  </template>
+                  <template v-else-if="item.btntype === 'uploadvideo'">
+                    <el-upload
+                      v-if="scope.row.isedit"
+                      :headers="headers"
+                      :action="item.action"
+                      :show-file-list="false"
+                      accept=".mp4,video/mp4,application/mp4"
+                      :data="scope.row"
+                      :before-upload="before_upload_Mp4Handle"
+                      :on-success="item.callback"
+                    >
+                      <el-button type="text">{{ item.label }}</el-button>
+                    </el-upload>
+                  </template>
+                  <template v-else>
+                    <el-button
+                      type="text"
+                      @click.native="execfun(scope.row, item.fnname)"
+                      >{{ item.label }}</el-button
+                    ></template
+                  >
+                </template>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </template>
       </template>
     </table-component>
