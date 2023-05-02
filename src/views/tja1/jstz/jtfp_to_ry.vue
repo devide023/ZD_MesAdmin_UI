@@ -67,13 +67,21 @@ export default {
     },
   },
   mounted() {
-    this.get_scx_list();
+    this.get_fpzb_list();
     this.form.jcbh = this.row.jcbh;
     this.form.jcmc = this.row.jcmc;
   },
   methods: {
     get_scx_list() {
       ApiFn.requestapi("get", "/a1/baseinfo/scx", {}).then((res) => {
+        if (res.code === 1) {
+          this.scxlist = res.list;
+        }
+      });
+    },
+    //技通分配组别列表
+    get_fpzb_list(){
+      ApiFn.requestapi("get", "/a1/jtfp/group/all_zblist", {}).then((res) => {
         if (res.code === 1) {
           this.scxlist = res.list;
         }

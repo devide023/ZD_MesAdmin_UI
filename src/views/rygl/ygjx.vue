@@ -30,11 +30,11 @@
         style="width: 300px; margin-right: 5px"
       >
       </el-date-picker>
-      <el-autocomplete
+      <el-input
         v-model="form.jcry"
-        placeholder="输入员工姓名检索"
+        placeholder="输入员工编号"
         style="width: 150px; margin-right: 5px"
-      ></el-autocomplete>
+      ></el-input>
       <el-button type="primary" icon="el-icon-search" @click="query_ryjx_handle"
         >查询</el-button
       >

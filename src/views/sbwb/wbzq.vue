@@ -92,12 +92,19 @@
       >
         <el-form-item label="生产线">
           <el-select
-            v-model="wbzq_form.scx"
+            v-model="wbzq_form.scxs"
             placeholder="生产线"
+            multiple
             clearable
             style="width: 150px"
+            collapse-tags
             @change="scx_change_handel"
           >
+            <el-option
+              label="全部"
+              value="全部"
+              @click.native="all_item_handle()"
+            ></el-option>
             <el-option
               v-for="(item, index) in scxxx_list"
               :key="index"
@@ -343,6 +350,7 @@ export default {
         sbbh: [],
       },
       scx_sbxx_list: [],
+      isallitemselected: false,
     };
   },
   mounted() {
@@ -396,7 +404,20 @@ export default {
     },
     scx_change_handel(scx) {
       try {
-        ApiFn.requestapi("post", "/lbj/wbzq/wbzq_list", { scx: scx }).then(
+        if (scx.length !== this.scxxx_list.length + 1 && scx.includes("全部")) {
+          let pos = this.wbzq_form.scxs.findIndex((t) => t === "全部");
+          if (pos !== -1) {
+            this.wbzq_form.scxs.splice(pos, 1);
+            this.isallitemselected = false;
+          }
+        } else if (
+          scx.length == this.scxxx_list.length &&
+          !scx.includes("全部")
+        ) {
+          this.wbzq_form.scxs.push("全部");
+          this.isallitemselected = true;
+        }
+        ApiFn.requestapi("post", "/lbj/wbzq/wbzq_list", { scxs: scx }).then(
           (res) => {
             if (res.code === 1) {
               this.wbzqlist = res.list;
@@ -413,6 +434,19 @@ export default {
       } catch (error) {
         this.$message.error(error);
       }
+    },
+    all_item_handle() {
+      this.isallitemselected = !this.isallitemselected;
+      if (this.isallitemselected) {
+        this.wbzq_form.scxs = [];
+        this.scxxx_list.forEach((i) => {
+          this.wbzq_form.scxs.push(i.value);
+        });
+        this.wbzq_form.scxs.push("全部");
+      } else {
+        this.wbzq_form.scxs = [];
+      }
+      this.scx_change_handel(this.wbzq_form.scxs);
     },
     sbbh_change_handle() {
       this.sbwbxx_search_handle();
@@ -448,9 +482,10 @@ export default {
                       this.dialogVisible = false;
                       this.wbzq_form.next_date = [];
                       this.wbzq_form.sbwbls = [];
-                      this.wbzq_form.kssj="";
-                      this.wbzq_form.jssj="";
-                      this.wbzq_form.sbbh=[];
+                      this.wbzq_form.kssj = "";
+                      this.wbzq_form.jssj = "";
+                      this.wbzq_form.sbbh = [];
+                      this.wbzq_form.scxs = [];
                       this.getlist(this.queryform);
                     } else if (res.code === 0) {
                       this.$message.error(res.msg);
