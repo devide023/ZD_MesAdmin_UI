@@ -59,7 +59,9 @@
             <template v-else-if="col.coltype === 'list' && iscoledit(col.prop)">
               <template v-if="col.remote">
                 <!-- 多选情况 -->
-                <template v-if="col.multiple && col.selectedvals && !scope.row.isdb">
+                <template
+                  v-if="col.multiple && col.selectedvals && !scope.row.isdb"
+                >
                   <el-select
                     v-model.trim="scope.row[col.selectedvals]"
                     filterable
@@ -114,7 +116,9 @@
               </template>
               <template v-else>
                 <!-- 多选情况 -->
-                <template v-if="col.multiple && col.selectedvals && !scope.row.isdb">
+                <template
+                  v-if="col.multiple && col.selectedvals && !scope.row.isdb"
+                >
                   <el-select
                     v-model="scope.row[col.selectedvals]"
                     clearable
@@ -373,11 +377,35 @@
               /></template>
             </template>
             <template v-else>
-              {{
-                col.subprop
-                  ? scope.row[col.prop][col.subprop]
-                  : scope.row[col.prop]
-              }}
+              <template v-if="col.cellbg">
+                <div
+                  v-if="
+                    (col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop]) === col.cellbgval
+                  "
+                  :style="{ backgroundColor: col.cellbg }"
+                  >{{
+                    col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop]
+                  }}</div
+                >
+                <template v-else>
+                  {{
+                    col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop]
+                  }}
+                </template>
+              </template>
+              <template v-else>
+                {{
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop]
+                }}</template
+              >
             </template>
           </template>
         </template>
@@ -413,6 +441,7 @@
 import { getToken } from "@/utils/auth";
 import { newGuid } from "@/utils/index";
 export default {
+  name: "TableComponent",
   data() {
     return {
       tableheight: 800,
@@ -713,7 +742,6 @@ export default {
   li {
     line-height: normal;
     padding: 7px;
-
     .name {
       text-overflow: ellipsis;
       overflow: hidden;

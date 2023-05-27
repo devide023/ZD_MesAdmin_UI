@@ -43,9 +43,9 @@ export const basemixin = {
     },
     activated() {
         try {
-            if (this.pageconfig.isactivated) {
-                let vm = this;
-                ApiFn.scopefunconfig().then(res => {
+            if (this.pageconfig.activated) {
+                this.pageconfig.activated(this);
+                /*ApiFn.scopefunconfig().then(res => {
                     if (res.code === 1) {
                         let scopeobj = Function('return ' + res.js)();
                         if (Object.keys(scopeobj).length > 0) {
@@ -56,7 +56,7 @@ export const basemixin = {
                     } else {
                         this.$message.error(res.msg);
                     }
-                });
+                });*/
             }
         } catch (error) {
             this.$message.error(error);
@@ -64,7 +64,10 @@ export const basemixin = {
     },
     mounted() {
         try {
-            let vm = this;
+            if(this.pageconfig.mounted){
+                this.pageconfig.mounted(this);
+            }
+            /*let vm = this;
             ApiFn.scopefunconfig().then(res => {
                 if (res.code === 1) {
                     let scopeobj = Function('return ' + res.js)();
@@ -76,7 +79,7 @@ export const basemixin = {
                 } else {
                     this.$message.error(res.msg);
                 }
-            });
+            });*/
         } catch (error) {
             this.$message.error(error);
         }
@@ -136,7 +139,11 @@ export const basemixin = {
                         if (this.pageconfig.trbginfo) {
                             this.trbginfo = this.pageconfig.trbginfo;
                         }
-                        this.getlist(this.queryform);
+                        if(this.pageconfig.activated){
+                            this.pageconfig.activated(this);
+                        }else{
+                            this.getlist(this.queryform);
+                        }
                     } else {
                         this.$message.error(res.msg);
                     }

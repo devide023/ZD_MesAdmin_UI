@@ -1,42 +1,8 @@
 <template>
   <div>
-    <search-bar
-      :collist="colshowlist"
-      :isgrade="pageconfig.isgradequery"
-      @query="query_handle"
-      @gradequery="grade_query_handle"
-    >
-      <template #other>
-        <el-button
-          v-for="(item, index) in btnlist"
-          :key="index"
-          :type="item.btntype"
-          :icon="item.icon"
-          @click="invokfn(item.fnname)"
-          >{{ item.btntxt }}</el-button
-        >
-        <template v-if="pageconfig.isbatoperate && batbtnlist.length > 0">
-          <bat-operate
-            :add_import_success_handle="import_by_add"
-            :replace_import_success_handle="import_by_replace"
-            :zh_import_success_handle="import_by_zh"
-            :export_excel_handle="export_excel"
-            :fields="colshowlist"
-          >
-            <template #other>
-              <el-dropdown-item
-                v-for="(btn, index) in pageconfig.bat_btnlist"
-                :key="index"
-              >
-                <el-button type="text" @click="invokfn(btn.fnname)">{{
-                  btn.btntxt
-                }}</el-button>
-              </el-dropdown-item>
-            </template>
-          </bat-operate>
-        </template>
-      </template>
-    </search-bar>
+    <div class="search_bar">
+      <component :is="comname" ref="query_bar_component" @query="query_handle" @export_to_excel="export_excel_handle"></component>
+    </div>
     <table-component
       :isselect="pageconfig.isselect"
       :isoperate="pageconfig.isoperate"
@@ -224,180 +190,145 @@
         </template>
       </template>
     </table-component>
-    <el-dialog
-      :title="dialog_title"
-      :visible.sync="dialogVisible"
-      :width="dialog_width"
-      top="10px"
-      :close-on-click-modal="false"
-      @opened="dialog_opend_handle"
-      @closed="dialog_closed_handle"
-    >
-      <div id="dialog_body"></div>
-      <div slot="footer" v-if="!dialog_hidefooter">
-        <el-button type="danger" @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialog_comfire_handle"
-          >确定</el-button
-        >
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
-import SearchBar from "@/components/QueryBar/index.vue";
-import TableComponent from "@/components/TableComponent/index.vue";
-import BatOperate from "@/components/BatOperate/index.vue";
-import { basemixin } from "@/mixin/basemixin";
-import { batoperatemixin } from "@/mixin/batoperate_mixin";
+import ApiFn from "@/api/baseapi";
 import { export_xls_mixin } from "@/mixin/export_xls_mixin";
 import { GetComponentName } from "@/utils/index";
-import { getToken } from "@/utils/auth";
+let all_file = {};
+let fs = require.context("@/components/", true, /\.vue$/);
+fs.keys().forEach((key) => {
+  all_file[key] = fs(key);
+});
+const componentsAll = {};
+for (const key in all_file) {
+  const element = all_file[key].default;
+  componentsAll[element.name] = element;
+}
 export default {
   name: GetComponentName(),
-  components: {
-    TableComponent,
-    SearchBar,
-    BatOperate,
-  },
-  mixins: [basemixin, batoperatemixin, export_xls_mixin],
+  components: componentsAll,
+  mixins: [export_xls_mixin],
   data() {
     return {
-      dialogVisible: false,
-      dialog_title: "表单",
-      dialog_fnitem: {},
-      dialog_width: "",
-      dialog_viewpath: "",
-      dialog_props: {},
-      dialog_vm: null,
-      dialog_hidefooter: false,
-      headers: {
-        Authorization: "Bearer " + getToken(),
+      comname: "",
+      list: [],
+      selectlist: [],
+      colshowlist: [],
+      btnlist: [],
+      batbtnlist: [],
+      pagepermis: {},
+      pageconfig: {},
+      editstatus: false,
+      dialogvisible: false,
+      resultcount: 0,
+      queryform: {
+        search_condition: [],
+        px_condition: [],
+        pageindex: 1,
+        pagesize: 20,
       },
+      trbginfo: [{}],
     };
   },
-  mounted() {},
-  methods: {
-    dialog_opend_handle() {
-      this.create(this, this.dialog_viewpath, this.dialog_props);
-    },
-    dialog_closed_handle() {
-      let chil = document.getElementById("dialog_body").childNodes;
-      chil.forEach((i) => {
-        document.getElementById("dialog_body").removeChild(i);
-      });
-    },
-    create(vm, viewpath, props) {
-      let Component = (resolve) =>
-        require.ensure([], () =>
-          resolve(require("@/views/" + viewpath + ".vue"))
-        );
-      vm.dialog_vm = new Vue({
-        mounted() {},
-        destroyed() {},
-        render(h) {
-          let node = h(Component, { props });
-          return node;
-        },
-      }).$mount();
-      document.getElementById("dialog_body").appendChild(this.dialog_vm.$el);
-    },
-    dialog_comfire_handle() {
-      if (
-        this.dialog_fnitem.callback &&
-        typeof this.dialog_fnitem.callback === "string"
-      ) {
-        this[this.dialog_fnitem.callback](this.dialog_vm);
-      } else if (
-        this.dialog_fnitem.callback &&
-        typeof this.dialog_fnitem.callback === "function"
-      ) {
-        this.dialog_fnitem.callback(this.dialog_vm);
+  mounted() {
+    ApiFn.pageconfig().then((res) => {
+      if (res.code === 1) {
+        this.pageconfig = Function("return " + res.pageconfig)();
+        this.comname = this.pageconfig.querybarname;
+        this.colshowlist = this.pageconfig.fields;
+      } else {
+        this.$message.error(res.msg);
       }
-    },
-    execfun(row, fnname) {
-      this[fnname](row);
-    },
-    isshow_operatebtn(row, conditions) {
-      let ret = [];
-      conditions.forEach((i) => {
-        if (i.oper === "=") {
-          let isok = row[i.field] === i.val ? true : false;
-          ret.push(isok);
-        } else if (i.oper === "in") {
-          if (Object.prototype.toString.call(i.val) === "[object Array]") {
-            let isconst = i.field.indexOf("const") !== -1 ? true : false;
-            if (isconst) {
-              if (i.field === "const_userid") {
-                let cuid = this.$store.getters.userinfo.id;
-                let elepos = i.val.findIndex((e) => e === cuid);
-                if (elepos !== -1) {
-                  ret.push(true);
-                } else {
-                  ret.push(false);
-                }
-              }else{
-                ret.push(false);
-              }
-            } else {
-              let elepos = i.val.findIndex((e) => e === row[i.field]);
-
-              if (elepos !== -1) {
-                ret.push(true);
-              } else {
-                ret.push(false);
-              }
-            }
-          } else {
-            ret.push(false);
-          }
-        } else if (i.oper === "!=") {
-          let isok = row[i.field] !== i.val ? true : false;
-          ret.push(isok);
-        } else if (i.oper === ">") {
-          let isok = row[i.field] > i.val ? true : false;
-          ret.push(isok);
-        } else if (i.oper === ">=") {
-          let isok = row[i.field] >= i.val ? true : false;
-          ret.push(isok);
-        } else if (i.oper === "<") {
-          let isok = row[i.field] < i.val ? true : false;
-          ret.push(isok);
-        } else if (i.oper === "<=") {
-          let isok = row[i.field] <= i.val ? true : false;
-          ret.push(isok);
+    });
+  },
+  methods: {
+    getlist(data) {
+      ApiFn.requestapi(
+        this.pageconfig.queryapi.method,
+        this.pageconfig.queryapi.url,
+        data
+      ).then((res) => {
+        if (res.code === 1) {
+          this.$message.success(res.msg);
+          this.resultcount = res.resultcount;
+          this.list = res.list;
+          this.pageconfig.queryapi.callback(this, res);
+        } else {
+          this.$message.error(res.msg);
         }
       });
-      return ret.filter((i) => i).length === ret.length ? true : false;
+    },
+    invokfn(f) {
+      this[f]();
     },
     execpagefun(row, fnitem) {
       this[fnitem.fnname](row, fnitem);
+    },
+    pageindex_change_handle(index) {
+      this.queryform.pageindex = index;
+      this.getlist(this.queryform);
+    },
+    pagesize_change_handle(value) {
+      this.queryform.pagesize = value;
+      this.getlist(this.queryform);
+    },
+    query_handle(data) {
+      this.queryform.search_condition = [];
+      this.queryform.search_condition = data;
+      for (
+        let index = 0;
+        index < this.queryform.search_condition.length - 1;
+        index++
+      ) {
+        this.queryform.search_condition[index].logic = "and";
+      }
+      this.queryform.pageindex = 1;
+      this.getlist(this.queryform);
+    },
+    grade_query_handle(data) {
+      this.queryform.search_condition = [];
+      this.queryform.px_condition = [];
+      data.list.forEach((i) => {
+        let exp = deepClone(condition.form);
+        exp.colname = i.colname;
+        exp.coltype = i.coltype;
+        exp.oper = i.oper;
+        exp.logic = i.logic;
+        exp.value = i.value;
+        exp.values = i.values;
+        this.queryform.search_condition.push(exp);
+      });
+      if (data.pxlist) {
+        this.queryform.px_condition = data.pxlist;
+      }
+      this.queryform.pageindex = 1;
+      this.getlist(this.queryform);
+    },
+    export_excel_handle(data) {
+      let _this = this;
+      ApiFn.requestapi(
+        this.pageconfig.queryapi.method,
+        this.pageconfig.queryapi.url,
+        {
+          pageindex: 1,
+          pagesize: 65535,
+          search_condition: data,
+        }
+      ).then(function (res) {
+        if (res.code === 1) {
+          let expdatalist = res.list;
+          _this.export_handle(_this.pageconfig.fields, expdatalist);
+        } else if (res.code === 0) {
+          _this.$message.error(res.msg);
+        }
+      });
     },
   },
 };
 </script>
 
-<style lang="scss">
-.avatar-uploader .el-upload {
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
-  text-align: center;
-}
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  display: block;
-  margin: auto;
-}
+<style lang="scss" scoped>
 </style>

@@ -5,6 +5,7 @@
       header-cell-class-name="tb_header_bg"
       border
       style="width: 100%"
+      @cell-click="Cell_Click_Handle"
     >
       <el-table-column
         prop="czrq"
@@ -63,17 +64,28 @@
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
     ></el-pagination>
+    <json-viewer
+      :jsonData="jsonData"
+      :jsonviewerVisible.sync="dialogVisible"
+      title="操作记录"
+    ></json-viewer>
   </div>
 </template>
 
 <script>
 var _this;
 import ApiFn from "@/api/baseapi";
+import JsonViewer from '@/components/JsonViewer/jsonviewer.vue';
 export default {
   name: "LogComponent",
+  components: {
+    JsonViewer,
+  },
   data() {
     return {
+      dialogVisible:false,
       list: [],
+      jsonData:{},
       resultcount: 0,
       lxlist: [
         {
@@ -127,6 +139,16 @@ export default {
     handleSizeChange(val) {
       this.queryform.pagesize = val;
       this.getlist();
+    },
+    Cell_Click_Handle(row, column, cell, event) {
+      if (column.property === "olddata") {
+        this.jsonData = JSON.parse(row.olddata);
+        this.dialogVisible = true;
+      }
+      else if(column.property === "newdata"){
+        this.jsonData = JSON.parse(row.newdata);
+        this.dialogVisible = true;
+      }
     },
   },
 };

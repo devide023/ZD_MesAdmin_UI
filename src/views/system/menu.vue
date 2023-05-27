@@ -1284,6 +1284,18 @@ export default {
         addtime: this.fn_form.addtime,
         addusername: this.fn_form.addusername,
       });
+      this.fn_form.batlist.push({
+        pid: row.id,
+        code: row.code,
+        name: "col_replace",
+        btntxt: "列批量替换",
+        menutype: "05",
+        seq: 30,
+        status: 1,
+        adduser: this.fn_form.adduser,
+        addtime: this.fn_form.addtime,
+        addusername: this.fn_form.addusername,
+      });
       this.fn_form.fnlist = defaultfuns.map((i) => {
         return {
           pid: row.id,

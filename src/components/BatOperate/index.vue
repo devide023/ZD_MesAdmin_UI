@@ -56,6 +56,13 @@
             <el-button type="text" @click="zh_tip_handle">综合导入</el-button>
           </el-dropdown-item>
         </template>
+        <template v-if="IsColReplace">
+          <el-dropdown-item>
+            <el-button type="text" @click.prevent.native="colval_replace_handle"
+              >列值替换</el-button
+            >
+          </el-dropdown-item>
+        </template>
         <el-dropdown-item>
           <el-button type="text" @click.prevent.native="export_excel_handle"
             >导出Excel</el-button
@@ -70,14 +77,23 @@
         <slot name="other"></slot>
       </el-dropdown-menu>
     </el-dropdown>
+    <colval-replace
+      :fields="fields"
+      :colreplace_dialogVisible.sync="replace_dialog"
+      @column_replace="get_colval_replace_info"
+    ></colval-replace>
   </div>
 </template>
 <script>
+import ColvalReplace from "@/components/ColumnReplace/colvalreplace.vue";
+import ApiFn from "@/api/baseapi";
 import { getToken } from "@/utils/auth";
 import { GetEnvInfo } from "@/utils/index";
 export default {
   name: "BatOperateComponent",
-  components: {},
+  components: {
+    ColvalReplace,
+  },
   props: {
     add_import_success_handle: {
       type: Function,
@@ -95,6 +111,13 @@ export default {
       type: Function,
       require: true,
     },
+    fields: {
+      type: Array,
+      require: false,
+      default: function () {
+        return [];
+      },
+    },
   },
   data() {
     return {
@@ -103,6 +126,7 @@ export default {
       headers: {
         Authorization: "Bearer " + getToken(),
       },
+      replace_dialog: false,
       action: GetEnvInfo().VUE_APP_BASE_API + "/upload/xls",
     };
   },
@@ -131,6 +155,11 @@ export default {
     },
     IsBatZh() {
       return this.page_bat_permis.findIndex((i) => i.name === "bat_zh") !== -1;
+    },
+    IsColReplace() {
+      return (
+        this.page_bat_permis.findIndex((i) => i.name === "col_replace") !== -1
+      );
     },
   },
   methods: {
@@ -246,6 +275,26 @@ export default {
           this.$refs["ref_upload_zh"].$refs["upload-inner"].handleClick();
         })
         .catch((error) => error);
+    },
+    colval_replace_handle() {
+      this.replace_dialog = true;
+    },
+    get_colval_replace_info(data) {
+      let fullpath = this.$router.currentRoute.fullPath;
+      let pos = fullpath.indexOf("?");
+      if (pos !== -1) {
+        fullpath = fullpath.substr(0, pos);
+      }
+      data.routepath = fullpath;
+      ApiFn.requestapi("post", "/global/colval_replace", data).then((res) => {
+        if (res.code === 1) {
+          this.$message.success(res.msg);
+          this.$basepage.getlist(this.$basepage.queryform);
+          this.replace_dialog = false;
+        } else {
+          this.$message.error(res.msg);
+        }
+      });
     },
   },
 };

@@ -21,6 +21,7 @@
             :replace_import_success_handle="import_by_replace"
             :zh_import_success_handle="import_by_zh"
             :export_excel_handle="export_excel"
+            :fields="colshowlist"
           >
             <template #other>
               <el-dropdown-item
@@ -251,7 +252,6 @@ export default {
     };
   },
   mounted() {
-    
   },
   methods: {
     execfun(row, fnname) {
