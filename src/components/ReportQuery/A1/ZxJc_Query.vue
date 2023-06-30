@@ -35,6 +35,20 @@
       >
       </el-option>
     </el-select>
+    <el-date-picker
+      v-model="form.kssj"
+      value-format="yyyy-MM-dd"
+      format="yyyy-MM-dd"
+      placeholder="请选择开始日期"
+      style="width: 140px; margin-right: 5px"
+    ></el-date-picker>
+    <el-date-picker
+      v-model="form.jssj"
+      value-format="yyyy-MM-dd"
+      format="yyyy-MM-dd"
+      placeholder="请选择结束日期"
+      style="width: 140px; margin-right: 5px"
+    ></el-date-picker>
     <el-input
       v-model="form.orderno"
       clearable
@@ -59,12 +73,15 @@
 
 <script>
 import { querybarmixin } from "@/mixin/A1/report_query_mixin";
+import { parseTime } from "@/utils/index";
 export default {
   name: "ZxjcComponent",
   mixins: [querybarmixin],
   data() {
     return {
       form: {
+        kssj: "",
+        jssj: "",
         scx: "",
         jclx: "",
         orderno:'',
@@ -74,6 +91,8 @@ export default {
   },
   mounted() {
     this.getjclxlist();
+    this.form.kssj = parseTime(new Date());
+    this.form.jssj = parseTime(new Date());
   },
   methods: {},
 };

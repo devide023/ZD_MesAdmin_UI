@@ -50,10 +50,19 @@
                 </el-autocomplete>
               </template>
               <template v-else>
-                <el-input
-                  v-model.trim="scope.row[col.prop]"
-                  clearable
-                ></el-input>
+                <template v-if="col.change_fn_name">
+                  <el-input
+                    v-model.trim="scope.row[col.prop]"
+                    clearable
+                    @change="(val)=>text_change_handle(val,scope.row,col)"
+                  ></el-input>
+                </template>
+                <template v-else>
+                  <el-input
+                    v-model.trim="scope.row[col.prop]"
+                    clearable
+                  ></el-input>
+                </template>
               </template>
             </template>
             <template v-else-if="col.coltype === 'list' && iscoledit(col.prop)">
@@ -202,12 +211,25 @@
               ></el-input-number>
             </template>
             <template v-else-if="col.coltype === 'date' && iscoledit(col.prop)">
-              <el-date-picker
+              <template v-if="col.change_fn_name">
+                 <el-date-picker
                 v-model="scope.row[col.prop]"
                 type="date"
                 value-format="yyyy-MM-dd"
+                format="yyyy-MM-dd"
+                style="width: 130px"
+                @change="(val)=>date_change_handle(val,scope.row,col)"
+              />
+              </template>
+              <template v-else>
+                <el-date-picker
+                v-model="scope.row[col.prop]"
+                type="date"
+                value-format="yyyy-MM-dd"
+                format="yyyy-MM-dd"
                 style="width: 130px"
               />
+              </template>              
             </template>
             <template
               v-else-if="col.coltype === 'datetime' && iscoledit(col.prop)"
@@ -216,6 +238,8 @@
                 v-model="scope.row[col.prop]"
                 type="datetime"
                 value-format="yyyy-MM-dd HH:mm:ss"
+                format="yyyy-MM-dd HH:mm:ss"
+                @change="date_change_handle"
                 style="width: 120px"
               />
             </template>
@@ -385,12 +409,13 @@
                       : scope.row[col.prop]) === col.cellbgval
                   "
                   :style="{ backgroundColor: col.cellbg }"
-                  >{{
+                >
+                  {{
                     col.subprop
                       ? scope.row[col.prop][col.subprop]
                       : scope.row[col.prop]
-                  }}</div
-                >
+                  }}
+                </div>
                 <template v-else>
                   {{
                     col.subprop
@@ -398,6 +423,13 @@
                       : scope.row[col.prop]
                   }}
                 </template>
+              </template>
+              <template v-else-if="col.link_fn_name">
+                <a style="color:blue !important" href="javascript:void(0);" @click="cell_link_handle(scope.row,col)">{{
+                    col.subprop
+                      ? scope.row[col.prop][col.subprop]
+                      : scope.row[col.prop]
+                  }}</a>
               </template>
               <template v-else>
                 {{
@@ -728,6 +760,28 @@ export default {
         this.$basepage[col.select_fn_name](this, item, row, col);
       }
     },
+    text_change_handle(val,row,col){
+      console.log(val,row,col);
+      if (typeof col.change_fn_name === "function") {
+        col.change_fn_name(this, val, row, col);
+      } else {
+        this.$basepage[col.change_fn_name](this, val, row, col);
+      }
+    },
+    date_change_handle(val,row,col) {
+      if (typeof col.change_fn_name === "function") {
+        col.change_fn_name(this, val, row, col);
+      } else {
+        this.$basepage[col.change_fn_name](this, val, row, col);
+      }
+    },
+    cell_link_handle(row,col){
+      if (typeof col.link_fn_name === "function") {
+        col.link_fn_name(this, row, col);
+      } else {
+        this.$basepage[col.link_fn_name](this, row, col);
+      }
+    }
   },
   watch: {
     datalist(val) {

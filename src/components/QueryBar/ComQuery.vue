@@ -40,7 +40,7 @@
                 v-for="(item, index) in collist"
                 :key="index"
                 :label="item.label"
-                :value="item.dbprop?item.dbprop:item.prop"
+                :value="item.dbprop ? item.dbprop : item.prop"
               />
             </el-select>
           </template>
@@ -77,6 +77,7 @@
               collapse-tags
               filterable
               style="width: 100%"
+              @focus="(e) => val_focus_handle(e, scope.row)"
             >
               <el-option
                 v-for="(item, index) in scope.row.coloptions"
@@ -225,6 +226,7 @@
 </template>
 
 <script>
+import ApiFn from "@/api/baseapi";
 import { setSearchExp, getSearchExp } from "@/utils/auth";
 import { parseTime } from "@/utils";
 export default {
@@ -348,11 +350,13 @@ export default {
       row.coloptions = [];
       row.value = "";
       let fieldinfo = this.collist.filter((i) => {
-        return (i.dbprop?i.dbprop:i.prop) === row.colname;
+        return (i.dbprop ? i.dbprop : i.prop) === row.colname;
       });
       if (fieldinfo.length > 0) {
-        row.coltype = fieldinfo[0].searchtype?fieldinfo[0].searchtype:fieldinfo[0].coltype;
-        row.coloptions = fieldinfo[0].options;
+        this.get_option_vals(row);
+        row.coltype = fieldinfo[0].searchtype
+          ? fieldinfo[0].searchtype
+          : fieldinfo[0].coltype;
       } else {
         row.coltype = "string";
         row.coloptions = [];
@@ -425,6 +429,48 @@ export default {
       if (pxid !== -1) {
         this.pxlist.splice(pxid, 1);
       }
+    },
+    get_option_vals(row) {
+      row.values = [];
+      row.coloptions = [];
+      row.value = "";
+      let fieldinfo = this.collist.filter((i) => {
+        return (i.dbprop ? i.dbprop : i.prop) === row.colname;
+      });
+      if (fieldinfo[0].optionconfig) {
+        let m = fieldinfo[0].optionconfig.method
+          ? fieldinfo[0].optionconfig.method
+          : "get";
+        let l = fieldinfo[0].optionconfig.url;
+        let pars = fieldinfo[0].optionconfig.querycnf;
+        let p = {};
+        pars.forEach((o) => {
+          Object.keys(o).forEach((k) => {
+            let pos = this.list.findIndex((t) => t.colname === k);            
+            if (pos !== -1) {
+              if (this.list[pos].values.length>0) {
+                p[k] = this.list[pos].values[0];
+              } else {
+                p[k] = "";
+              }
+            } else {
+              p[k] = "";
+            }
+          });
+        });
+        ApiFn.requestapi(m, l, p).then((r) => {
+          if (r.code === 1) {
+            row.coloptions = r.list;
+          } else {
+            this.$message.error(r.msg);
+          }
+        });
+      } else {
+        row.coloptions = fieldinfo[0].options;
+      }
+    },
+    val_focus_handle(e, row) {
+      this.get_option_vals(row);
     },
   },
 };

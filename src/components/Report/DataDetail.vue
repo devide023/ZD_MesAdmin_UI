@@ -44,6 +44,9 @@
         <template v-if="field.coltype==='datetime'">
           {{scope.row[field.prop] | parseTime("{y}-{m}-{d} {h}:{i}:{s}")}}
         </template>
+        <template v-else-if="field.coltype==='date'">
+          {{scope.row[field.prop] | parseTime("{y}-{m}-{d}")}}
+        </template>
         <template v-else>
           {{scope.row[field.prop]}}
         </template>

@@ -3,12 +3,14 @@
     <el-date-picker
       v-model="form.kssj"
       value-format="yyyy-MM-dd"
+      format="yyyy-MM-dd"
       placeholder="请选择开始日期"
       style="width: 140px; margin-right: 5px"
     ></el-date-picker>
     <el-date-picker
       v-model="form.jssj"
       value-format="yyyy-MM-dd"
+      format="yyyy-MM-dd"
       placeholder="请选择结束日期"
       style="width: 140px; margin-right: 5px"
     ></el-date-picker>
