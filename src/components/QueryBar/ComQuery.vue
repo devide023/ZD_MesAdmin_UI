@@ -383,7 +383,6 @@ export default {
         let code = this.$store.getters.userinfo.code;
         let json = getSearchExp();
         let savedata = JSON.parse(json);
-        //console.log(savedata);
         if (savedata) {
           let pos = savedata.findIndex(
             (t) => t.path === path && t.code === code
@@ -431,9 +430,7 @@ export default {
       }
     },
     get_option_vals(row) {
-      row.values = [];
       row.coloptions = [];
-      row.value = "";
       let fieldinfo = this.collist.filter((i) => {
         return (i.dbprop ? i.dbprop : i.prop) === row.colname;
       });

@@ -10,6 +10,7 @@
       :row-key="RowKey"
       header-cell-class-name="tb_header_bg"
       :tree-props="this.treeprops"
+      @cell-dblclick="Cell_Dbclick_Handle"
     >
       <el-table-column v-if="isselect" type="selection"></el-table-column>
       <el-table-column
@@ -54,7 +55,7 @@
                   <el-input
                     v-model.trim="scope.row[col.prop]"
                     clearable
-                    @change="(val)=>text_change_handle(val,scope.row,col)"
+                    @change="(val) => text_change_handle(val, scope.row, col)"
                   ></el-input>
                 </template>
                 <template v-else>
@@ -212,24 +213,24 @@
             </template>
             <template v-else-if="col.coltype === 'date' && iscoledit(col.prop)">
               <template v-if="col.change_fn_name">
-                 <el-date-picker
-                v-model="scope.row[col.prop]"
-                type="date"
-                value-format="yyyy-MM-dd"
-                format="yyyy-MM-dd"
-                style="width: 130px"
-                @change="(val)=>date_change_handle(val,scope.row,col)"
-              />
+                <el-date-picker
+                  v-model="scope.row[col.prop]"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  format="yyyy-MM-dd"
+                  style="width: 130px"
+                  @change="(val) => date_change_handle(val, scope.row, col)"
+                />
               </template>
               <template v-else>
                 <el-date-picker
-                v-model="scope.row[col.prop]"
-                type="date"
-                value-format="yyyy-MM-dd"
-                format="yyyy-MM-dd"
-                style="width: 130px"
-              />
-              </template>              
+                  v-model="scope.row[col.prop]"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  format="yyyy-MM-dd"
+                  style="width: 130px"
+                />
+              </template>
             </template>
             <template
               v-else-if="col.coltype === 'datetime' && iscoledit(col.prop)"
@@ -368,11 +369,20 @@
               >
             </template>
             <template v-else-if="col.options">
-              {{
-                col.subprop
-                  ? scope.row[col.prop][col.subprop]
-                  : scope.row[col.prop] | showname(col.options)
-              }}
+              <template v-if="col.relation">
+                {{
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop] | showname(scope.row[col.relation])
+                }}
+              </template>
+              <template v-else>
+                {{
+                  col.subprop
+                    ? scope.row[col.prop][col.subprop]
+                    : scope.row[col.prop] | showname(col.options)
+                }}</template
+              >
             </template>
             <template v-else-if="col.isicon">
               <template
@@ -425,11 +435,16 @@
                 </template>
               </template>
               <template v-else-if="col.link_fn_name">
-                <a style="color:blue !important" href="javascript:void(0);" @click="cell_link_handle(scope.row,col)">{{
+                <a
+                  style="color: blue !important"
+                  href="javascript:void(0);"
+                  @click="cell_link_handle(scope.row, col)"
+                  >{{
                     col.subprop
                       ? scope.row[col.prop][col.subprop]
                       : scope.row[col.prop]
-                  }}</a>
+                  }}</a
+                >
               </template>
               <template v-else>
                 {{
@@ -466,16 +481,28 @@
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
     ></el-pagination>
+
+    <json-viewer
+      :jsonData="jsonData"
+      :jsonviewerVisible.sync="jsondialogVisible"
+      title="数据项"
+    ></json-viewer>
   </div>
 </template>
 
 <script>
 import { getToken } from "@/utils/auth";
 import { newGuid } from "@/utils/index";
+import JsonViewer from "@/components/JsonViewer/jsonviewer.vue";
 export default {
   name: "TableComponent",
+  components: {
+    JsonViewer,
+  },
   data() {
     return {
+      jsondialogVisible: false,
+      jsonData: {},
       tableheight: 800,
       rooturl: window.winconfig.production.VUE_APP_ROOT,
       fullpath: "",
@@ -760,28 +787,39 @@ export default {
         this.$basepage[col.select_fn_name](this, item, row, col);
       }
     },
-    text_change_handle(val,row,col){
-      console.log(val,row,col);
+    text_change_handle(val, row, col) {
+      console.log(val, row, col);
       if (typeof col.change_fn_name === "function") {
         col.change_fn_name(this, val, row, col);
       } else {
         this.$basepage[col.change_fn_name](this, val, row, col);
       }
     },
-    date_change_handle(val,row,col) {
+    date_change_handle(val, row, col) {
       if (typeof col.change_fn_name === "function") {
         col.change_fn_name(this, val, row, col);
       } else {
         this.$basepage[col.change_fn_name](this, val, row, col);
       }
     },
-    cell_link_handle(row,col){
+    cell_link_handle(row, col) {
       if (typeof col.link_fn_name === "function") {
         col.link_fn_name(this, row, col);
       } else {
         this.$basepage[col.link_fn_name](this, row, col);
       }
-    }
+    },
+    Cell_Dbclick_Handle(row, column, cell, event) {
+      let colname = column.property;
+      let pos = this.collist.findIndex((i) => i.prop === colname);
+      if (pos !== -1) {
+        let isformat = this.collist[pos].formatjson;
+        if (isformat) {
+          this.jsonData = JSON.parse(row[colname]);
+          this.jsondialogVisible = true;
+        }
+      }
+    },
   },
   watch: {
     datalist(val) {
